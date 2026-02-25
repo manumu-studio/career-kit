@@ -1,0 +1,36 @@
+#!/bin/sh
+# Pre-commit hook — runs fast quality checks on frontend and backend
+. "$(dirname "$0")/_/husky.sh"
+
+echo "═══════════════════════════════════"
+echo "  Frontend checks"
+echo "═══════════════════════════════════"
+
+echo "🔎 TypeScript typecheck..."
+cd frontend && npx tsc --noEmit || exit 1
+
+echo "🔍 ESLint..."
+npm run lint || exit 1
+
+cd ..
+
+echo ""
+echo "═══════════════════════════════════"
+echo "  Backend checks"
+echo "═══════════════════════════════════"
+
+cd backend
+
+echo "🔍 Ruff lint..."
+.venv/bin/ruff check . || exit 1
+
+echo "📐 Ruff format..."
+.venv/bin/ruff format --check . || exit 1
+
+echo "🔎 Mypy strict..."
+.venv/bin/mypy app/ || exit 1
+
+cd ..
+
+echo ""
+echo "✅ All checks passed"
