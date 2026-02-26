@@ -18,5 +18,8 @@ class LLMProvider(ABC):
 
         Returns:
             Validated optimization output in the API response shape.
+
+        Notes:
+            Implementations should log UsageMetrics for each outbound LLM call.
         """
         ...

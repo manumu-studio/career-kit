@@ -33,6 +33,17 @@ class OptimizationResult(BaseModel):
     summary: str
 
 
+class UsageMetrics(BaseModel):
+    """Tracks token usage and estimated spend for one LLM request."""
+
+    input_tokens: int = Field(ge=0)
+    output_tokens: int = Field(ge=0)
+    total_tokens: int = Field(ge=0)
+    estimated_cost_usd: float = Field(ge=0)
+    model: str
+    provider: str
+
+
 class ErrorResponse(BaseModel):
     """Standard API error payload."""
 

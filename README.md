@@ -33,7 +33,8 @@ npm run dev
 
 ## Roadmap
 
-- [x] v0.1 — Project scaffold + architecture
-- [ ] v0.2 — Core pipeline (upload → parse → optimize → display)
+- [x] v0.1 — Foundation flow (upload → parse → optimize → results) + rate limiting + usage logging + test suite
+- [ ] v0.2 — Company intelligence (research + profile synthesis + optimize integration)
 - [ ] v0.3 — Cover letter generation + PDF export
-- [ ] v0.4 — Multi-provider LLM support (Claude / OpenAI / Gemini)
+- [ ] v0.4 — UX polish + validation + accessibility
+- [ ] v0.7 — Multi-provider LLM support (Claude / OpenAI / Gemini)

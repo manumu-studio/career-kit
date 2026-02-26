@@ -13,8 +13,12 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     max_file_size_mb: int = 5
     llm_provider: str = "anthropic"
+    rate_limit_requests: int = 10
+    rate_limit_window_seconds: int = 60
+    llm_input_cost_per_million: float = 0.80
+    llm_output_cost_per_million: float = 4.00
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", enable_decoding=False)
 
     @field_validator("cors_origins", mode="before")
     @classmethod
