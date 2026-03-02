@@ -3,14 +3,16 @@
 /** Upload page where users submit CV + job description for optimization. */
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CompanySearch } from "@/components/ui/CompanySearch";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { JobDescription } from "@/components/ui/JobDescription";
 import { useOptimizationContext } from "@/context/OptimizationContext";
 import { optimizeCV } from "@/lib/api";
+import type { CompanyResearchResult } from "@/types/company";
 
 export default function Home() {
   const router = useRouter();
-  const { setResult } = useOptimizationContext();
+  const { companyResearch, setCompanyResearch, setResult } = useOptimizationContext();
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -27,7 +29,14 @@ export default function Home() {
     setIsSubmitting(true);
 
     try {
-      const result = await optimizeCV(file, jobDescription.trim());
+      const result = await optimizeCV(file, jobDescription.trim(), {
+        companyContext: companyResearch
+          ? {
+              companyName: companyResearch.profile.name,
+              companyProfile: companyResearch.profile,
+            }
+          : undefined,
+      });
       setResult(result);
       router.push("/results");
     } catch (error: unknown) {
@@ -39,12 +48,39 @@ export default function Home() {
     }
   };
 
+  const handleResearchComplete = (researchResult: CompanyResearchResult): void => {
+    setCompanyResearch(researchResult);
+  };
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-6 px-6 py-12">
       <header className="space-y-2">
         <h1 className="text-4xl font-semibold tracking-tight text-white">ATS Career Kit</h1>
         <p className="text-base text-slate-300">Optimize your CV for any job posting</p>
       </header>
+
+      <CompanySearch
+        onResearchComplete={handleResearchComplete}
+        onResearchError={(error) => {
+          setSubmissionError(error);
+        }}
+        onViewReport={() => {
+          router.push("/report");
+        }}
+      />
+
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-white">Step 2: Upload CV + Job Description</h2>
+        <button
+          className="text-sm text-slate-300 underline"
+          onClick={() => {
+            setCompanyResearch(null);
+          }}
+          type="button"
+        >
+          Skip research
+        </button>
+      </div>
 
       <FileUpload onFileChange={setFile} />
       <JobDescription onChange={setJobDescription} value={jobDescription} />
