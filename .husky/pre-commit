@@ -1,6 +1,5 @@
 #!/bin/sh
 # Pre-commit hook — runs fast quality checks on frontend and backend
-. "$(dirname "$0")/_/husky.sh"
 
 echo "═══════════════════════════════════"
 echo "  Frontend checks"

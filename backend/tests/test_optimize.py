@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import Any, Optional
 
 import pytest
 import pytest_asyncio
@@ -12,15 +12,22 @@ from httpx import ASGITransport, AsyncClient
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
 from app.main import app
-from app.models.schemas import OptimizationResult
+from app.models.schemas import CompanyResearchResult, OptimizationResult
 from app.services.llm.base import LLMProvider
 
 
 class _MockSuccessProvider(LLMProvider):
     """Mock provider that returns a valid optimization result."""
 
-    async def optimize(self, cv_text: str, job_description: str) -> OptimizationResult:
+    async def optimize(
+        self,
+        cv_text: str,
+        job_description: str,
+        company_name: Optional[str] = None,  # noqa: UP045
+        company_context: object | None = None,
+    ) -> OptimizationResult:
         """Return deterministic successful output for endpoint tests."""
+        _ = (cv_text, job_description, company_name, company_context)
         return OptimizationResult(
             sections=[
                 {
@@ -43,13 +50,40 @@ class _MockSuccessProvider(LLMProvider):
             summary="Strong backend fit with one notable cloud tooling gap.",
         )
 
+    async def synthesize_company(
+        self,
+        company_name: str,
+        website_content: str,
+        search_results: str,
+        job_title: Optional[str] = None,  # noqa: UP045
+    ) -> CompanyResearchResult:
+        _ = (company_name, website_content, search_results, job_title)
+        raise NotImplementedError
+
 
 class _MockInvalidJsonProvider(LLMProvider):
     """Mock provider that simulates parse failure from LLM output."""
 
-    async def optimize(self, cv_text: str, job_description: str) -> OptimizationResult:
+    async def optimize(
+        self,
+        cv_text: str,
+        job_description: str,
+        company_name: Optional[str] = None,  # noqa: UP045
+        company_context: object | None = None,
+    ) -> OptimizationResult:
         """Raise ValueError to emulate invalid JSON returned by the LLM."""
+        _ = (cv_text, job_description, company_name, company_context)
         raise ValueError("LLM returned non-JSON output.")
+
+    async def synthesize_company(
+        self,
+        company_name: str,
+        website_content: str,
+        search_results: str,
+        job_title: Optional[str] = None,  # noqa: UP045
+    ) -> CompanyResearchResult:
+        _ = (company_name, website_content, search_results, job_title)
+        raise NotImplementedError
 
 
 @pytest_asyncio.fixture

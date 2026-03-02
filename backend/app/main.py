@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.routers.optimize import router as optimize_router
+from app.routers.research import router as research_router
 
 app = FastAPI(title="ATS Career Kit API")
 
@@ -23,6 +24,7 @@ app.add_middleware(
 )
 
 app.include_router(optimize_router)
+app.include_router(research_router)
 
 
 @app.get("/health")

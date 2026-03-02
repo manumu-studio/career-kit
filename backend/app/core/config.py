@@ -1,6 +1,7 @@
 """Application configuration loaded from environment variables."""
 
 from functools import lru_cache
+from typing import Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -17,6 +18,7 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
     llm_input_cost_per_million: float = 0.80
     llm_output_cost_per_million: float = 4.00
+    tavily_api_key: Optional[str] = None  # noqa: UP045
 
     model_config = SettingsConfigDict(env_file=".env", enable_decoding=False)
 

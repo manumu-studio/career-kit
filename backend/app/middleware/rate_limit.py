@@ -1,4 +1,4 @@
-"""In-memory per-IP rate limiting middleware for optimize requests."""
+"""In-memory per-IP rate limiting middleware for expensive API routes."""
 
 from __future__ import annotations
 
@@ -14,7 +14,9 @@ from starlette.types import ASGIApp
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """Apply a fixed-window request limit for the /optimize route."""
+    """Apply a fixed-window request limit for selected POST endpoints."""
+
+    _LIMITED_PATHS = {"/optimize", "/research-company"}
 
     def __init__(
         self,
@@ -36,8 +38,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        """Rate limit /optimize requests and pass through all other routes."""
-        if request.url.path != "/optimize":
+        """Rate limit selected routes and pass through all other requests."""
+        if request.url.path not in self._LIMITED_PATHS or request.method == "OPTIONS":
             return await call_next(request)
 
         client_ip = self._get_client_ip(request)

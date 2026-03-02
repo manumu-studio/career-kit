@@ -1,11 +1,13 @@
-"""CV optimization endpoint."""
+"""CV optimization endpoint with optional company-aware tailoring context."""
 
-from typing import Annotated
+import json
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from pydantic import ValidationError
 
 from app.core.config import settings
-from app.models.schemas import ErrorResponse, OptimizationResult
+from app.models.schemas import CompanyProfile, ErrorResponse, OptimizationResult
 from app.services.llm.factory import get_provider
 from app.services.pdf_parser import extract_text_from_pdf
 
@@ -20,6 +22,8 @@ router = APIRouter(tags=["optimize"])
 async def optimize_cv(
     cv_file: Annotated[UploadFile, File(...)],
     job_description: Annotated[str, Form(...)],
+    company_name: Annotated[Optional[str], Form()] = None,  # noqa: UP045
+    company_profile_json: Annotated[Optional[str], Form()] = None,  # noqa: UP045
 ) -> OptimizationResult:
     """Parse CV and invoke the configured LLM provider."""
     filename = cv_file.filename or ""
@@ -37,7 +41,22 @@ async def optimize_cv(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     try:
-        return await provider.optimize(cv_text=cv_text, job_description=job_description)
+        company_context: Optional[CompanyProfile] = None  # noqa: UP045
+        if company_profile_json:
+            raw_context = json.loads(company_profile_json)
+            company_context = CompanyProfile.model_validate(raw_context)
+
+        return await provider.optimize(
+            cv_text=cv_text,
+            job_description=job_description,
+            company_name=company_name,
+            company_context=company_context,
+        )
+    except (json.JSONDecodeError, ValidationError) as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid company context payload: {exc}",
+        ) from exc
     except ValueError as exc:
         raise HTTPException(
             status_code=500,

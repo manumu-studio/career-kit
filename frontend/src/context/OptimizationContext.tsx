@@ -9,13 +9,17 @@ import {
   useMemo,
   useState,
 } from "react";
+import type { CompanyResearchResult } from "@/types/company";
 import type { OptimizationResult } from "@/types/optimization";
 
-const STORAGE_KEY = "optimization-result-v1";
+const OPTIMIZATION_STORAGE_KEY = "optimization-result-v1";
+const COMPANY_RESEARCH_STORAGE_KEY = "ats-company-research";
 
 interface OptimizationContextValue {
   result: OptimizationResult | null;
+  companyResearch: CompanyResearchResult | null;
   setResult: (result: OptimizationResult) => void;
+  setCompanyResearch: (result: CompanyResearchResult | null) => void;
   clearResult: () => void;
 }
 
@@ -44,36 +48,75 @@ function isOptimizationResult(value: unknown): value is OptimizationResult {
   );
 }
 
+function isCompanyResearchResult(value: unknown): value is CompanyResearchResult {
+  if (!isObject(value)) {
+    return false;
+  }
+  if (!isObject(value.profile) || !isObject(value.report)) {
+    return false;
+  }
+  return (
+    typeof value.profile.name === "string" &&
+    typeof value.report.executive_summary === "string" &&
+    isStringArray(value.sources_used) &&
+    typeof value.research_quality === "string" &&
+    typeof value.researched_at === "string"
+  );
+}
+
 export function OptimizationProvider({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const [result, setResultState] = useState<OptimizationResult | null>(null);
+  const [companyResearch, setCompanyResearchState] =
+    useState<CompanyResearchResult | null>(null);
 
   // Hydrate latest result from session storage after initial mount.
   useEffect(() => {
-    const stored = sessionStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      return;
+    const optimizationStored = sessionStorage.getItem(OPTIMIZATION_STORAGE_KEY);
+    if (optimizationStored) {
+      try {
+        const parsed: unknown = JSON.parse(optimizationStored);
+        if (isOptimizationResult(parsed)) {
+          setResultState(parsed);
+        }
+      } catch {
+        sessionStorage.removeItem(OPTIMIZATION_STORAGE_KEY);
+      }
     }
 
-    try {
-      const parsed: unknown = JSON.parse(stored);
-      if (isOptimizationResult(parsed)) {
-        setResultState(parsed);
+    const companyStored = sessionStorage.getItem(COMPANY_RESEARCH_STORAGE_KEY);
+    if (companyStored) {
+      try {
+        const parsed: unknown = JSON.parse(companyStored);
+        if (isCompanyResearchResult(parsed)) {
+          setCompanyResearchState(parsed);
+        }
+      } catch {
+        sessionStorage.removeItem(COMPANY_RESEARCH_STORAGE_KEY);
       }
-    } catch {
-      sessionStorage.removeItem(STORAGE_KEY);
     }
   }, []);
 
   useEffect(() => {
     if (result) {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(result));
+      sessionStorage.setItem(OPTIMIZATION_STORAGE_KEY, JSON.stringify(result));
       return;
     }
 
-    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(OPTIMIZATION_STORAGE_KEY);
   }, [result]);
+
+  useEffect(() => {
+    if (companyResearch) {
+      sessionStorage.setItem(
+        COMPANY_RESEARCH_STORAGE_KEY,
+        JSON.stringify(companyResearch),
+      );
+      return;
+    }
+    sessionStorage.removeItem(COMPANY_RESEARCH_STORAGE_KEY);
+  }, [companyResearch]);
 
   const setResult = useCallback((nextResult: OptimizationResult): void => {
     setResultState(nextResult);
@@ -83,13 +126,19 @@ export function OptimizationProvider({
     setResultState(null);
   }, []);
 
+  const setCompanyResearch = useCallback((nextResult: CompanyResearchResult | null): void => {
+    setCompanyResearchState(nextResult);
+  }, []);
+
   const value = useMemo(
     () => ({
       result,
+      companyResearch,
       setResult,
+      setCompanyResearch,
       clearResult,
     }),
-    [clearResult, result, setResult],
+    [clearResult, companyResearch, result, setCompanyResearch, setResult],
   );
 
   return <OptimizationContext.Provider value={value}>{children}</OptimizationContext.Provider>;

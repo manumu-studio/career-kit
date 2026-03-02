@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import AsyncIterator
+from typing import Optional
 
 import pytest
 import pytest_asyncio
@@ -14,6 +15,7 @@ from httpx import ASGITransport, AsyncClient
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.models.schemas import CompanyResearchResult
 from app.routers.optimize import router as optimize_router
 
 
@@ -105,7 +107,10 @@ def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
             self,
             cv_text: str,  # noqa: ARG002
             job_description: str,  # noqa: ARG002
+            company_name: Optional[str] = None,  # noqa: ARG002, UP045
+            company_context: object | None = None,  # noqa: ARG002
         ) -> dict[str, object]:
+            _ = (company_name, company_context)
             return {
                 "sections": [
                     {
@@ -129,6 +134,16 @@ def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
                 "match_score": 85,
                 "summary": "Strong backend fit with one notable cloud tooling gap.",
             }
+
+        async def synthesize_company(
+            self,
+            company_name: str,
+            website_content: str,
+            search_results: str,
+            job_title: Optional[str] = None,  # noqa: UP045
+        ) -> CompanyResearchResult:
+            _ = (company_name, website_content, search_results, job_title)
+            raise NotImplementedError
 
     def _mock_get_provider(provider_name: str = "anthropic") -> _MockProvider:  # noqa: ARG001
         return _MockProvider()
@@ -220,6 +235,23 @@ async def test_health_not_limited(async_client: AsyncClient) -> None:
         response = await async_client.get("/health")
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
+
+
+@pytest.mark.asyncio
+async def test_options_requests_bypass_rate_limit(async_client: AsyncClient) -> None:
+    """Preflight OPTIONS requests should pass through without rate limiting."""
+    statuses: list[int] = []
+    for _ in range(10):
+        response = await async_client.options(
+            "/optimize",
+            headers={
+                "Origin": "http://localhost:3000",
+                "Access-Control-Request-Method": "POST",
+            },
+        )
+        statuses.append(response.status_code)
+    assert all(status != 429 for status in statuses)
+    assert any(status == 200 for status in statuses)
 
 
 @pytest.mark.asyncio
