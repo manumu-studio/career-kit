@@ -79,8 +79,9 @@ class DuckDuckGoSearchProvider(SearchProvider):
             ddgs_class = ddgs_module.DDGS
 
             def _run_search() -> list[dict[str, object]]:
-                # verify=False: Xcode Python 3.9 SSL lacks TLS 1.3 support
-                return list(ddgs_class(verify=False).text(query, max_results=max_results))
+                # verify=False: Xcode Python 3.9 SSL lacks TLS 1.3
+                client = ddgs_class(verify=False)
+                return list(client.text(query, max_results=max_results))
 
             raw_results = await asyncio.to_thread(_run_search)
             mapped = [

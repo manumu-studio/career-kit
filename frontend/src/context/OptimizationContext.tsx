@@ -14,13 +14,33 @@ import type { OptimizationResult } from "@/types/optimization";
 
 const OPTIMIZATION_STORAGE_KEY = "optimization-result-v1";
 const COMPANY_RESEARCH_STORAGE_KEY = "ats-company-research";
+const FORM_STATE_STORAGE_KEY = "ats-form-state-v1";
+
+export interface FormState {
+  companyName: string;
+  companyUrl: string;
+  jobTitle: string;
+  jobDescription: string;
+  fileName: string | null;
+}
+
+const DEFAULT_FORM_STATE: FormState = {
+  companyName: "",
+  companyUrl: "",
+  jobTitle: "",
+  jobDescription: "",
+  fileName: null,
+};
 
 interface OptimizationContextValue {
   result: OptimizationResult | null;
   companyResearch: CompanyResearchResult | null;
+  formState: FormState;
   setResult: (result: OptimizationResult) => void;
   setCompanyResearch: (result: CompanyResearchResult | null) => void;
   clearResult: () => void;
+  setFormState: (update: Partial<FormState>) => void;
+  clearFormState: () => void;
 }
 
 const OptimizationContext = createContext<OptimizationContextValue | undefined>(undefined);
@@ -48,6 +68,19 @@ function isOptimizationResult(value: unknown): value is OptimizationResult {
   );
 }
 
+function isFormState(value: unknown): value is FormState {
+  if (!isObject(value)) {
+    return false;
+  }
+  return (
+    typeof value.companyName === "string" &&
+    typeof value.companyUrl === "string" &&
+    typeof value.jobTitle === "string" &&
+    typeof value.jobDescription === "string" &&
+    (value.fileName === null || typeof value.fileName === "string")
+  );
+}
+
 function isCompanyResearchResult(value: unknown): value is CompanyResearchResult {
   if (!isObject(value)) {
     return false;
@@ -70,6 +103,7 @@ export function OptimizationProvider({
   const [result, setResultState] = useState<OptimizationResult | null>(null);
   const [companyResearch, setCompanyResearchState] =
     useState<CompanyResearchResult | null>(null);
+  const [formState, setFormStateRaw] = useState<FormState>(DEFAULT_FORM_STATE);
 
   // Hydrate latest result from session storage after initial mount.
   useEffect(() => {
@@ -96,6 +130,18 @@ export function OptimizationProvider({
         sessionStorage.removeItem(COMPANY_RESEARCH_STORAGE_KEY);
       }
     }
+
+    const formStored = sessionStorage.getItem(FORM_STATE_STORAGE_KEY);
+    if (formStored) {
+      try {
+        const parsed: unknown = JSON.parse(formStored);
+        if (isFormState(parsed)) {
+          setFormStateRaw(parsed);
+        }
+      } catch {
+        sessionStorage.removeItem(FORM_STATE_STORAGE_KEY);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -118,6 +164,10 @@ export function OptimizationProvider({
     sessionStorage.removeItem(COMPANY_RESEARCH_STORAGE_KEY);
   }, [companyResearch]);
 
+  useEffect(() => {
+    sessionStorage.setItem(FORM_STATE_STORAGE_KEY, JSON.stringify(formState));
+  }, [formState]);
+
   const setResult = useCallback((nextResult: OptimizationResult): void => {
     setResultState(nextResult);
   }, []);
@@ -130,15 +180,35 @@ export function OptimizationProvider({
     setCompanyResearchState(nextResult);
   }, []);
 
+  const setFormState = useCallback((update: Partial<FormState>): void => {
+    setFormStateRaw((prev) => ({ ...prev, ...update }));
+  }, []);
+
+  const clearFormState = useCallback((): void => {
+    setFormStateRaw(DEFAULT_FORM_STATE);
+  }, []);
+
   const value = useMemo(
     () => ({
       result,
       companyResearch,
+      formState,
       setResult,
       setCompanyResearch,
       clearResult,
+      setFormState,
+      clearFormState,
     }),
-    [clearResult, companyResearch, result, setCompanyResearch, setResult],
+    [
+      clearFormState,
+      clearResult,
+      companyResearch,
+      formState,
+      result,
+      setCompanyResearch,
+      setFormState,
+      setResult,
+    ],
   );
 
   return <OptimizationContext.Provider value={value}>{children}</OptimizationContext.Provider>;

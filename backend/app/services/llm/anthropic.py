@@ -44,33 +44,55 @@ class AnthropicProvider(LLMProvider):
         company_context: Optional[CompanyProfile] = None,  # noqa: UP045
     ) -> OptimizationResult:
         """Generate and validate ATS optimization output."""
+        system = build_system_prompt()
+        user_prompt = build_user_prompt(
+            cv_text=cv_text,
+            job_description=job_description,
+            company_name=company_name,
+            company_context=company_context,
+        )
         response = await self._client.messages.create(
             model=self._model,
-            max_tokens=4096,
-            system=build_system_prompt(),
-            messages=[
-                {
-                    "role": "user",
-                    "content": build_user_prompt(
-                        cv_text=cv_text,
-                        job_description=job_description,
-                        company_name=company_name,
-                        company_context=company_context,
-                    ),
-                }
-            ],
+            max_tokens=8192,
+            system=system,
+            messages=[{"role": "user", "content": user_prompt}],
         )
         self._log_usage(response)
+        self._check_stop_reason(response, "optimize")
 
         raw_text = self._extract_text_content(response.content)
         cleaned_text = self._strip_markdown_fences(raw_text)
 
-        try:
-            payload = json.loads(cleaned_text)
-        except json.JSONDecodeError as exc:
-            raise ValueError("LLM returned non-JSON output.") from exc
+        payload = self._load_json_object(cleaned_text)
+        if payload is not None:
+            return OptimizationResult.model_validate(payload)
 
-        return OptimizationResult.model_validate(payload)
+        # Retry once with explicit JSON correction request.
+        retry_response = await self._client.messages.create(
+            model=self._model,
+            max_tokens=8192,
+            system=system,
+            messages=[
+                {"role": "user", "content": user_prompt},
+                {"role": "assistant", "content": cleaned_text},
+                {
+                    "role": "user",
+                    "content": (
+                        "Fix your JSON and return ONLY valid JSON matching "
+                        "the provided schema."
+                    ),
+                },
+            ],
+        )
+        self._log_usage(retry_response)
+        self._check_stop_reason(retry_response, "optimize retry")
+
+        retry_text = self._extract_text_content(retry_response.content)
+        retry_cleaned = self._strip_markdown_fences(retry_text)
+        retry_payload = self._load_json_object(retry_cleaned)
+        if retry_payload is None:
+            raise ValueError("LLM returned non-JSON output after retry.")
+        return OptimizationResult.model_validate(retry_payload)
 
     async def synthesize_company(
         self,
@@ -93,6 +115,7 @@ class AnthropicProvider(LLMProvider):
             messages=[{"role": "user", "content": user_prompt}],
         )
         self._log_usage(response)
+        self._check_stop_reason(response, "synthesize_company")
 
         raw_text = self._extract_text_content(response.content)
         cleaned_text = self._strip_markdown_fences(raw_text)
@@ -118,6 +141,7 @@ class AnthropicProvider(LLMProvider):
             ],
         )
         self._log_usage(retry_response)
+        self._check_stop_reason(retry_response, "synthesize_company retry")
         retry_text = self._extract_text_content(retry_response.content)
         retry_cleaned = self._strip_markdown_fences(retry_text)
         retry_payload = self._load_json_object(retry_cleaned)
@@ -147,6 +171,16 @@ class AnthropicProvider(LLMProvider):
                 provider="anthropic",
             )
         )
+
+    @staticmethod
+    def _check_stop_reason(response: object, context: str) -> None:
+        """Raise immediately when the response was truncated at the token limit."""
+        stop_reason = getattr(response, "stop_reason", None)
+        if stop_reason == "max_tokens":
+            raise ValueError(
+                f"LLM response truncated at token limit during {context}. "
+                "Reduce input size or increase max_tokens."
+            )
 
     @staticmethod
     def _usage_token_value(usage: object, field_name: str) -> int:

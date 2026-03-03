@@ -1,64 +1,68 @@
-# ENTRY-2 — Foundation Hardening + Test Coverage
-**Date:** 2026-02-26
-**Type:** Feature
-**Branch:** `feature/foundation`
-**Version:** `0.1.0`
+# ENTRY-2 — Form State Persistence & Portfolio Review
+**Date:** 2026-03-03
+**Type:** Feature + Review
+**Branch:** `feature/company-intelligence`
+**Version:** `0.2.0`
 ---
 
-## What I Did
-- Completed `TASK-007` by adding IP-based rate limiting on `POST /optimize` (default: 10 requests per 60 seconds).
-- Completed `TASK-008` by adding token usage and estimated cost logging for Anthropic calls.
-- Completed `TASK-009` by adding frontend test infrastructure and broad unit/component/hook/context test coverage.
-- Updated `docs/pull-requests/PR-0.1.0.md` to include all `TASK-007` through `TASK-009` changes.
+## What I Built
+
+### Form State Persistence
+- Extended `OptimizationContext` with a `FormState` slice (`companyName`, `companyUrl`, `jobTitle`, `jobDescription`, `fileName`) persisted to `sessionStorage` under `ats-form-state-v1`.
+- Added `isFormState` runtime validator before hydration — same guard pattern used for existing stored values.
+- Added `setFormState` (partial merge updater) and `clearFormState` to the context value.
+- Updated `useCompanySearch` to hydrate its three inputs from context once after the provider finishes loading from storage, and to sync every change back to context.
+- Updated the upload page to hydrate job description from context on mount and sync changes back; `handleFileChange` wrapped in `useCallback` to prevent an infinite re-render loop caused by `FileUpload`'s dependency-listed `onFileChange` prop.
+- When a file was previously selected but the object is gone (navigation), shows a "Previously selected: `filename` — please re-select your file" hint.
 
 ## Files Touched
 | File | Action | Notes |
 |---|---|---|
-| `backend/app/middleware/rate_limit.py` | Created | Async lock-protected in-memory limiter with 429 + `Retry-After` |
-| `backend/app/main.py` | Modified | Registered rate-limit middleware after CORS |
-| `backend/app/core/config.py` | Modified | Added rate-limit + LLM pricing settings |
-| `backend/app/core/usage_logger.py` | Created | Structured usage logs + process-lifetime usage summary |
-| `backend/app/services/llm/anthropic.py` | Modified | Extracted usage tokens and logged estimated cost |
-| `backend/app/models/schemas.py` | Modified | Added `UsageMetrics` model |
-| `backend/tests/test_rate_limit.py` | Created | 6 tests covering throttle behavior + window reset |
-| `backend/tests/test_usage_logging.py` | Created | 5 tests for cost calc, log output, and totals |
-| `frontend/vitest.config.ts` | Created | Vitest + jsdom + alias config |
-| `frontend/src/test/*` | Created | Test setup, provider render helper, deterministic mocks |
-| `frontend/src/**/*.test.{ts,tsx}` | Created | Utility, component, hook, and context tests |
-| `docs/pull-requests/PR-0.1.0.md` | Modified | Added TASK-007/008/009 scope and validation results |
+| `frontend/src/context/OptimizationContext.tsx` | Modified | Added `FormState`, `isFormState`, `setFormState`, `clearFormState`, sessionStorage persistence |
+| `frontend/src/components/ui/CompanySearch/useCompanySearch.ts` | Modified | Context hydration on mount + sync on change for all three inputs |
+| `frontend/src/app/page.tsx` | Modified | Job description hydration, `handleFileChange` memoized, file-name hint |
 
 ## Decisions
-- Used in-memory IP throttling for MVP simplicity and no extra infra dependency.
-- Logged token/cost usage as structured backend logs rather than DB persistence for initial observability.
-- Standardized frontend tests on Vitest + React Testing Library for fast feedback and user-centric assertions.
+- Hydration guard via `useRef` rather than `useState` flag: avoids an extra render and keeps the effect lean.
+- File object not persisted (not serializable) — only the name is stored so the UI can show a re-select prompt.
+- `clearFormState` exposed on context for explicit resets; wiring to a "Start New Analysis" UI action is deferred to the next UX pass.
+
+## Bug Fixed
+**`Maximum update depth exceeded` on mount.**
+`FileUpload.tsx` lists `onFileChange` as a `useEffect` dependency. The plain arrow `handleFileChange` in `page.tsx` received a new reference on every render, causing `setFile` → re-render → new reference → effect re-fires → loop. Wrapping in `useCallback([setFormState])` (stable dep) breaks the cycle.
 
 ## Still Open
-- Rate limiting and usage totals are process-local (reset on restart and not shared across multi-instance deployments).
-- `PACKET-02` (`feature/company-intelligence`) remains next and is not started.
+- `clearFormState` has no UI trigger yet; will be wired to a "Start New Analysis" button in the next UX pass.
 
 ## Validation
-### Frontend
 ```bash
-cd frontend
-npm run test
-npx tsc --noEmit
-npm run build
-npm run lint
+cd frontend && npx tsc --noEmit && npm run lint && npm run build
 ```
-- `npm run test`: pass (`50` tests)
-- `npx tsc --noEmit`: pass
-- `npm run build`: pass
-- `npm run lint`: pass
+- `tsc --noEmit`: pass
+- `lint`: pass
+- `build`: pass
 
-### Backend
-```bash
-cd backend
-python3 -m ruff check .
-python3 -m ruff format --check .
-python3 -m mypy app/
-python3 -m pytest
-```
-- `ruff check`: pass
-- `ruff format --check`: pass
-- `mypy app/`: pass
-- `pytest`: pass (`23` tests)
+---
+
+## Portfolio Review
+
+Reviewed `PORTFOLIO_AUDIT_2026.md` and identified positioning gaps before using it for CV updates.
+
+### Audit Corrections Needed
+| Issue | Was | Should Be |
+|---|---|---|
+| Petsgram deployment | "Netlify + Render" | AWS (EC2 + S3 + CloudFront) |
+| ManuMu Studio framing | "Portfolio project namespace" | Freelance business delivering client work |
+| OR Studio context | "Real client project" | Client delivery through freelance business |
+| Cross-project patterns | No infra section | AWS infrastructure management included |
+
+### Seniority Assessment — Strong mid-level, senior-adjacent
+**Senior-level signals already present:** OAuth 2.0/OIDC from scratch (PKCE, RS256, federated sign-out), multi-service ecosystem, AI pipeline architecture, AWS infrastructure (self-managed), security awareness (SSRF, CSP, rate limiting), freelance business with client delivery, bilingual strict typing (TS + mypy).
+
+**Remaining gaps:** No team impact signal, no scale signal, no IaC/DevOps depth, all projects are solo.
+
+**Bottom line:** Technical ceiling is senior. Gap is verifiable scope of experience, not skill.
+
+## Still Open
+- [ ] Update `PORTFOLIO_AUDIT_2026.md` with AWS and business corrections
+- [ ] Update `CV_ENHANCED_2026.md` to reflect corrected positioning

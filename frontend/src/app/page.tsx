@@ -1,7 +1,7 @@
 "use client";
 
 /** Upload page where users submit CV + job description for optimization. */
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanySearch } from "@/components/ui/CompanySearch";
 import { FileUpload } from "@/components/ui/FileUpload";
@@ -12,13 +12,37 @@ import type { CompanyResearchResult } from "@/types/company";
 
 export default function Home() {
   const router = useRouter();
-  const { companyResearch, setCompanyResearch, setResult } = useOptimizationContext();
+  const { companyResearch, setCompanyResearch, setResult, formState, setFormState } =
+    useOptimizationContext();
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
+  // Hydrate job description from persisted form state once context finishes loading.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    if (formState.jobDescription) {
+      setJobDescription(formState.jobDescription);
+      hydratedRef.current = true;
+    }
+  }, [formState.jobDescription]);
+
   const isReadyToSubmit = file !== null && jobDescription.trim().length > 0;
+
+  const handleJobDescriptionChange = (value: string): void => {
+    setJobDescription(value);
+    setFormState({ jobDescription: value });
+  };
+
+  const handleFileChange = useCallback(
+    (newFile: File | null): void => {
+      setFile(newFile);
+      setFormState({ fileName: newFile?.name ?? null });
+    },
+    [setFormState],
+  );
 
   const handleSubmit = async (): Promise<void> => {
     if (!file || !isReadyToSubmit) {
@@ -82,8 +106,15 @@ export default function Home() {
         </button>
       </div>
 
-      <FileUpload onFileChange={setFile} />
-      <JobDescription onChange={setJobDescription} value={jobDescription} />
+      <FileUpload onFileChange={handleFileChange} />
+      {!file && formState.fileName ? (
+        <p className="text-sm text-slate-400">
+          Previously selected:{" "}
+          <span className="font-medium text-slate-200">{formState.fileName}</span> — please
+          re-select your file.
+        </p>
+      ) : null}
+      <JobDescription onChange={handleJobDescriptionChange} value={jobDescription} />
 
       {submissionError ? <p className="text-sm text-rose-300">{submissionError}</p> : null}
 

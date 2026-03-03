@@ -1,5 +1,6 @@
 /** Hook managing company research inputs, progress states, and API calls. */
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useOptimizationContext } from "@/context/OptimizationContext";
 import { researchCompany } from "@/lib/api";
 import type { CompanyResearchResult, ResearchStep } from "@/types/company";
 
@@ -25,13 +26,51 @@ function wait(ms: number): Promise<void> {
 }
 
 export function useCompanySearch(): UseCompanySearchReturn {
-  const [companyName, setCompanyName] = useState<string>("");
-  const [companyUrl, setCompanyUrl] = useState<string>("");
-  const [jobTitle, setJobTitle] = useState<string>("");
+  const { formState, setFormState } = useOptimizationContext();
+
+  const [companyName, setCompanyNameState] = useState<string>("");
+  const [companyUrl, setCompanyUrlState] = useState<string>("");
+  const [jobTitle, setJobTitleState] = useState<string>("");
   const [currentStep, setCurrentStep] = useState<ResearchStep>("idle");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CompanyResearchResult | null>(null);
+
+  // Hydrate local inputs from persisted form state once context finishes loading.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    if (formState.companyName || formState.companyUrl || formState.jobTitle) {
+      setCompanyNameState(formState.companyName);
+      setCompanyUrlState(formState.companyUrl);
+      setJobTitleState(formState.jobTitle);
+      hydratedRef.current = true;
+    }
+  }, [formState]);
+
+  const setCompanyName = useCallback(
+    (value: string): void => {
+      setCompanyNameState(value);
+      setFormState({ companyName: value });
+    },
+    [setFormState],
+  );
+
+  const setCompanyUrl = useCallback(
+    (value: string): void => {
+      setCompanyUrlState(value);
+      setFormState({ companyUrl: value });
+    },
+    [setFormState],
+  );
+
+  const setJobTitle = useCallback(
+    (value: string): void => {
+      setJobTitleState(value);
+      setFormState({ jobTitle: value });
+    },
+    [setFormState],
+  );
 
   const clearError = useCallback(() => {
     setError(null);
