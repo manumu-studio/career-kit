@@ -1,3 +1,7 @@
+# === Root ===
+node_modules/
+.claude/
+
 # === Frontend (Node.js / Next.js) ===
 frontend/node_modules/
 frontend/.next/
@@ -34,19 +38,24 @@ CONTINUATION_PROMPT_NEXT_SESSION.md
 
 # === Docs ===
 _docs/
-docs/session-prompts/
-docs/build-packets/
-docs/build-packets-reports/
-docs/cursor-tasks/
-docs/cursor-task-reports/
- 
-docs/DEVELOPMENT_PLAYBOOK.md
+
+
 
 # === AI Tool Configs ===
 .cursorrules
 CLAUDE.md
 PROJECT_MAP.md
 
+
 # === Docs (internal) ===
 docs/roadmap/
 docs/architecture/
+docs/CV_ENHANCED_2026.md
+docs/cursor-task-reports
+docs/cursor-tasks
+docs/build-packets
+docs/build-packets-reports
+docs/PORTFOLIO_AUDIT_2026.md
+docs/language
+docs/session-prompts
+docs/DEVELOPMENT_PLAYBOOK.md

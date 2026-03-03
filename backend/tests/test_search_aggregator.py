@@ -56,7 +56,7 @@ class _MockTavilyClient:
 class _MockDDGS:
     """Mock DuckDuckGo search class used by fallback provider."""
 
-    def __init__(self, result_count: int = 5) -> None:
+    def __init__(self, result_count: int = 5, **_kwargs: object) -> None:
         self._result_count = result_count
 
     def text(self, query: str, max_results: int = 5) -> list[dict[str, str]]:

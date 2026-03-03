@@ -34,7 +34,7 @@ function getStepStatus(
     return "done";
   }
   if (stepIndex === currentIndex) {
-    return "active";
+    return step === "done" ? "done" : "active";
   }
   return "pending";
 }
