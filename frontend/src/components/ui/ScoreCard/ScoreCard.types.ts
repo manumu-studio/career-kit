@@ -1,4 +1,4 @@
-/** Props for rendering ATS match score visuals. */
+/** Props for rendering job match score visuals. */
 export interface ScoreCardProps {
   score: number;
 }

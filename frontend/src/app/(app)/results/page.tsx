@@ -1,6 +1,6 @@
 "use client";
 
-/** Results page showing ATS score, comparison details, keywords, and gaps. */
+/** Results page showing match score, comparison details, keywords, and gaps. */
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,7 @@ export default function ResultsPage() {
   // Keep users on the upload route when there is no optimization payload.
   useEffect(() => {
     if (!result) {
-      router.replace("/");
+      router.replace("/home");
     }
   }, [result, router]);
 
@@ -30,11 +30,11 @@ export default function ResultsPage() {
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold text-white">Optimization Results</h1>
-          <p className="text-sm text-slate-400">Your ATS-tailored CV improvements are ready.</p>
+          <p className="text-sm text-slate-400">Your job-tailored CV improvements are ready.</p>
         </div>
         <Link
           className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 hover:text-white"
-          href="/"
+          href="/home"
         >
           Back to Upload
         </Link>

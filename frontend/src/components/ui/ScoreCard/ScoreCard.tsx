@@ -1,4 +1,4 @@
-/** Renders ATS match score as a circular progress card. */
+/** Renders job match score as a circular progress card. */
 import type { ScoreCardProps } from "@/components/ui/ScoreCard/ScoreCard.types";
 import { useScoreCard } from "@/components/ui/ScoreCard/useScoreCard";
 
@@ -10,7 +10,7 @@ export function ScoreCard({ score }: Readonly<ScoreCardProps>) {
 
   return (
     <article className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-      <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-slate-300">ATS Match</h2>
+      <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-slate-300">Job Match</h2>
       <div className="flex flex-col items-center gap-3">
         <div className="relative h-32 w-32">
           <svg className="-rotate-90" viewBox="0 0 120 120">

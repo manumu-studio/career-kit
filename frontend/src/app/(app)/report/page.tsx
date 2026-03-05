@@ -15,7 +15,7 @@ export default function ReportPage() {
         <p className="text-slate-300">
           Research a company from the upload page to view the full report.
         </p>
-        <Link className="text-sky-300 underline" href="/">
+        <Link className="text-sky-300 underline" href="/home">
           Back to home
         </Link>
       </main>
@@ -24,7 +24,7 @@ export default function ReportPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-10">
-      <Link className="text-sm text-sky-300 underline" href="/">
+      <Link className="text-sm text-sky-300 underline" href="/home">
         ← Back to Upload
       </Link>
       <CompanyReport research={companyResearch} />

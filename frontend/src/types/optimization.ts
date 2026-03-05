@@ -5,7 +5,7 @@ export interface Gap {
   suggestion: string;
 }
 
-/** A CV section before/after ATS optimization. */
+/** A CV section before/after CV optimization. */
 export interface CvSection {
   heading: string;
   original: string;

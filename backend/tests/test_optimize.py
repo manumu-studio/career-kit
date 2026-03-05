@@ -34,7 +34,7 @@ class _MockSuccessProvider(LLMProvider):
                     "heading": "Experience",
                     "original": "Built APIs.",
                     "optimized": "Built resilient APIs aligned to role priorities.",
-                    "changes_made": ["Added ATS-aligned keywords"],
+                    "changes_made": ["Added job-aligned keywords"],
                 }
             ],
             gap_analysis=[

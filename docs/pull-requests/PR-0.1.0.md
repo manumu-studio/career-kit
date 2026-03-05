@@ -1,4 +1,4 @@
-# PR-0.1.0 — Foundation End-to-End ATS Flow
+# PR-0.1.0 — Foundation End-to-End Flow
 **Branch:** `feature/foundation` (initial branch)
 **Version:** `0.1.0`
 **Date:** 2026-02-25

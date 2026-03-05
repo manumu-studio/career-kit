@@ -1,11 +1,10 @@
-/** Root layout and static metadata for ATS Career Kit. */
+/** Root layout and static metadata for Career Kit. */
 import type { Metadata } from "next";
 import "./globals.css";
-import { OptimizationProvider } from "@/context/OptimizationContext";
 
 export const metadata: Metadata = {
-  title: "ATS Career Kit",
-  description: "Optimize your CV for applicant tracking systems.",
+  title: "Career Kit",
+  description: "Optimize your CV for job applications.",
 };
 
 export default function RootLayout({
@@ -16,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
-        <OptimizationProvider>{children}</OptimizationProvider>
+        {children}
       </body>
     </html>
   );

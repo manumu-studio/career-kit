@@ -43,7 +43,7 @@ class AnthropicProvider(LLMProvider):
         company_name: Optional[str] = None,  # noqa: UP045
         company_context: Optional[CompanyProfile] = None,  # noqa: UP045
     ) -> OptimizationResult:
-        """Generate and validate ATS optimization output."""
+        """Generate and validate CV optimization output."""
         system = build_system_prompt()
         user_prompt = build_user_prompt(
             cv_text=cv_text,

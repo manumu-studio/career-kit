@@ -25,7 +25,7 @@ class WebsiteScraper:
         "leadership": ["/team", "/leadership"],
     }
     BLOG_PATH: str = "/blog"
-    USER_AGENT: str = "ATSCareerKit/1.0 (career-research)"
+    USER_AGENT: str = "CareerKit/1.0 (career-research)"
     REQUEST_TIMEOUT: float = 5.0
     MAX_PAGE_SIZE: int = 500_000
     INTER_REQUEST_DELAY: float = 0.5

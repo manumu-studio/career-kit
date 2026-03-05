@@ -1,8 +1,8 @@
-# ATS Career Kit
+# Career Kit
 
-AI-powered CV optimizer that tailors resumes to pass ATS (Applicant Tracking System) filters.
+AI-powered CV optimizer that tailors resumes for job applications.
 
-Upload your CV (PDF) + paste a job description → get an ATS-optimized CV, gap analysis, keyword scoring, and match score.
+Upload your CV (PDF) + paste a job description → get a job-tailored CV, gap analysis, keyword scoring, and match score.
 
 ## Stack
 
@@ -28,13 +28,15 @@ uvicorn app.main:app --reload
 cd frontend
 npm install
 cp .env.example .env.local
+# Add auth vars for M2 Auth: AUTH_CLIENT_ID, AUTH_CLIENT_SECRET, NEXTAUTH_SECRET, APP_URL
 npm run dev
 ```
 
 ## Roadmap
 
 - [x] v0.1 — Foundation flow (upload → parse → optimize → results) + rate limiting + usage logging + test suite
-- [ ] v0.2 — Company intelligence (research + profile synthesis + optimize integration)
-- [ ] v0.3 — Cover letter generation + PDF export
-- [ ] v0.4 — UX polish + validation + accessibility
+- [x] v0.2 — Company intelligence (research + profile synthesis + optimize integration)
+- [x] v0.3 — Auth gate (M2 Auth OIDC, NextAuth v5, route protection)
+- [ ] v0.4 — Cover letter generation + PDF export
+- [ ] v0.5 — UX polish + validation + accessibility
 - [ ] v0.7 — Multi-provider LLM support (Claude / OpenAI / Gemini)

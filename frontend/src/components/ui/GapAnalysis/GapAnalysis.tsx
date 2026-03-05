@@ -1,4 +1,4 @@
-/** Renders ATS skill gaps with importance badges and suggestions. */
+/** Renders skill gaps with importance badges and suggestions. */
 import type { GapAnalysisProps } from "@/components/ui/GapAnalysis/GapAnalysis.types";
 import { useGapAnalysis } from "@/components/ui/GapAnalysis/useGapAnalysis";
 

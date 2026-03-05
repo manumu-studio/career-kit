@@ -8,7 +8,7 @@ from app.middleware.rate_limit import RateLimitMiddleware
 from app.routers.optimize import router as optimize_router
 from app.routers.research import router as research_router
 
-app = FastAPI(title="ATS Career Kit API")
+app = FastAPI(title="Career Kit API")
 
 app.add_middleware(
     CORSMiddleware,

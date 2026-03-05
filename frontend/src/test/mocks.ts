@@ -6,7 +6,7 @@ export function mockCvSection(): CvSection {
     heading: "Experience",
     original: "Built APIs for internal tools.",
     optimized: "Built resilient APIs for internal tools with measurable outcomes.",
-    changes_made: ["Added ATS keywords", "Added measurable impact"],
+    changes_made: ["Added job-relevant keywords", "Added measurable impact"],
   };
 }
 
