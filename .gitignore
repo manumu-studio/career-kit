@@ -1,6 +1,6 @@
 # === Root ===
 node_modules/
-.claude/
+.DS_Store
 
 # === Frontend (Node.js / Next.js) ===
 frontend/node_modules/
@@ -31,31 +31,42 @@ backend/.coverage
 .idea/
 *.swp
 *.swo
-.DS_Store
 
-# === Project ===
-CONTINUATION_PROMPT_NEXT_SESSION.md
-
-# === Docs ===
+# === Legacy docs ===
 _docs/
 
+# === Private working docs ===
+docs/CV_ENHANCED_2026.md
+docs/PORTFOLIO_AUDIT_2026.md
+docs/language/
 
+# ============================================
+# AI/IDE Development System (PRIVATE — local only)
+# ============================================
 
-# === AI Tool Configs ===
+# Cursor rules
 .cursorrules
-CLAUDE.md
+
+# Session continuity
+CONTINUATION_PROMPT_NEXT_SESSION.md
 PROJECT_MAP.md
 
-
-# === Docs (internal) ===
-docs/roadmap/
-docs/architecture/
-docs/CV_ENHANCED_2026.md
-docs/cursor-task-reports
-docs/cursor-tasks
-docs/build-packets
-docs/build-packets-reports
-docs/PORTFOLIO_AUDIT_2026.md
-docs/language
-docs/session-prompts
+# Internal process docs
 docs/DEVELOPMENT_PLAYBOOK.md
+docs/CLAUDE.md
+docs/build-packets/
+docs/build-packet-reports/
+docs/cursor-tasks/
+docs/cursor-task-reports/
+docs/cursor-specs/
+docs/session-prompts/
+
+# Claude Code config
+.claude/
+
+# Project-level CLAUDE.md (root)
+CLAUDE.md
+
+# ============================================
+# End of system section
+# ============================================

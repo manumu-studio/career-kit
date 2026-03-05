@@ -1,4 +1,4 @@
-/** Props for rendering ATS gap analysis items. */
+/** Props for rendering gap analysis items. */
 import type { Gap } from "@/types/optimization";
 
 export interface GapAnalysisProps {
