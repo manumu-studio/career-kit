@@ -2,6 +2,7 @@
 
 /** Company research form that triggers backend research and displays results. */
 import { cn } from "@/lib/utils";
+import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
 import { CompanyCard } from "@/components/ui/CompanyCard";
 import { ResearchProgress } from "@/components/ui/ResearchProgress";
 import type { CompanySearchProps } from "./CompanySearch.types";
@@ -11,6 +12,7 @@ export function CompanySearch({
   onResearchComplete,
   onResearchError,
   onViewReport,
+  userId,
   className,
 }: CompanySearchProps) {
   const {
@@ -21,22 +23,42 @@ export function CompanySearch({
     isLoading,
     error,
     result,
+    cachedMatch,
     setCompanyName,
     setCompanyUrl,
     setJobTitle,
     startResearch,
+    loadCachedResearch,
+    dismissCachedBanner,
     clearError,
-  } = useCompanySearch();
+  } = useCompanySearch({ userId });
 
-  const handleResearch = async (): Promise<void> => {
+  const handleResearch = async (forceRefresh?: boolean): Promise<void> => {
     try {
-      const researchResult = await startResearch();
+      const researchResult = await startResearch(forceRefresh);
       onResearchComplete(researchResult);
     } catch (requestError: unknown) {
       const message =
         requestError instanceof Error ? requestError.message : "Company research failed.";
       onResearchError(message);
     }
+  };
+
+  const handleUseCached = async (): Promise<void> => {
+    if (!cachedMatch) return;
+    try {
+      const researchResult = await loadCachedResearch(cachedMatch);
+      onResearchComplete(researchResult);
+    } catch (requestError: unknown) {
+      const message =
+        requestError instanceof Error ? requestError.message : "Failed to load cached research.";
+      onResearchError(message);
+    }
+  };
+
+  const handleResearchAgain = (): void => {
+    dismissCachedBanner();
+    void handleResearch(true);
   };
 
   return (
@@ -89,6 +111,15 @@ export function CompanySearch({
           />
         </label>
       </div>
+
+      {cachedMatch && !result ? (
+        <CacheHitBanner
+          match={cachedMatch}
+          onRunAgain={handleResearchAgain}
+          onUseCached={handleUseCached}
+          variant="research"
+        />
+      ) : null}
 
       <div className="flex items-center gap-3">
         <button

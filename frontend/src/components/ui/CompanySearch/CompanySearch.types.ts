@@ -5,5 +5,6 @@ export interface CompanySearchProps {
   onResearchComplete: (result: CompanyResearchResult) => void;
   onResearchError: (error: string) => void;
   onViewReport?: () => void;
+  userId?: string;
   className?: string;
 }

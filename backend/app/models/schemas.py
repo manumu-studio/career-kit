@@ -1,6 +1,6 @@
 """Request and response schemas for optimization and research endpoints."""
 
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -31,6 +31,9 @@ class OptimizationResult(BaseModel):
     keyword_misses: list[str]
     match_score: int = Field(ge=0, le=100)
     summary: str
+    cache_hit: bool = False
+    cached_at: Optional[str] = None  # ISO timestamp of original analysis
+    analysis_id: Optional[str] = None  # UUID of stored analysis
 
 
 class UsageMetrics(BaseModel):
@@ -145,6 +148,9 @@ class CompanyResearchResult(BaseModel):
     sources_used: list[str]
     research_quality: Literal["high", "medium", "low"]
     researched_at: str
+    cache_hit: bool = False
+    cached_at: Optional[str] = None  # ISO timestamp of original analysis
+    analysis_id: Optional[str] = None  # UUID of stored analysis
 
 
 class CompanyResearchRequest(BaseModel):
@@ -153,3 +159,84 @@ class CompanyResearchRequest(BaseModel):
     company_name: str
     company_url: Optional[str] = None  # noqa: UP045
     job_title: Optional[str] = None  # noqa: UP045
+    force_refresh: bool = False  # Skip cache and run fresh research
+
+
+# --- History API schemas ---
+
+
+class HistoryListItem(BaseModel):
+    """Compact analysis entry for history list."""
+
+    id: str
+    analysis_type: Literal["research", "optimize", "both"]
+    company_name: Optional[str] = None
+    job_title: Optional[str] = None
+    job_description_preview: Optional[str] = None
+    cv_filename: Optional[str] = None
+    created_at: str
+    expires_at: str
+    cache_hit: bool
+    match_score: Optional[int] = None  # From optimization_result_json if present
+
+
+class HistoryListResponse(BaseModel):
+    """Paginated list of user analyses."""
+
+    items: list[HistoryListItem]
+    total: int
+    page: int
+    limit: int
+
+
+class HistoryDetailResponse(BaseModel):
+    """Full analysis detail for history detail view."""
+
+    id: str
+    analysis_type: Literal["research", "optimize", "both"]
+    company_name: Optional[str] = None
+    job_title: Optional[str] = None
+    job_description_preview: Optional[str] = None
+    cv_filename: Optional[str] = None
+    created_at: str
+    expires_at: str
+    cache_hit: bool
+    company_research_json: Optional[dict[str, Any]] = None
+    optimization_result_json: Optional[dict[str, Any]] = None
+
+
+class HistoryStatsResponse(BaseModel):
+    """Usage stats for user analyses."""
+
+    total_analyses: int
+    cache_hits: int
+    total_cost_usd: float
+
+
+class CheckResearchRequest(BaseModel):
+    """Request body for POST /history/check-research."""
+
+    company_url: str
+
+
+class CheckOptimizationRequest(BaseModel):
+    """Request body for POST /history/check-optimization."""
+
+    job_description: str
+    company_url: Optional[str] = None  # noqa: UP045
+
+
+class CachedMatchInfo(BaseModel):
+    """Cached analysis summary for cache-check responses."""
+
+    analysis_id: str
+    company_name: Optional[str] = None
+    job_title: Optional[str] = None
+    created_at: str
+
+
+class CheckCacheResponse(BaseModel):
+    """Response for cache-check endpoints."""
+
+    cached: bool
+    match: Optional[CachedMatchInfo] = None

@@ -9,7 +9,6 @@ This journal tracks the development progress of ATS Career Kit, an AI-powered CV
 
 ## Current Focus
 
-- Analysis history persistence (planned).
 - Cover letter generation + PDF export (planned).
 
 ---
@@ -43,6 +42,15 @@ Frontend-only auth gate with NextAuth v5 and M2 Auth (OIDC). Route groups `(publ
 
 ---
 
+### [Entry 4 — Analysis History & Result Caching](docs/journal/ENTRY-4.md)
+**Date:** 2026-03-06
+**Type:** Feature
+**Version:** `0.4.0`
+
+PostgreSQL persistence for research and optimization. Cache check before LLM calls. History page with list, detail, comparison. Cache hit banners on upload page. Neon serverless support.
+
+---
+
 ## Pull Requests
 
 ### [PR-0.1.0 — Foundation End-to-End Flow](docs/pull-requests/PR-0.1.0.md)
@@ -54,12 +62,15 @@ Company research pipeline, report page, form state persistence, and auth plannin
 ### [PR-0.3.0 — M2 Auth OIDC Integration](docs/pull-requests/PR-0.3.0.md)
 Auth gate with NextAuth v5 and M2 Auth. Route groups, UserBar, federated sign-out.
 
+### [PR-0.4.0 — Analysis History & Result Caching](docs/pull-requests/PR-0.4.0.md)
+PostgreSQL persistence, cache logic, History page, cache hit banners, Neon support.
+
 ---
 
 ## Project Status
 
-**Current Version:** 0.3.0
-**Last Updated:** 2026-03-05
+**Current Version:** 0.4.0
+**Last Updated:** 2026-03-06
 
 ### Completed Features
 
@@ -67,13 +78,16 @@ Auth gate with NextAuth v5 and M2 Auth. Route groups, UserBar, federated sign-ou
 - Company intelligence pipeline (scrape + search + LLM synthesis)
 - Form state persistence across navigation
 - M2 Auth (OIDC) integration — frontend-only auth gate
+- Analysis history persistence (PostgreSQL, Neon)
+- Result caching (research 14d, optimization 30d TTL)
+- History page with list, detail, comparison views
+- Cache hit banners on upload page
 - Rate limiting on optimize endpoint
 - Token cost logging
 - Frontend and backend test suites
 
 ### Planned Features
 
-- Analysis history persistence
 - Cover letter and PDF export
 - UX polish and error handling
 - Multi-provider LLM support
@@ -81,4 +95,4 @@ Auth gate with NextAuth v5 and M2 Auth. Route groups, UserBar, federated sign-ou
 
 ---
 
-**Last Updated:** 2026-03-05
+**Last Updated:** 2026-03-06

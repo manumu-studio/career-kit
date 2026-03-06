@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     llm_input_cost_per_million: float = 0.80
     llm_output_cost_per_million: float = 4.00
     tavily_api_key: Optional[str] = None  # noqa: UP045
+    database_url: str = (
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/ats_career_kit"
+    )
 
     model_config = SettingsConfigDict(env_file=".env", enable_decoding=False)
 

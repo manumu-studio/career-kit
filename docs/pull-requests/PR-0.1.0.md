@@ -83,6 +83,6 @@ cd backend && python3 -m ruff check . && python3 -m ruff format --check . && pyt
 - Backend lint/format/typecheck/tests: pass
 
 ## References
-- `docs/cursor-task-reports/TASK-007-report.md`
-- `docs/cursor-task-reports/TASK-008-report.md`
-- `docs/cursor-task-reports/TASK-009-report.md`
+- `docs/cursor-task-reports/PACKET-01/TASK-007-report.md`
+- `docs/cursor-task-reports/PACKET-01/TASK-008-report.md`
+- `docs/cursor-task-reports/PACKET-01/TASK-009-report.md`

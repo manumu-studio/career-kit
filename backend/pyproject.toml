@@ -12,6 +12,16 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.per-file-ignores]
+# SQLAlchemy Mapped: Optional/Dict for Python 3.9 compat (annotation eval at runtime)
+"app/models/database.py" = ["UP035", "UP045", "UP006"]
+# Pydantic schemas: Optional for Python 3.9 compat
+"app/models/schemas.py" = ["UP045"]
+# Cache service: Optional, timezone.utc for Python 3.9 compat
+"app/services/cache/cache_service.py" = ["UP017", "UP035", "UP045", "UP006"]
+# History router: Optional for Python 3.9 compat (FastAPI evaluates annotations)
+"app/routers/history.py" = ["UP045"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
