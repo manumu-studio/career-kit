@@ -3,14 +3,18 @@
 /** Upload page where users submit CV + job description for optimization. */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
 import { CompanySearch } from "@/components/ui/CompanySearch";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { JobDescription } from "@/components/ui/JobDescription";
 import { useOptimizationContext } from "@/context/OptimizationContext";
-import { optimizeCV } from "@/lib/api";
+import { useSession } from "@/features/auth";
+import { checkOptimizationCache, optimizeCV } from "@/lib/api";
+import type { CachedMatchInfo } from "@/types/history";
 import type { CompanyResearchResult } from "@/types/company";
 
 export default function Home() {
+  const { data: session } = useSession();
   const router = useRouter();
   const { companyResearch, setCompanyResearch, setResult, formState, setFormState } =
     useOptimizationContext();
@@ -18,6 +22,8 @@ export default function Home() {
   const [jobDescription, setJobDescription] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [optimizationCachedMatch, setOptimizationCachedMatch] =
+    useState<CachedMatchInfo | null>(null);
 
   // Hydrate job description from persisted form state once context finishes loading.
   const hydratedRef = useRef(false);
@@ -44,32 +50,77 @@ export default function Home() {
     [setFormState],
   );
 
+  const runOptimization = useCallback(
+    async (forceRefresh?: boolean): Promise<void> => {
+      if (!file || !isReadyToSubmit) return;
+      setSubmissionError(null);
+      setOptimizationCachedMatch(null);
+      setIsSubmitting(true);
+      try {
+        const result = await optimizeCV(file, jobDescription.trim(), {
+          companyContext: companyResearch
+            ? {
+                companyName: companyResearch.profile.name,
+                companyProfile: companyResearch.profile,
+              }
+            : undefined,
+          userId: session?.user?.externalId,
+          forceRefresh,
+        });
+        setResult(result);
+        router.push("/results");
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : "Failed to optimize CV. Please try again.";
+        setSubmissionError(message);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [
+      file,
+      jobDescription,
+      isReadyToSubmit,
+      companyResearch,
+      session?.user?.externalId,
+      router,
+      setResult,
+    ],
+  );
+
   const handleSubmit = async (): Promise<void> => {
-    if (!file || !isReadyToSubmit) {
-      return;
-    }
+    if (!file || !isReadyToSubmit) return;
 
     setSubmissionError(null);
-    setIsSubmitting(true);
+    const companyUrl = companyResearch?.profile?.website ?? undefined;
 
     try {
-      const result = await optimizeCV(file, jobDescription.trim(), {
-        companyContext: companyResearch
-          ? {
-              companyName: companyResearch.profile.name,
-              companyProfile: companyResearch.profile,
-            }
-          : undefined,
-      });
-      setResult(result);
-      router.push("/results");
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to optimize CV. Please try again.";
-      setSubmissionError(message);
-    } finally {
-      setIsSubmitting(false);
+      const check = await checkOptimizationCache(
+        jobDescription.trim(),
+        companyUrl,
+        session?.user?.externalId,
+      );
+      if (check.cached && check.match) {
+        setOptimizationCachedMatch(check.match);
+        return;
+      }
+    } catch {
+      // Proceed with optimization if check fails
     }
+
+    void runOptimization();
+  };
+
+  const handleViewPreviousOptimization = (): void => {
+    if (optimizationCachedMatch) {
+      router.push(`/history/${optimizationCachedMatch.analysis_id}`);
+      setOptimizationCachedMatch(null);
+    }
+  };
+
+  const handleOptimizeAgain = (): void => {
+    setOptimizationCachedMatch(null);
+    void runOptimization(true);
   };
 
   const handleResearchComplete = (researchResult: CompanyResearchResult): void => {
@@ -91,6 +142,7 @@ export default function Home() {
         onViewReport={() => {
           router.push("/report");
         }}
+        userId={session?.user?.externalId}
       />
 
       <div className="flex items-center justify-between">
@@ -115,6 +167,15 @@ export default function Home() {
         </p>
       ) : null}
       <JobDescription onChange={handleJobDescriptionChange} value={jobDescription} />
+
+      {optimizationCachedMatch ? (
+        <CacheHitBanner
+          match={optimizationCachedMatch}
+          onRunAgain={handleOptimizeAgain}
+          onUseCached={handleViewPreviousOptimization}
+          variant="optimization"
+        />
+      ) : null}
 
       {submissionError ? <p className="text-sm text-rose-300">{submissionError}</p> : null}
 

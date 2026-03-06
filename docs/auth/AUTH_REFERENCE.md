@@ -189,7 +189,7 @@ PACKET-03 specifies that Career Kit does not get a database in the current phase
 - **Follow every instruction** — task was written by the architect.
 - **Stay in scope** — only modify files listed in the task.
 - **Never modify** `.cursorrules`, `.claude/`, or `docs/` beyond task scope.
-- **Create task report** at `docs/cursor-task-reports/TASK-NNN-report.md` after completion.
+- **Create task report** at `docs/cursor-task-reports/PACKET-NN/TASK-NNN-report.md` after completion.
 
 ### Auth-Specific Guardrails (from tasks)
 

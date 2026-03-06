@@ -58,6 +58,7 @@ export interface CompanyResearchRequest {
   company_name: string;
   company_url: string | null;
   job_title: string | null;
+  force_refresh?: boolean;
 }
 
 export type ResearchStep =

@@ -37,6 +37,11 @@ npm run dev
 - [x] v0.1 — Foundation flow (upload → parse → optimize → results) + rate limiting + usage logging + test suite
 - [x] v0.2 — Company intelligence (research + profile synthesis + optimize integration)
 - [x] v0.3 — Auth gate (M2 Auth OIDC, NextAuth v5, route protection)
-- [ ] v0.4 — Cover letter generation + PDF export
-- [ ] v0.5 — UX polish + validation + accessibility
+- [x] v0.4 — Analysis history (PostgreSQL persistence, caching, History page)
+- [ ] v0.5 — Cover letter generation + PDF export
+- [ ] v0.6 — UX polish + validation + accessibility
 - [ ] v0.7 — Multi-provider LLM support (Claude / OpenAI / Gemini)
+
+## Database (optional)
+
+For analysis history and caching, set `DATABASE_URL` in `backend/.env`. Supports PostgreSQL (local or Neon). Run `alembic upgrade head` to create tables.
