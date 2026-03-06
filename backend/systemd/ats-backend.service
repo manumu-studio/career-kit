@@ -1,0 +1,24 @@
+# Systemd service for ATS Career Kit FastAPI backend (uvicorn).
+# Install: sudo cp backend/systemd/ats-backend.service /etc/systemd/system/
+#         sudo systemctl daemon-reload && sudo systemctl enable ats-backend
+# Logs: journalctl -u ats-backend -f
+# Adjust .venv path if your virtual env is elsewhere.
+# --workers 2 is appropriate for t3.micro (2 vCPU); scale with instance size.
+
+[Unit]
+Description=ATS Career Kit FastAPI Backend
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/ats-career-kit/backend
+EnvironmentFile=/home/ubuntu/ats-career-kit/backend/.env
+ExecStart=/home/ubuntu/ats-career-kit/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

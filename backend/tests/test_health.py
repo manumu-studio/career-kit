@@ -16,4 +16,9 @@ def test_health_endpoint_returns_ok() -> None:
     response = client.get("/health")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    data = response.json()
+    assert data["status"] in ("healthy", "degraded")
+    assert "version" in data
+    assert data["database"] in ("connected", "disconnected")
+    assert "timestamp" in data
+    assert "uptime_seconds" in data

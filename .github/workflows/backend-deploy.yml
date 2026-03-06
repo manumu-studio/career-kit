@@ -1,0 +1,45 @@
+# Backend CD: Deploy to EC2 on push to main after CI passes.
+# Uses AWS OIDC + SSM. For SSH fallback, see comments below.
+
+name: Backend Deploy
+
+on:
+  workflow_run:
+    workflows: ["Backend CI"]
+    branches: [main]
+    types: [completed]
+
+jobs:
+  backend-deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: production
+
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy via SSM
+        id: deploy
+        run: |
+          cmd_id=$(aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["cd /home/ubuntu/ats-career-kit && git pull origin main && cd backend && source .venv/bin/activate && pip install -r requirements.txt && alembic upgrade head && sudo systemctl restart ats-backend"]' \
+            --query 'Command.CommandId' --output text)
+          aws ssm wait command-executed --command-id "$cmd_id" --instance-id "${{ secrets.EC2_INSTANCE_ID }}"
+          # Alternative: use appleboy/ssh-action@v1 with EC2_HOST, EC2_SSH_KEY if SSM not configured
+
+      - name: Health check
+        run: |
+          sleep 10
+          response=$(curl -s -o /dev/null -w "%{http_code}" "https://${{ secrets.EC2_HOST }}/health")
+          if [ "$response" != "200" ]; then
+            echo "Health check failed with status $response"
+            exit 1
+          fi
+          echo "Health check passed"
