@@ -1,12 +1,11 @@
-"""Anthropic Claude implementation of the LLM provider interface."""
+"""OpenAI GPT-4o implementation of the LLM provider interface."""
 
 from __future__ import annotations
 
 import json
 import re
-from typing import Optional
 
-from anthropic import AsyncAnthropic
+from openai import AsyncOpenAI
 
 from app.core.config import get_settings
 from app.core.prompts import (
@@ -25,16 +24,22 @@ from app.models.schemas import (
 from app.services.llm.base import LLMProvider
 
 
-class AnthropicProvider(LLMProvider):
-    """Claude implementation using the Anthropic SDK."""
+class OpenAIProvider(LLMProvider):
+    """OpenAI GPT-4o implementation."""
 
     def __init__(self) -> None:
         """Initialize provider with API client and model name."""
         settings = get_settings()
-        self._client = AsyncAnthropic(api_key=settings.anthropic_api_key)
-        self._model = "claude-haiku-4-5-20251001"
-        self._input_cost_per_million = settings.llm_input_cost_per_million
-        self._output_cost_per_million = settings.llm_output_cost_per_million
+        if not settings.openai_api_key:
+            raise ValueError("OPENAI_API_KEY is not configured.")
+        self._client = AsyncOpenAI(api_key=settings.openai_api_key)
+        self._model = "gpt-4o"
+        self._input_cost_per_million = getattr(
+            settings, "openai_input_cost_per_million", 2.50
+        )
+        self._output_cost_per_million = getattr(
+            settings, "openai_output_cost_per_million", 10.00
+        )
 
     @property
     def model_name(self) -> str:
@@ -45,8 +50,8 @@ class AnthropicProvider(LLMProvider):
         self,
         cv_text: str,
         job_description: str,
-        company_name: Optional[str] = None,  # noqa: UP045
-        company_context: Optional[CompanyProfile] = None,  # noqa: UP045
+        company_name: str | None = None,
+        company_context: CompanyProfile | None = None,
     ) -> OptimizationResult:
         """Generate and validate CV optimization output."""
         system = build_system_prompt()
@@ -56,28 +61,29 @@ class AnthropicProvider(LLMProvider):
             company_name=company_name,
             company_context=company_context,
         )
-        response = await self._client.messages.create(
+        response = await self._client.chat.completions.create(
             model=self._model,
             max_tokens=8192,
-            system=system,
-            messages=[{"role": "user", "content": user_prompt}],
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_prompt},
+            ],
+            response_format={"type": "json_object"},
         )
         self._log_usage(response)
-        self._check_stop_reason(response, "optimize")
+        self._check_finish_reason(response, "optimize")
 
-        raw_text = self._extract_text_content(response.content)
+        raw_text = self._extract_content(response)
         cleaned_text = self._strip_markdown_fences(raw_text)
-
         payload = self._load_json_object(cleaned_text)
         if payload is not None:
             return OptimizationResult.model_validate(payload)
 
-        # Retry once with explicit JSON correction request.
-        retry_response = await self._client.messages.create(
+        retry_response = await self._client.chat.completions.create(
             model=self._model,
             max_tokens=8192,
-            system=system,
             messages=[
+                {"role": "system", "content": system},
                 {"role": "user", "content": user_prompt},
                 {"role": "assistant", "content": cleaned_text},
                 {
@@ -88,11 +94,11 @@ class AnthropicProvider(LLMProvider):
                     ),
                 },
             ],
+            response_format={"type": "json_object"},
         )
         self._log_usage(retry_response)
-        self._check_stop_reason(retry_response, "optimize retry")
-
-        retry_text = self._extract_text_content(retry_response.content)
+        self._check_finish_reason(retry_response, "optimize retry")
+        retry_text = self._extract_content(retry_response)
         retry_cleaned = self._strip_markdown_fences(retry_text)
         retry_payload = self._load_json_object(retry_cleaned)
         if retry_payload is None:
@@ -104,36 +110,39 @@ class AnthropicProvider(LLMProvider):
         company_name: str,
         website_content: str,
         search_results: str,
-        job_title: Optional[str] = None,  # noqa: UP045
+        job_title: str | None = None,
     ) -> CompanyResearchResult:
         """Generate and validate structured company research output."""
+        system = build_company_system_prompt()
         user_prompt = build_company_user_prompt(
             company_name=company_name,
             job_title=job_title or "Not specified",
             website_content=website_content,
             search_results=search_results,
         )
-        response = await self._client.messages.create(
+        response = await self._client.chat.completions.create(
             model=self._model,
             max_tokens=4096,
-            system=build_company_system_prompt(),
-            messages=[{"role": "user", "content": user_prompt}],
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_prompt},
+            ],
+            response_format={"type": "json_object"},
         )
         self._log_usage(response)
-        self._check_stop_reason(response, "synthesize_company")
+        self._check_finish_reason(response, "synthesize_company")
 
-        raw_text = self._extract_text_content(response.content)
+        raw_text = self._extract_content(response)
         cleaned_text = self._strip_markdown_fences(raw_text)
         payload = self._load_json_object(cleaned_text)
         if payload is not None:
             return CompanyResearchResult.model_validate(payload)
 
-        # Retry once with explicit JSON correction request.
-        retry_response = await self._client.messages.create(
+        retry_response = await self._client.chat.completions.create(
             model=self._model,
             max_tokens=4096,
-            system=build_company_system_prompt(),
             messages=[
+                {"role": "system", "content": system},
                 {"role": "user", "content": user_prompt},
                 {"role": "assistant", "content": cleaned_text},
                 {
@@ -144,10 +153,11 @@ class AnthropicProvider(LLMProvider):
                     ),
                 },
             ],
+            response_format={"type": "json_object"},
         )
         self._log_usage(retry_response)
-        self._check_stop_reason(retry_response, "synthesize_company retry")
-        retry_text = self._extract_text_content(retry_response.content)
+        self._check_finish_reason(retry_response, "synthesize_company retry")
+        retry_text = self._extract_content(retry_response)
         retry_cleaned = self._strip_markdown_fences(retry_text)
         retry_payload = self._load_json_object(retry_cleaned)
         if retry_payload is None:
@@ -155,10 +165,10 @@ class AnthropicProvider(LLMProvider):
         return CompanyResearchResult.model_validate(retry_payload)
 
     def _log_usage(self, response: object) -> None:
-        """Extract usage counters from Anthropic response and emit usage log."""
+        """Extract usage from OpenAI response and emit usage log."""
         usage = getattr(response, "usage", None)
-        input_tokens = self._usage_token_value(usage, "input_tokens")
-        output_tokens = self._usage_token_value(usage, "output_tokens")
+        input_tokens = self._usage_value(usage, "prompt_tokens")
+        output_tokens = self._usage_value(usage, "completion_tokens")
         total_tokens = input_tokens + output_tokens
         estimated_cost = calculate_estimated_cost(
             input_tokens=input_tokens,
@@ -173,44 +183,43 @@ class AnthropicProvider(LLMProvider):
                 total_tokens=total_tokens,
                 estimated_cost_usd=estimated_cost,
                 model=self._model,
-                provider="anthropic",
+                provider="openai",
             )
         )
 
     @staticmethod
-    def _check_stop_reason(response: object, context: str) -> None:
-        """Raise immediately when the response was truncated at the token limit."""
-        stop_reason = getattr(response, "stop_reason", None)
-        if stop_reason == "max_tokens":
-            raise ValueError(
-                f"LLM response truncated at token limit during {context}. "
-                "Reduce input size or increase max_tokens."
-            )
+    def _check_finish_reason(response: object, context: str) -> None:
+        """Raise when response was truncated at token limit."""
+        choice = getattr(response, "choices", None)
+        if choice and len(choice) > 0:
+            finish_reason = getattr(choice[0], "finish_reason", None)
+            if finish_reason == "length":
+                raise ValueError(
+                    f"LLM response truncated at token limit during {context}. "
+                    "Reduce input size or increase max_tokens."
+                )
 
     @staticmethod
-    def _usage_token_value(usage: object, field_name: str) -> int:
-        """Return non-negative integer usage values from provider response."""
+    def _usage_value(usage: object, field_name: str) -> int:
+        """Return non-negative integer from usage object."""
         value = getattr(usage, field_name, 0)
         if isinstance(value, int):
             return max(0, value)
         return 0
 
     @staticmethod
-    def _extract_text_content(content_blocks: object) -> str:
-        """Extract plain text from Anthropic content blocks."""
-        if not isinstance(content_blocks, list):
-            raise ValueError("Unexpected response format from Anthropic API.")
-
-        text_parts: list[str] = []
-        for block in content_blocks:
-            block_text = getattr(block, "text", None)
-            if isinstance(block_text, str) and block_text.strip():
-                text_parts.append(block_text)
-
-        if not text_parts:
+    def _extract_content(response: object) -> str:
+        """Extract text from OpenAI chat completion response."""
+        choice = getattr(response, "choices", None)
+        if not choice or len(choice) == 0:
+            raise ValueError("OpenAI response did not include content.")
+        msg = getattr(choice[0], "message", None)
+        if msg is None:
+            raise ValueError("OpenAI response did not include message.")
+        content = getattr(msg, "content", None)
+        if not isinstance(content, str) or not content.strip():
             raise ValueError("LLM response did not include text content.")
-
-        return "\n".join(text_parts).strip()
+        return content.strip()
 
     @staticmethod
     def _strip_markdown_fences(value: str) -> str:
@@ -222,8 +231,8 @@ class AnthropicProvider(LLMProvider):
         return stripped
 
     @staticmethod
-    def _load_json_object(raw_text: str) -> Optional[dict[str, object]]:  # noqa: UP045
-        """Attempt JSON parsing and return dictionary payload when valid."""
+    def _load_json_object(raw_text: str) -> dict[str, object] | None:
+        """Attempt JSON parsing and return dict when valid."""
         try:
             payload = json.loads(raw_text)
         except json.JSONDecodeError:

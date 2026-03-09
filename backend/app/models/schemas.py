@@ -34,6 +34,7 @@ class OptimizationResult(BaseModel):
     cache_hit: bool = False
     cached_at: Optional[str] = None  # ISO timestamp of original analysis
     analysis_id: Optional[str] = None  # UUID of stored analysis
+    provider: Optional[str] = None  # LLM provider that generated this result
 
 
 class UsageMetrics(BaseModel):

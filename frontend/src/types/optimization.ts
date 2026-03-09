@@ -21,4 +21,8 @@ export interface OptimizationResult {
   keyword_misses: string[];
   match_score: number;
   summary: string;
+  cache_hit?: boolean;
+  cached_at?: string | null;
+  analysis_id?: string | null;
+  provider?: string | null;
 }

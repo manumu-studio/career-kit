@@ -33,6 +33,7 @@ async def optimize_cv(
     company_name: Annotated[Optional[str], Form()] = None,  # noqa: UP045
     company_profile_json: Annotated[Optional[str], Form()] = None,  # noqa: UP045
     force_refresh: Annotated[bool, Form()] = False,
+    provider: Annotated[Optional[str], Form()] = None,  # noqa: UP045
 ) -> OptimizationResult:
     """Parse CV and invoke the configured LLM provider."""
     filename = cv_file.filename or ""
@@ -45,7 +46,7 @@ async def optimize_cv(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     try:
-        provider = get_provider(settings.llm_provider)
+        llm_provider = get_provider(provider or settings.llm_provider)
     except ValueError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
@@ -84,12 +85,15 @@ async def optimize_cv(
             await db.rollback()
 
     try:
-        result = await provider.optimize(
+        result = await llm_provider.optimize(
             cv_text=cv_text,
             job_description=job_description,
             company_name=company_name,
             company_context=company_context,
         )
+        provider_name = provider or settings.llm_provider
+        result.provider = provider_name
+        result_dict = result.model_dump()
         try:
             stored = await cache_service.store_optimization_result(
                 user_id=user_id,
@@ -98,8 +102,8 @@ async def optimize_cv(
                 company_name=company_name,
                 job_title=None,
                 cv_filename=cv_file.filename,
-                result=result.model_dump(),
-                llm_model="claude-haiku-4-5-20251001",
+                result=result_dict,
+                llm_model=llm_provider.model_name,
                 cost_usd=0.0,
             )
             result.analysis_id = str(stored.id)

@@ -13,6 +13,7 @@ import type {
   HistoryListResponse,
   HistoryStatsResponse,
 } from "@/types/history";
+import type { ComparisonResult, ProvidersResponse } from "@/types/provider";
 
 interface OptimizeCvErrorBody {
   detail?: string;
@@ -20,6 +21,7 @@ interface OptimizeCvErrorBody {
 
 const OPTIMIZE_ENDPOINT = "/optimize";
 const RESEARCH_ENDPOINT = "/research-company";
+const PROVIDERS_ENDPOINT = "/providers";
 
 interface OptimizeCompanyContext {
   companyName: string;
@@ -30,6 +32,7 @@ interface OptimizeCvOptions {
   companyContext?: OptimizeCompanyContext;
   userId?: string;
   forceRefresh?: boolean;
+  provider?: string;
 }
 
 export async function optimizeCV(
@@ -49,6 +52,9 @@ export async function optimizeCV(
   }
   if (options?.forceRefresh) {
     formData.append("force_refresh", "true");
+  }
+  if (options?.provider) {
+    formData.append("provider", options.provider);
   }
 
   const headers: Record<string, string> = {};
@@ -78,6 +84,43 @@ export async function optimizeCV(
   }
 
   return (await response.json()) as OptimizationResult;
+}
+
+export async function getProviders(): Promise<ProvidersResponse> {
+  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${PROVIDERS_ENDPOINT}`);
+  if (!response.ok) {
+    throw new Error(`Providers fetch failed: ${response.status}`);
+  }
+  return (await response.json()) as ProvidersResponse;
+}
+
+export async function compareProviders(
+  cvFile: File,
+  jobDescription: string,
+  providers: string[],
+): Promise<ComparisonResult> {
+  const formData = new FormData();
+  formData.append("cv_file", cvFile);
+  formData.append("job_description", jobDescription);
+  formData.append("providers", providers.join(","));
+
+  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/compare`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let detail = `Compare failed (${response.status})`;
+    try {
+      const body = (await response.json()) as { detail?: string };
+      if (typeof body.detail === "string") detail = body.detail;
+    } catch {
+      // ignore
+    }
+    throw new Error(detail);
+  }
+
+  return (await response.json()) as ComparisonResult;
 }
 
 interface ResearchCompanyOptions {

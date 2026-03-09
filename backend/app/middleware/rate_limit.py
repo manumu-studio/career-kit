@@ -16,7 +16,7 @@ from starlette.types import ASGIApp
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Apply a fixed-window request limit for selected POST endpoints."""
 
-    _LIMITED_PATHS = {"/optimize", "/research-company"}
+    _LIMITED_PATHS = {"/optimize", "/research-company", "/compare"}
 
     def __init__(
         self,

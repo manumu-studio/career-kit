@@ -10,9 +10,11 @@ import {
   useState,
 } from "react";
 import type { CompanyResearchResult } from "@/types/company";
+import type { ComparisonResult, LLMProviderName } from "@/types/provider";
 import type { OptimizationResult } from "@/types/optimization";
 
 const OPTIMIZATION_STORAGE_KEY = "optimization-result-v1";
+const PROVIDER_USED_KEY = "ats-provider-used";
 const COMPANY_RESEARCH_STORAGE_KEY = "ats-company-research";
 const FORM_STATE_STORAGE_KEY = "ats-form-state-v1";
 
@@ -34,9 +36,12 @@ const DEFAULT_FORM_STATE: FormState = {
 
 interface OptimizationContextValue {
   result: OptimizationResult | null;
+  providerUsed: LLMProviderName | null;
+  comparisonResult: ComparisonResult | null;
   companyResearch: CompanyResearchResult | null;
   formState: FormState;
-  setResult: (result: OptimizationResult) => void;
+  setResult: (result: OptimizationResult, provider?: LLMProviderName) => void;
+  setComparisonResult: (result: ComparisonResult | null) => void;
   setCompanyResearch: (result: CompanyResearchResult | null) => void;
   clearResult: () => void;
   setFormState: (update: Partial<FormState>) => void;
@@ -101,6 +106,9 @@ export function OptimizationProvider({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const [result, setResultState] = useState<OptimizationResult | null>(null);
+  const [providerUsed, setProviderUsedState] = useState<LLMProviderName | null>(null);
+  const [comparisonResult, setComparisonResultState] =
+    useState<ComparisonResult | null>(null);
   const [companyResearch, setCompanyResearchState] =
     useState<CompanyResearchResult | null>(null);
   const [formState, setFormStateRaw] = useState<FormState>(DEFAULT_FORM_STATE);
@@ -113,6 +121,10 @@ export function OptimizationProvider({
         const parsed: unknown = JSON.parse(optimizationStored);
         if (isOptimizationResult(parsed)) {
           setResultState(parsed);
+          const p = (parsed as { provider?: string }).provider;
+          if (p && ["anthropic", "openai", "gemini"].includes(p)) {
+            setProviderUsedState(p as LLMProviderName);
+          }
         }
       } catch {
         sessionStorage.removeItem(OPTIMIZATION_STORAGE_KEY);
@@ -142,6 +154,11 @@ export function OptimizationProvider({
         sessionStorage.removeItem(FORM_STATE_STORAGE_KEY);
       }
     }
+
+    const providerStored = sessionStorage.getItem(PROVIDER_USED_KEY);
+    if (providerStored && ["anthropic", "openai", "gemini"].includes(providerStored)) {
+      setProviderUsedState(providerStored as LLMProviderName);
+    }
   }, []);
 
   useEffect(() => {
@@ -152,6 +169,14 @@ export function OptimizationProvider({
 
     sessionStorage.removeItem(OPTIMIZATION_STORAGE_KEY);
   }, [result]);
+
+  useEffect(() => {
+    if (providerUsed) {
+      sessionStorage.setItem(PROVIDER_USED_KEY, providerUsed);
+      return;
+    }
+    sessionStorage.removeItem(PROVIDER_USED_KEY);
+  }, [providerUsed]);
 
   useEffect(() => {
     if (companyResearch) {
@@ -168,12 +193,23 @@ export function OptimizationProvider({
     sessionStorage.setItem(FORM_STATE_STORAGE_KEY, JSON.stringify(formState));
   }, [formState]);
 
-  const setResult = useCallback((nextResult: OptimizationResult): void => {
-    setResultState(nextResult);
-  }, []);
+  const setResult = useCallback(
+    (nextResult: OptimizationResult, provider?: LLMProviderName): void => {
+      setResultState(nextResult);
+      if (provider) {
+        setProviderUsedState(provider);
+      }
+    },
+    [],
+  );
 
   const clearResult = useCallback((): void => {
     setResultState(null);
+    setProviderUsedState(null);
+  }, []);
+
+  const setComparisonResult = useCallback((next: ComparisonResult | null): void => {
+    setComparisonResultState(next);
   }, []);
 
   const setCompanyResearch = useCallback((nextResult: CompanyResearchResult | null): void => {
@@ -191,9 +227,12 @@ export function OptimizationProvider({
   const value = useMemo(
     () => ({
       result,
+      providerUsed,
+      comparisonResult,
       companyResearch,
       formState,
       setResult,
+      setComparisonResult,
       setCompanyResearch,
       clearResult,
       setFormState,
@@ -203,9 +242,12 @@ export function OptimizationProvider({
       clearFormState,
       clearResult,
       companyResearch,
+      comparisonResult,
       formState,
+      providerUsed,
       result,
       setCompanyResearch,
+      setComparisonResult,
       setFormState,
       setResult,
     ],
