@@ -25,6 +25,6 @@ describe("JobDescription", () => {
   it("shows character count", () => {
     const onChange = vi.fn();
     render(<JobDescription onChange={onChange} value="abc" />);
-    expect(screen.getByText("3 characters")).toBeInTheDocument();
+    expect(screen.getByText(/3\s*\/\s*10000/)).toBeInTheDocument();
   });
 });

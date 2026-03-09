@@ -62,7 +62,7 @@ describe("useFileUpload", () => {
     });
 
     expect(result.current.file).toBeNull();
-    expect(result.current.error).toBe("Only PDF files are supported.");
+    expect(result.current.error).toBe("Only PDF files are accepted.");
   });
 
   it("rejects files larger than 5MB", () => {
@@ -76,6 +76,6 @@ describe("useFileUpload", () => {
     });
 
     expect(result.current.file).toBeNull();
-    expect(result.current.error).toBe("File size must be 5MB or less.");
+    expect(result.current.error).toBe("File must be under 5MB.");
   });
 });
