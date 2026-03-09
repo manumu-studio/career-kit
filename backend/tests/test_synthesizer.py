@@ -16,6 +16,7 @@ from app.models.schemas import (
     CompanyProfile,
     CompanyReport,
     CompanyResearchResult,
+    CoverLetterResult,
     EmployeeSentiment,
     OptimizationResult,
     SearchResult,
@@ -80,6 +81,17 @@ class _MockSynthesisProvider(LLMProvider):
             research_quality="medium",
             researched_at="2026-01-01T00:00:00+00:00",
         )
+
+    async def generate_cover_letter(
+        self,
+        cv_text: str,
+        job_description: str,
+        company_name: str,
+        hiring_manager: str | None,
+        tone: str,
+    ) -> CoverLetterResult:
+        _ = (cv_text, job_description, company_name, hiring_manager, tone)
+        raise NotImplementedError
 
 
 def _make_search_results(count: int) -> list[SearchResult]:

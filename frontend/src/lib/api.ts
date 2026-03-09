@@ -13,6 +13,7 @@ import type {
   HistoryListResponse,
   HistoryStatsResponse,
 } from "@/types/history";
+import type { CoverLetterRequest, CoverLetterResult } from "@/types/cover-letter";
 import type { ComparisonResult, ProvidersResponse } from "@/types/provider";
 
 interface OptimizeCvErrorBody {
@@ -20,6 +21,7 @@ interface OptimizeCvErrorBody {
 }
 
 const OPTIMIZE_ENDPOINT = "/optimize";
+const COVER_LETTER_ENDPOINT = "/cover-letter";
 const RESEARCH_ENDPOINT = "/research-company";
 const PROVIDERS_ENDPOINT = "/providers";
 
@@ -84,6 +86,38 @@ export async function optimizeCV(
   }
 
   return (await response.json()) as OptimizationResult;
+}
+
+export async function generateCoverLetter(
+  request: CoverLetterRequest,
+  userId?: string,
+): Promise<CoverLetterResult> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (userId) {
+    headers["X-User-Id"] = userId;
+  }
+
+  const response = await fetch(
+    `${env.NEXT_PUBLIC_API_URL}${COVER_LETTER_ENDPOINT}`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify(request),
+    },
+  );
+
+  if (!response.ok) {
+    let detail = `Cover letter generation failed (${response.status})`;
+    try {
+      const body = (await response.json()) as { detail?: string };
+      if (typeof body.detail === "string") detail = body.detail;
+    } catch {
+      // ignore
+    }
+    throw new Error(detail);
+  }
+
+  return (await response.json()) as CoverLetterResult;
 }
 
 export async function getProviders(): Promise<ProvidersResponse> {

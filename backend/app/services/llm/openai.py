@@ -11,6 +11,8 @@ from app.core.config import get_settings
 from app.core.prompts import (
     build_company_system_prompt,
     build_company_user_prompt,
+    build_cover_letter_system_prompt,
+    build_cover_letter_user_prompt,
     build_system_prompt,
     build_user_prompt,
 )
@@ -18,6 +20,7 @@ from app.core.usage_logger import calculate_estimated_cost, usage_logger
 from app.models.schemas import (
     CompanyProfile,
     CompanyResearchResult,
+    CoverLetterResult,
     OptimizationResult,
     UsageMetrics,
 )
@@ -163,6 +166,67 @@ class OpenAIProvider(LLMProvider):
         if retry_payload is None:
             raise ValueError("LLM returned non-JSON output after retry.")
         return CompanyResearchResult.model_validate(retry_payload)
+
+    async def generate_cover_letter(
+        self,
+        cv_text: str,
+        job_description: str,
+        company_name: str,
+        hiring_manager: str | None,
+        tone: str,
+    ) -> CoverLetterResult:
+        """Generate and validate cover letter output."""
+        hiring_manager_or_default = hiring_manager or "Hiring Manager"
+        user_prompt = build_cover_letter_user_prompt(
+            cv_text=cv_text,
+            job_description=job_description,
+            company_name=company_name,
+            hiring_manager_or_default=hiring_manager_or_default,
+            tone=tone,
+        )
+        response = await self._client.chat.completions.create(
+            model=self._model,
+            max_tokens=4096,
+            messages=[
+                {"role": "system", "content": build_cover_letter_system_prompt()},
+                {"role": "user", "content": user_prompt},
+            ],
+            response_format={"type": "json_object"},
+        )
+        self._log_usage(response)
+        self._check_finish_reason(response, "generate_cover_letter")
+
+        raw_text = self._extract_content(response)
+        cleaned_text = self._strip_markdown_fences(raw_text)
+        payload = self._load_json_object(cleaned_text)
+        if payload is not None:
+            return CoverLetterResult.model_validate(payload)
+
+        retry_response = await self._client.chat.completions.create(
+            model=self._model,
+            max_tokens=4096,
+            messages=[
+                {"role": "system", "content": build_cover_letter_system_prompt()},
+                {"role": "user", "content": user_prompt},
+                {"role": "assistant", "content": cleaned_text},
+                {
+                    "role": "user",
+                    "content": (
+                        "Fix your JSON and return ONLY valid JSON matching "
+                        "the provided schema."
+                    ),
+                },
+            ],
+            response_format={"type": "json_object"},
+        )
+        self._log_usage(retry_response)
+        self._check_finish_reason(retry_response, "generate_cover_letter retry")
+        retry_text = self._extract_content(retry_response)
+        retry_cleaned = self._strip_markdown_fences(retry_text)
+        retry_payload = self._load_json_object(retry_cleaned)
+        if retry_payload is None:
+            raise ValueError("LLM returned non-JSON output after retry.")
+        return CoverLetterResult.model_validate(retry_payload)
 
     def _log_usage(self, response: object) -> None:
         """Extract usage from OpenAI response and emit usage log."""

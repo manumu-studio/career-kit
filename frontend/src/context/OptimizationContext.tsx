@@ -10,12 +10,14 @@ import {
   useState,
 } from "react";
 import type { CompanyResearchResult } from "@/types/company";
+import type { CoverLetterResult } from "@/types/cover-letter";
 import type { ComparisonResult, LLMProviderName } from "@/types/provider";
 import type { OptimizationResult } from "@/types/optimization";
 
 const OPTIMIZATION_STORAGE_KEY = "optimization-result-v1";
 const PROVIDER_USED_KEY = "ats-provider-used";
 const COMPANY_RESEARCH_STORAGE_KEY = "ats-company-research";
+const COVER_LETTER_STORAGE_KEY = "ats-cover-letter-v1";
 const FORM_STATE_STORAGE_KEY = "ats-form-state-v1";
 
 export interface FormState {
@@ -39,10 +41,12 @@ interface OptimizationContextValue {
   providerUsed: LLMProviderName | null;
   comparisonResult: ComparisonResult | null;
   companyResearch: CompanyResearchResult | null;
+  coverLetter: CoverLetterResult | null;
   formState: FormState;
   setResult: (result: OptimizationResult, provider?: LLMProviderName) => void;
   setComparisonResult: (result: ComparisonResult | null) => void;
   setCompanyResearch: (result: CompanyResearchResult | null) => void;
+  setCoverLetter: (result: CoverLetterResult | null) => void;
   clearResult: () => void;
   setFormState: (update: Partial<FormState>) => void;
   clearFormState: () => void;
@@ -86,6 +90,20 @@ function isFormState(value: unknown): value is FormState {
   );
 }
 
+function isCoverLetterResult(value: unknown): value is CoverLetterResult {
+  if (!isObject(value)) return false;
+  return (
+    typeof value.greeting === "string" &&
+    typeof value.opening_paragraph === "string" &&
+    Array.isArray(value.body_paragraphs) &&
+    typeof value.closing_paragraph === "string" &&
+    typeof value.sign_off === "string" &&
+    isStringArray(value.key_selling_points) &&
+    typeof value.tone_used === "string" &&
+    typeof value.word_count === "number"
+  );
+}
+
 function isCompanyResearchResult(value: unknown): value is CompanyResearchResult {
   if (!isObject(value)) {
     return false;
@@ -111,6 +129,7 @@ export function OptimizationProvider({
     useState<ComparisonResult | null>(null);
   const [companyResearch, setCompanyResearchState] =
     useState<CompanyResearchResult | null>(null);
+  const [coverLetter, setCoverLetterState] = useState<CoverLetterResult | null>(null);
   const [formState, setFormStateRaw] = useState<FormState>(DEFAULT_FORM_STATE);
 
   // Hydrate latest result from session storage after initial mount.
@@ -155,6 +174,18 @@ export function OptimizationProvider({
       }
     }
 
+    const coverLetterStored = sessionStorage.getItem(COVER_LETTER_STORAGE_KEY);
+    if (coverLetterStored) {
+      try {
+        const parsed: unknown = JSON.parse(coverLetterStored);
+        if (isCoverLetterResult(parsed)) {
+          setCoverLetterState(parsed);
+        }
+      } catch {
+        sessionStorage.removeItem(COVER_LETTER_STORAGE_KEY);
+      }
+    }
+
     const providerStored = sessionStorage.getItem(PROVIDER_USED_KEY);
     if (providerStored && ["anthropic", "openai", "gemini"].includes(providerStored)) {
       setProviderUsedState(providerStored as LLMProviderName);
@@ -190,6 +221,17 @@ export function OptimizationProvider({
   }, [companyResearch]);
 
   useEffect(() => {
+    if (coverLetter) {
+      sessionStorage.setItem(
+        COVER_LETTER_STORAGE_KEY,
+        JSON.stringify(coverLetter),
+      );
+      return;
+    }
+    sessionStorage.removeItem(COVER_LETTER_STORAGE_KEY);
+  }, [coverLetter]);
+
+  useEffect(() => {
     sessionStorage.setItem(FORM_STATE_STORAGE_KEY, JSON.stringify(formState));
   }, [formState]);
 
@@ -206,6 +248,7 @@ export function OptimizationProvider({
   const clearResult = useCallback((): void => {
     setResultState(null);
     setProviderUsedState(null);
+    setCoverLetterState(null);
   }, []);
 
   const setComparisonResult = useCallback((next: ComparisonResult | null): void => {
@@ -214,6 +257,10 @@ export function OptimizationProvider({
 
   const setCompanyResearch = useCallback((nextResult: CompanyResearchResult | null): void => {
     setCompanyResearchState(nextResult);
+  }, []);
+
+  const setCoverLetter = useCallback((nextResult: CoverLetterResult | null): void => {
+    setCoverLetterState(nextResult);
   }, []);
 
   const setFormState = useCallback((update: Partial<FormState>): void => {
@@ -230,10 +277,12 @@ export function OptimizationProvider({
       providerUsed,
       comparisonResult,
       companyResearch,
+      coverLetter,
       formState,
       setResult,
       setComparisonResult,
       setCompanyResearch,
+      setCoverLetter,
       clearResult,
       setFormState,
       clearFormState,
@@ -242,12 +291,14 @@ export function OptimizationProvider({
       clearFormState,
       clearResult,
       companyResearch,
+      coverLetter,
       comparisonResult,
       formState,
       providerUsed,
       result,
       setCompanyResearch,
       setComparisonResult,
+      setCoverLetter,
       setFormState,
       setResult,
     ],

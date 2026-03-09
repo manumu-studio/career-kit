@@ -1,8 +1,13 @@
-"""Prompt builders for CV optimization and company research workflows."""
+"""Prompt builders for CV optimization, company research, and cover letter workflows."""
 
 from typing import Optional
 
-from app.models.schemas import CompanyProfile, CompanyResearchResult, OptimizationResult
+from app.models.schemas import (
+    CompanyProfile,
+    CompanyResearchResult,
+    CoverLetterResult,
+    OptimizationResult,
+)
 
 SYSTEM_PROMPT = """You are an expert CV optimization consultant.
 
@@ -104,6 +109,63 @@ def build_user_prompt(
 def build_company_system_prompt() -> str:
     """Return the system instruction for company research synthesis."""
     return COMPANY_RESEARCH_SYSTEM_PROMPT
+
+
+COVER_LETTER_SYSTEM_PROMPT = (  # noqa: E501
+    """You are an expert career consultant who writes compelling,
+    personalized cover letters.
+
+Your task: Given a candidate's CV text, a job description, and company information,
+write a tailored cover letter that complements (not duplicates) the CV.
+
+Rules:
+1. NEVER fabricate experiences or qualifications the candidate doesn't have
+2. Lead with the strongest alignment between the candidate's experience and the role
+3. Reference specific company details when possible
+4. Keep the tone consistent throughout — match the requested tone exactly
+5. Aim for 250-400 words (3-4 paragraphs)
+6. Avoid generic phrases like "I am writing to express my interest"
+7. Each paragraph should have a distinct purpose (hook, evidence, value, close)
+8. Mirror key terminology from the job description naturally
+
+Tone guidelines:
+- "professional": formal business language, measured confidence
+- "conversational": warm but competent, slight personality showing
+- "enthusiastic": high energy, genuine excitement, still credible
+
+Respond ONLY with valid JSON matching the provided schema.
+No markdown, no explanation outside the JSON."""
+)
+
+
+def build_cover_letter_system_prompt() -> str:
+    """Return the system instruction for cover letter generation."""
+    return COVER_LETTER_SYSTEM_PROMPT
+
+
+def build_cover_letter_user_prompt(
+    cv_text: str,
+    job_description: str,
+    company_name: str,
+    hiring_manager_or_default: str,
+    tone: str,
+) -> str:
+    """Build user prompt for cover letter generation with output schema."""
+    json_schema = CoverLetterResult.model_json_schema()
+    return (
+        "## Candidate CV\n"
+        f"{cv_text}\n\n"
+        "## Job Description\n"
+        f"{job_description}\n\n"
+        "## Company\n"
+        f"{company_name}\n\n"
+        "## Address To\n"
+        f"{hiring_manager_or_default}\n\n"
+        "## Tone\n"
+        f"{tone}\n\n"
+        "## Output Schema\n"
+        f"{json_schema}"
+    )
 
 
 def build_company_user_prompt(

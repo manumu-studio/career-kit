@@ -2,7 +2,7 @@
 
 AI-powered CV optimizer that tailors resumes for job applications.
 
-Upload your CV (PDF) + paste a job description → get a job-tailored CV, gap analysis, keyword scoring, and match score.
+Upload your CV (PDF) + paste a job description → get a job-tailored CV, cover letter, gap analysis, keyword scoring, and match score. Export both as PDFs.
 
 ## Stack
 
@@ -45,8 +45,8 @@ npm run dev
 - [x] v0.4 — Analysis history (PostgreSQL persistence, caching, History page)
 - [x] v0.5 — Backend deployment (EC2, Nginx, HTTPS, GitHub Actions CI/CD)
 - [x] v0.6 — Multi-provider LLM support (Claude / OpenAI / Gemini)
-- [ ] v0.7 — i18n EN/ES (UI + LLM output + cross-language input)
-- [ ] v0.8 — Cover letter generation + PDF export
+- [x] v0.7 — Cover letter generation + PDF export
+- [ ] v0.8 — i18n EN/ES (UI + LLM output + cross-language input)
 - [ ] v0.9 — Testing suite
 - [ ] v0.10 — UX polish + validation + accessibility
 - [ ] v0.11 — Full production (Docker, Sentry, monitoring)

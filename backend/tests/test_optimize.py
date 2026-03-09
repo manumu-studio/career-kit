@@ -12,7 +12,11 @@ from httpx import ASGITransport, AsyncClient
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
 from app.main import app
-from app.models.schemas import CompanyResearchResult, OptimizationResult
+from app.models.schemas import (
+    CompanyResearchResult,
+    CoverLetterResult,
+    OptimizationResult,
+)
 from app.services.llm.base import LLMProvider
 
 
@@ -60,6 +64,17 @@ class _MockSuccessProvider(LLMProvider):
         _ = (company_name, website_content, search_results, job_title)
         raise NotImplementedError
 
+    async def generate_cover_letter(
+        self,
+        cv_text: str,
+        job_description: str,
+        company_name: str,
+        hiring_manager: str | None,
+        tone: str,
+    ) -> CoverLetterResult:
+        _ = (cv_text, job_description, company_name, hiring_manager, tone)
+        raise NotImplementedError
+
 
 class _MockInvalidJsonProvider(LLMProvider):
     """Mock provider that simulates parse failure from LLM output."""
@@ -83,6 +98,17 @@ class _MockInvalidJsonProvider(LLMProvider):
         job_title: Optional[str] = None,  # noqa: UP045
     ) -> CompanyResearchResult:
         _ = (company_name, website_content, search_results, job_title)
+        raise NotImplementedError
+
+    async def generate_cover_letter(
+        self,
+        cv_text: str,
+        job_description: str,
+        company_name: str,
+        hiring_manager: str | None,
+        tone: str,
+    ) -> CoverLetterResult:
+        _ = (cv_text, job_description, company_name, hiring_manager, tone)
         raise NotImplementedError
 
 
