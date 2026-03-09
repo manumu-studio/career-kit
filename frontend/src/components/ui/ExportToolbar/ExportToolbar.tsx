@@ -51,7 +51,8 @@ export function ExportToolbar({
   return (
     <div className="flex flex-wrap gap-3">
       <button
-        className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Download optimized CV as PDF"
+        className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
         disabled={cvLoading}
         onClick={() => void handleDownloadCv()}
         type="button"
@@ -66,7 +67,8 @@ export function ExportToolbar({
         )}
       </button>
       <button
-        className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Download cover letter as PDF"
+        className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
         disabled={!coverLetter || letterLoading}
         onClick={() => void handleDownloadLetter()}
         type="button"

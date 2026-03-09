@@ -2,7 +2,7 @@
 
 /** Hook to fetch providers and manage selection with localStorage persistence. */
 import { useCallback, useEffect, useState } from "react";
-import { getProviders } from "@/lib/api";
+import { getProviders, handleApiError } from "@/lib/api";
 import type { LLMProviderName } from "@/types/provider";
 
 const STORAGE_KEY = "ats-provider-preference";
@@ -33,7 +33,7 @@ export function useProviderSelector() {
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load providers");
+          setError(handleApiError(err));
           setAvailable(["anthropic"]);
           setDefaultProvider("anthropic");
           setSelected("anthropic");

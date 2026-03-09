@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   deleteHistoryEntry,
   fetchHistoryList,
+  handleApiError,
 } from "@/lib/api";
 import type { HistoryListItem } from "@/types/history";
 import type { HistoryListParams } from "@/types/history";
@@ -60,7 +61,7 @@ export function useHistoryList(
       setItems(data.items);
       setTotal(data.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load history");
+      setError(handleApiError(err));
       setItems([]);
       setTotal(0);
     } finally {

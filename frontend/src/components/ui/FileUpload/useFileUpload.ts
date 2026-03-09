@@ -20,11 +20,11 @@ function validateFile(file: File): string | null {
   const isPdfExtension = file.name.toLowerCase().endsWith(".pdf");
 
   if (!isPdfMimeType && !isPdfExtension) {
-    return "Only PDF files are supported.";
+    return "Only PDF files are accepted.";
   }
 
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    return "File size must be 5MB or less.";
+    return "File must be under 5MB.";
   }
 
   return null;

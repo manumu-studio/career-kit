@@ -3,3 +3,29 @@
 * {
   box-sizing: border-box;
 }
+
+/* Visible focus rings for keyboard navigation (WCAG 2.4.7) */
+:focus-visible {
+  outline: 2px solid rgb(56 189 248);
+  outline-offset: 2px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer {
+    animation: none;
+    background: rgb(51 65 85);
+  }
+}

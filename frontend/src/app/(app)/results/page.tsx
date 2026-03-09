@@ -15,7 +15,8 @@ import { ScoreCard } from "@/components/ui/ScoreCard";
 import { ToneSelector } from "@/components/ui/ToneSelector";
 import { useOptimizationContext } from "@/context/OptimizationContext";
 import { useSession } from "@/features/auth";
-import { generateCoverLetter } from "@/lib/api";
+import { useToast } from "@/components/ui/Toast";
+import { generateCoverLetter, handleApiError } from "@/lib/api";
 import type { CoverLetterTone } from "@/types/cover-letter";
 
 function buildCvTextFromSections(
@@ -46,6 +47,7 @@ export default function ResultsPage() {
   const [coverTone, setCoverTone] = useState<CoverLetterTone>("professional");
   const [isGenerating, setIsGenerating] = useState(false);
   const [coverError, setCoverError] = useState<string | null>(null);
+  const { error: toastError } = useToast();
 
   useEffect(() => {
     if (!coverCompanyName && (companyResearch?.profile?.name ?? formState.companyName)) {
@@ -83,9 +85,9 @@ export default function ResultsPage() {
       );
       setCoverLetter(letter);
     } catch (err: unknown) {
-      setCoverError(
-        err instanceof Error ? err.message : "Failed to generate cover letter.",
-      );
+      const msg = handleApiError(err);
+      setCoverError(msg);
+      toastError(msg);
     } finally {
       setIsGenerating(false);
     }
@@ -97,6 +99,7 @@ export default function ResultsPage() {
     coverTone,
     session?.user?.externalId,
     setCoverLetter,
+    toastError,
   ]);
 
   if (!result) {
@@ -104,11 +107,13 @@ export default function ResultsPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-6 py-10 lg:py-12">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-4 pb-24 py-8 sm:px-6 md:pb-0 md:py-10 lg:py-12">
+      <header className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-semibold text-white">Optimization Results</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-semibold text-white sm:text-3xl">
+              Optimization Results
+            </h1>
             {(() => {
               const p = providerUsed ?? result?.provider;
               return p && ["anthropic", "openai", "gemini"].includes(p) ? (
@@ -119,10 +124,12 @@ export default function ResultsPage() {
           <p className="text-sm text-slate-400">Your job-tailored CV improvements are ready.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <ExportToolbar
-            optimizationResult={result}
-            coverLetter={coverLetter}
-          />
+          <div className="hidden md:contents">
+            <ExportToolbar
+              optimizationResult={result}
+              coverLetter={coverLetter}
+            />
+          </div>
           <Link
             className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 hover:text-white"
             href="/home"
@@ -132,11 +139,25 @@ export default function ResultsPage() {
         </div>
       </header>
 
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center gap-2 border-t border-slate-800 bg-slate-950/95 p-3 backdrop-blur md:hidden">
+        <ExportToolbar
+          optimizationResult={result}
+          coverLetter={coverLetter}
+        />
+      </div>
+
+      <section
+        aria-live="polite"
+        aria-label="Optimization summary"
+        className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5"
+      >
         <p className="text-sm leading-relaxed text-slate-200">{result.summary}</p>
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
+      <div
+        aria-label="Optimization results"
+        className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]"
+      >
         <div className="space-y-8">
           <ScoreCard score={result.match_score} />
           <KeywordMatch matches={result.keyword_matches} misses={result.keyword_misses} />
