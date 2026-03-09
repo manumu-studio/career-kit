@@ -9,7 +9,7 @@ export function ScoreCard({ score }: Readonly<ScoreCardProps>) {
   const { score: clampedScore, label, accentClass, trailClass, offset } = useScoreCard(score);
 
   return (
-    <article className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+    <article className="w-full rounded-2xl border border-slate-800 bg-slate-900/60 p-4 md:mx-auto md:max-w-xs md:p-6 lg:mx-0 lg:max-w-none">
       <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-slate-300">Job Match</h2>
       <div className="flex flex-col items-center gap-3">
         <div className="relative h-32 w-32">

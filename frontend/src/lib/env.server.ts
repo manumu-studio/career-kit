@@ -16,11 +16,16 @@ const serverEnvSchema = z.object({
 
 const parsed = serverEnvSchema.parse(process.env);
 
+const isCi = process.env.CI === "true";
+const hasPlaceholderAuth =
+  parsed.AUTH_CLIENT_ID === DEV_PLACEHOLDER ||
+  parsed.AUTH_CLIENT_SECRET === DEV_PLACEHOLDER ||
+  parsed.NEXTAUTH_SECRET === DEV_SECRET;
+
 if (
   process.env.NODE_ENV === "production" &&
-  (parsed.AUTH_CLIENT_ID === DEV_PLACEHOLDER ||
-    parsed.AUTH_CLIENT_SECRET === DEV_PLACEHOLDER ||
-    parsed.NEXTAUTH_SECRET === DEV_SECRET)
+  hasPlaceholderAuth &&
+  !isCi
 ) {
   throw new Error(
     "AUTH_CLIENT_ID, AUTH_CLIENT_SECRET, and NEXTAUTH_SECRET are required in production. Copy .env.example to .env.local and set real values.",

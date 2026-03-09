@@ -2,7 +2,7 @@
 
 /** Hook to run provider comparison and manage loading/error state. */
 import { useCallback, useState } from "react";
-import { compareProviders } from "@/lib/api";
+import { compareProviders, handleApiError } from "@/lib/api";
 import type { ComparisonResult } from "@/types/provider";
 
 export function useProviderComparison() {
@@ -20,8 +20,7 @@ export function useProviderComparison() {
         setResult(data);
         return data;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Comparison failed";
-        setError(msg);
+        setError(handleApiError(err));
         throw err;
       } finally {
         setLoading(false);

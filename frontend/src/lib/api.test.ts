@@ -37,7 +37,7 @@ describe("optimizeCV", () => {
     );
   });
 
-  it("throws server detail message for json error bodies", async () => {
+  it("throws ApiError with server detail message for json error bodies", async () => {
     const fetchMock = vi.fn(async () => ({
       ok: false,
       status: 500,
@@ -45,13 +45,16 @@ describe("optimizeCV", () => {
     }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const { optimizeCV } = await loadApiModule();
+    const { optimizeCV, ApiError } = await loadApiModule();
     const file = new File(["pdf-content"], "resume.pdf", { type: "application/pdf" });
 
-    await expect(optimizeCV(file, "Need FastAPI experience")).rejects.toThrow("LLM failed");
+    const err = await optimizeCV(file, "Need FastAPI experience").catch((e) => e);
+    expect(err).toBeInstanceOf(ApiError);
+    expect((err as InstanceType<typeof ApiError>).message).toBe("LLM failed");
+    expect((err as InstanceType<typeof ApiError>).status).toBe(500);
   });
 
-  it("throws generic message when error body is not json", async () => {
+  it("throws ApiError with generic message when error body is not json", async () => {
     const fetchMock = vi.fn(async () => ({
       ok: false,
       status: 500,
@@ -61,12 +64,11 @@ describe("optimizeCV", () => {
     }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const { optimizeCV } = await loadApiModule();
+    const { optimizeCV, ApiError } = await loadApiModule();
     const file = new File(["pdf-content"], "resume.pdf", { type: "application/pdf" });
-
-    await expect(optimizeCV(file, "Need FastAPI experience")).rejects.toThrow(
-      "Optimization request failed (500)",
-    );
+    const err = await optimizeCV(file, "Need FastAPI experience").catch((e) => e);
+    expect(err).toBeInstanceOf(ApiError);
+    expect((err as Error).message).toBe("Request failed (500)");
   });
 
   it("propagates network errors", async () => {

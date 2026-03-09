@@ -1,6 +1,7 @@
 "use client";
 
 /** Company research form that triggers backend research and displays results. */
+import { handleApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
 import { CompanyCard } from "@/components/ui/CompanyCard";
@@ -38,9 +39,7 @@ export function CompanySearch({
       const researchResult = await startResearch(forceRefresh);
       onResearchComplete(researchResult);
     } catch (requestError: unknown) {
-      const message =
-        requestError instanceof Error ? requestError.message : "Company research failed.";
-      onResearchError(message);
+      onResearchError(handleApiError(requestError));
     }
   };
 
@@ -50,9 +49,7 @@ export function CompanySearch({
       const researchResult = await loadCachedResearch(cachedMatch);
       onResearchComplete(researchResult);
     } catch (requestError: unknown) {
-      const message =
-        requestError instanceof Error ? requestError.message : "Failed to load cached research.";
-      onResearchError(message);
+      onResearchError(handleApiError(requestError));
     }
   };
 

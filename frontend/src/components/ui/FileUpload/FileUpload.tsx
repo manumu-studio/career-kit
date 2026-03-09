@@ -41,8 +41,9 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
       <h2 className="text-lg font-semibold text-white">Upload Your CV (PDF)</h2>
 
       <label
+        aria-label="Upload your CV as a PDF file, maximum 5MB"
         className={cn(
-          "flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition",
+          "flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition md:mx-auto md:max-w-xl md:py-10",
           isDragging ? "border-sky-400 bg-sky-500/10" : "border-slate-700 bg-slate-900/60",
         )}
         onDragLeave={handleDragLeave}
@@ -52,6 +53,7 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
         <input
           ref={inputRef}
           accept=".pdf,application/pdf"
+          aria-describedby={error ? "file-upload-error" : undefined}
           className="hidden"
           onChange={handleFileSelect}
           type="file"
@@ -84,7 +86,11 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
         </button>
       ) : null}
 
-      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+      {error ? (
+        <p className="text-sm text-rose-300" id="file-upload-error" role="alert">
+          {error}
+        </p>
+      ) : null}
     </section>
   );
 }

@@ -13,7 +13,7 @@ describe("ExportToolbar", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Download CV (PDF)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Download optimized CV as PDF" })).toBeInTheDocument();
   });
 
   it("renders Download Cover Letter (PDF) button", () => {
@@ -25,7 +25,7 @@ describe("ExportToolbar", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Download Cover Letter (PDF)" }),
+      screen.getByRole("button", { name: "Download cover letter as PDF" }),
     ).toBeInTheDocument();
   });
 
@@ -38,7 +38,7 @@ describe("ExportToolbar", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Download Cover Letter (PDF)" }),
+      screen.getByRole("button", { name: "Download cover letter as PDF" }),
     ).toBeDisabled();
   });
 
@@ -51,7 +51,7 @@ describe("ExportToolbar", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Download Cover Letter (PDF)" }),
+      screen.getByRole("button", { name: "Download cover letter as PDF" }),
     ).not.toBeDisabled();
   });
 
@@ -63,6 +63,6 @@ describe("ExportToolbar", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Download CV (PDF)" })).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: "Download optimized CV as PDF" })).not.toBeDisabled();
   });
 });

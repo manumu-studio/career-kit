@@ -1,13 +1,21 @@
 "use client";
 
 /** Compare two optimization results side-by-side. */
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ComparisonView } from "@/components/ui/ComparisonView";
 import { useSession } from "@/features/auth";
-import { fetchHistoryDetail } from "@/lib/api";
+import { fetchHistoryDetail, handleApiError } from "@/lib/api";
 import type { OptimizationResult } from "@/types/optimization";
+
+function CompareLoadingFallback() {
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-12">
+      <span className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-sky-400" />
+    </main>
+  );
+}
 
 function isOptimizationResult(value: unknown): value is OptimizationResult {
   if (typeof value !== "object" || value === null) return false;
@@ -22,7 +30,7 @@ function isOptimizationResult(value: unknown): value is OptimizationResult {
   );
 }
 
-export default function ComparePage() {
+function ComparePageContent() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const idA = searchParams.get("a");
@@ -82,7 +90,7 @@ export default function ComparePage() {
           : detailB.company_name ?? "Version B",
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load analyses.");
+      setError(handleApiError(err));
     } finally {
       setIsLoading(false);
     }
@@ -136,5 +144,13 @@ export default function ComparePage() {
         resultB={resultB}
       />
     </main>
+  );
+}
+
+export default function ComparePage() {
+  return (
+    <Suspense fallback={<CompareLoadingFallback />}>
+      <ComparePageContent />
+    </Suspense>
   );
 }

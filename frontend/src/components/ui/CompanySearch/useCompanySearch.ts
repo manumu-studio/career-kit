@@ -4,6 +4,7 @@ import { useOptimizationContext } from "@/context/OptimizationContext";
 import {
   checkResearchCache,
   fetchHistoryDetail,
+  handleApiError,
   researchCompany,
 } from "@/lib/api";
 import type { CachedMatchInfo } from "@/types/history";
@@ -183,8 +184,7 @@ export function useCompanySearch(
       setCurrentStep("done");
       return response;
     } catch (requestError: unknown) {
-      const message =
-        requestError instanceof Error ? requestError.message : "Company research failed.";
+      const message = handleApiError(requestError);
       setError(message);
       setCurrentStep("error");
       throw new Error(message);

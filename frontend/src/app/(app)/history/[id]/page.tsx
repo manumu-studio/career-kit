@@ -4,13 +4,17 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import {
+  LoadingSkeleton,
+  ResultsSectionSkeleton,
+} from "@/components/ui/LoadingSkeleton";
 import { CvComparison } from "@/components/ui/CvComparison";
 import { GapAnalysis } from "@/components/ui/GapAnalysis";
 import { KeywordMatch } from "@/components/ui/KeywordMatch";
 import { CompanyReport } from "@/components/ui/CompanyReport";
 import { ScoreCard } from "@/components/ui/ScoreCard";
 import { useSession } from "@/features/auth";
-import { fetchHistoryDetail } from "@/lib/api";
+import { fetchHistoryDetail, handleApiError } from "@/lib/api";
 import type { CompanyResearchResult } from "@/types/company";
 import type { OptimizationResult } from "@/types/optimization";
 import type { HistoryDetailResponse } from "@/types/history";
@@ -58,7 +62,7 @@ export default function HistoryDetailPage() {
       const data = await fetchHistoryDetail(id, session?.user?.externalId);
       setDetail(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load analysis");
+      setError(handleApiError(err));
     } finally {
       setIsLoading(false);
     }
@@ -75,8 +79,12 @@ export default function HistoryDetailPage() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-12">
-        <span className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-sky-400" />
+      <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10">
+        <div className="space-y-2">
+          <LoadingSkeleton variant="text" className="h-8 w-48" />
+          <LoadingSkeleton variant="text" className="h-4 w-32" />
+        </div>
+        <ResultsSectionSkeleton />
       </main>
     );
   }

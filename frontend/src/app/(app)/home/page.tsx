@@ -10,9 +10,23 @@ import { JobDescription } from "@/components/ui/JobDescription";
 import { ProviderSelector, useProviderSelector } from "@/components/ui/ProviderSelector";
 import { useOptimizationContext } from "@/context/OptimizationContext";
 import { useSession } from "@/features/auth";
-import { checkOptimizationCache, compareProviders, optimizeCV } from "@/lib/api";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { useToast } from "@/components/ui/Toast";
+import {
+  checkOptimizationCache,
+  compareProviders,
+  handleApiError,
+  optimizeCV,
+} from "@/lib/api";
 import type { CachedMatchInfo } from "@/types/history";
 import type { CompanyResearchResult } from "@/types/company";
+
+const OPTIMIZATION_STEPS = [
+  "Uploading PDF",
+  "Parsing PDF",
+  "Analyzing CV",
+  "Generating results",
+] as const;
 
 export default function Home() {
   const { data: session } = useSession();
@@ -27,6 +41,7 @@ export default function Home() {
   } = useOptimizationContext();
   const { available, defaultProvider, selected, onChange, loading: providersLoading } =
     useProviderSelector();
+  const { error: toastError } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -36,6 +51,7 @@ export default function Home() {
   const [compareExpanded, setCompareExpanded] = useState(false);
   const [compareSelected, setCompareSelected] = useState<Set<string>>(new Set());
   const [isComparing, setIsComparing] = useState(false);
+  const [progressStep, setProgressStep] = useState(0);
 
   // Hydrate job description from persisted form state once context finishes loading.
   const hydratedRef = useRef(false);
@@ -47,7 +63,10 @@ export default function Home() {
     }
   }, [formState.jobDescription]);
 
-  const isReadyToSubmit = file !== null && jobDescription.trim().length > 0;
+  const jobDescTrimmed = jobDescription.trim();
+  const isJobDescValid =
+    jobDescTrimmed.length >= 50 && jobDescTrimmed.length <= 10000;
+  const isReadyToSubmit = file !== null && isJobDescValid;
 
   const handleJobDescriptionChange = (value: string): void => {
     setJobDescription(value);
@@ -68,6 +87,11 @@ export default function Home() {
       setSubmissionError(null);
       setOptimizationCachedMatch(null);
       setIsSubmitting(true);
+      setProgressStep(0);
+      let stepInterval: ReturnType<typeof setInterval> | null = null;
+      stepInterval = setInterval(() => {
+        setProgressStep((s) => Math.min(s + 1, OPTIMIZATION_STEPS.length - 1));
+      }, 3000);
       try {
         const result = await optimizeCV(file, jobDescription.trim(), {
           companyContext: companyResearch
@@ -83,10 +107,11 @@ export default function Home() {
         setResult(result, selected ?? undefined);
         router.push("/results");
       } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Failed to optimize CV. Please try again.";
-        setSubmissionError(message);
+        const msg = handleApiError(err);
+        setSubmissionError(msg);
+        toastError(msg);
       } finally {
+        if (stepInterval) clearInterval(stepInterval);
         setIsSubmitting(false);
       }
     },
@@ -99,6 +124,7 @@ export default function Home() {
       router,
       setResult,
       selected,
+      toastError,
     ],
   );
 
@@ -163,16 +189,16 @@ export default function Home() {
       setComparisonResult(result);
       router.push("/compare");
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Comparison failed. Please try again.";
+      const msg = handleApiError(err);
       setSubmissionError(msg);
+      toastError(msg);
     } finally {
       setIsComparing(false);
     }
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-6 px-6 py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-6 px-4 py-10 sm:px-6 sm:py-12">
       <header className="space-y-2">
         <h1 className="text-4xl font-semibold tracking-tight text-white">Career Kit</h1>
         <p className="text-base text-slate-300">Optimize your CV for any job posting</p>
@@ -210,7 +236,19 @@ export default function Home() {
           re-select your file.
         </p>
       ) : null}
-      <JobDescription onChange={handleJobDescriptionChange} value={jobDescription} />
+      <JobDescription
+        onChange={handleJobDescriptionChange}
+        value={jobDescription}
+        error={
+          jobDescTrimmed.length > 0 && jobDescTrimmed.length < 50
+            ? "Job description must be at least 50 characters"
+            : jobDescTrimmed.length > 10000
+              ? "Job description must be under 10,000 characters"
+              : null
+        }
+        minLength={50}
+        maxLength={10000}
+      />
 
       {!providersLoading ? (
         <ProviderSelector
@@ -233,23 +271,32 @@ export default function Home() {
 
       {submissionError ? <p className="text-sm text-rose-300">{submissionError}</p> : null}
 
-      <button
-        className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-sky-500 px-5 py-2.5 font-medium text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
-        disabled={!isReadyToSubmit || isSubmitting}
-        onClick={() => {
-          void handleSubmit();
-        }}
-        type="button"
-      >
-        {isSubmitting ? (
-          <>
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
-            Analyzing...
-          </>
-        ) : (
-          "Optimize My CV"
-        )}
-      </button>
+      {isSubmitting ? (
+        <div className="w-full rounded-xl border border-slate-700 bg-slate-900/60 p-6">
+          <ProgressBar steps={OPTIMIZATION_STEPS} currentStep={progressStep} />
+        </div>
+      ) : (
+        <button
+          aria-label={
+            !isReadyToSubmit
+              ? "Upload a PDF and enter at least 50 characters in the job description to enable"
+              : "Optimize My CV"
+          }
+          className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-sky-500 px-5 py-2.5 font-medium text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
+          disabled={!isReadyToSubmit}
+          onClick={() => {
+            void handleSubmit();
+          }}
+          title={
+            !isReadyToSubmit
+              ? "Upload a PDF and enter at least 50 characters in the job description"
+              : undefined
+          }
+          type="button"
+        >
+          Optimize My CV
+        </button>
+      )}
 
       <div className="border-t border-slate-800 pt-6">
         <button
