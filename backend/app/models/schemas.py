@@ -241,3 +241,29 @@ class CheckCacheResponse(BaseModel):
 
     cached: bool
     match: Optional[CachedMatchInfo] = None
+
+
+# --- Cover letter schemas ---
+
+
+class CoverLetterRequest(BaseModel):
+    """Request body for POST /cover-letter endpoint."""
+
+    cv_text: str
+    job_description: str
+    company_name: str
+    hiring_manager: Optional[str] = None
+    tone: Literal["professional", "conversational", "enthusiastic"] = "professional"
+
+
+class CoverLetterResult(BaseModel):
+    """Structured cover letter output from the LLM."""
+
+    greeting: str
+    opening_paragraph: str
+    body_paragraphs: list[str]
+    closing_paragraph: str
+    sign_off: str
+    key_selling_points: list[str]
+    tone_used: str
+    word_count: int

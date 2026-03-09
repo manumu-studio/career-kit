@@ -12,6 +12,8 @@ from app.core.config import get_settings
 from app.core.prompts import (
     build_company_system_prompt,
     build_company_user_prompt,
+    build_cover_letter_system_prompt,
+    build_cover_letter_user_prompt,
     build_system_prompt,
     build_user_prompt,
 )
@@ -19,6 +21,7 @@ from app.core.usage_logger import calculate_estimated_cost, usage_logger
 from app.models.schemas import (
     CompanyProfile,
     CompanyResearchResult,
+    CoverLetterResult,
     OptimizationResult,
     UsageMetrics,
 )
@@ -154,6 +157,62 @@ class GeminiProvider(LLMProvider):
         if retry_payload is None:
             raise ValueError("LLM returned non-JSON output after retry.")
         return CompanyResearchResult.model_validate(retry_payload)
+
+    async def generate_cover_letter(
+        self,
+        cv_text: str,
+        job_description: str,
+        company_name: str,
+        hiring_manager: str | None,
+        tone: str,
+    ) -> CoverLetterResult:
+        """Generate and validate cover letter output."""
+        hiring_manager_or_default = hiring_manager or "Hiring Manager"
+        user_prompt = build_cover_letter_user_prompt(
+            cv_text=cv_text,
+            job_description=job_description,
+            company_name=company_name,
+            hiring_manager_or_default=hiring_manager_or_default,
+            tone=tone,
+        )
+        full_prompt = f"{build_cover_letter_system_prompt()}\n\n{user_prompt}"
+        response = await self._client.aio.models.generate_content(
+            model=self._model,
+            contents=full_prompt,
+            config=types.GenerateContentConfig(
+                max_output_tokens=4096,
+                response_mime_type="application/json",
+            ),
+        )
+        self._log_usage(response)
+        self._check_finish_reason(response, "generate_cover_letter")
+
+        raw_text = self._extract_text(response)
+        cleaned_text = self._strip_markdown_fences(raw_text)
+        payload = self._load_json_object(cleaned_text)
+        if payload is not None:
+            return CoverLetterResult.model_validate(payload)
+
+        retry_prompt = (
+            f"{full_prompt}\n\n"
+            "Fix your JSON and return ONLY valid JSON matching the schema."
+        )
+        retry_response = await self._client.aio.models.generate_content(
+            model=self._model,
+            contents=retry_prompt,
+            config=types.GenerateContentConfig(
+                max_output_tokens=4096,
+                response_mime_type="application/json",
+            ),
+        )
+        self._log_usage(retry_response)
+        self._check_finish_reason(retry_response, "generate_cover_letter retry")
+        retry_text = self._extract_text(retry_response)
+        retry_cleaned = self._strip_markdown_fences(retry_text)
+        retry_payload = self._load_json_object(retry_cleaned)
+        if retry_payload is None:
+            raise ValueError("LLM returned non-JSON output after retry.")
+        return CoverLetterResult.model_validate(retry_payload)
 
     def _log_usage(self, response: object) -> None:
         """Extract usage from Gemini response and emit usage log."""

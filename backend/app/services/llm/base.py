@@ -1,9 +1,16 @@
 """Abstract base class for LLM providers."""
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from app.models.schemas import CompanyProfile, CompanyResearchResult, OptimizationResult
+from app.models.schemas import (
+    CompanyProfile,
+    CompanyResearchResult,
+    CoverLetterResult,
+    OptimizationResult,
+)
 
 
 class LLMProvider(ABC):
@@ -45,4 +52,16 @@ class LLMProvider(ABC):
         job_title: Optional[str] = None,  # noqa: UP045
     ) -> CompanyResearchResult:
         """Synthesize scraped company research data into structured output."""
+        ...
+
+    @abstractmethod
+    async def generate_cover_letter(
+        self,
+        cv_text: str,
+        job_description: str,
+        company_name: str,
+        hiring_manager: str | None,
+        tone: str,
+    ) -> CoverLetterResult:
+        """Generate a tailored cover letter from CV + JD + company context."""
         ...

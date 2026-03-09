@@ -15,7 +15,11 @@ from httpx import ASGITransport, AsyncClient
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
 from app.middleware.rate_limit import RateLimitMiddleware
-from app.models.schemas import CompanyResearchResult, OptimizationResult
+from app.models.schemas import (
+    CompanyResearchResult,
+    CoverLetterResult,
+    OptimizationResult,
+)
 from app.routers.optimize import router as optimize_router
 
 
@@ -145,6 +149,17 @@ def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
             job_title: Optional[str] = None,  # noqa: UP045
         ) -> CompanyResearchResult:
             _ = (company_name, website_content, search_results, job_title)
+            raise NotImplementedError
+
+        async def generate_cover_letter(
+            self,
+            cv_text: str,
+            job_description: str,
+            company_name: str,
+            hiring_manager: str | None,
+            tone: str,
+        ) -> CoverLetterResult:
+            _ = (cv_text, job_description, company_name, hiring_manager, tone)
             raise NotImplementedError
 
     def _mock_get_provider(provider_name: str = "anthropic") -> _MockProvider:  # noqa: ARG001
