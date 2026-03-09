@@ -1,0 +1,75 @@
+# Backend CI: ruff, mypy, pytest on every PR and push to main.
+# Runs only when backend files change.
+
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+jobs:
+  backend-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ats_career_kit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ats_career_kit_test
+      CORS_ORIGINS: http://localhost:3000
+      ANTHROPIC_API_KEY: "test-key"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Run migrations
+        run: cd backend && alembic upgrade head
+
+      - name: Ruff lint
+        run: cd backend && ruff check .
+
+      - name: Ruff format check
+        run: cd backend && ruff format --check .
+
+      - name: Mypy type check
+        run: cd backend && mypy app/
+
+      - name: Pytest
+        run: cd backend && pytest

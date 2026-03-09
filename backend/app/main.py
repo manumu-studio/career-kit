@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.models.database import engine
+from app.routers.health import router as health_router
 from app.routers.history import router as history_router
 from app.routers.optimize import router as optimize_router
 from app.routers.research import router as research_router
@@ -81,12 +82,7 @@ app.add_middleware(
     rate_limit_window_seconds=settings.rate_limit_window_seconds,
 )
 
+app.include_router(health_router)
 app.include_router(history_router)
 app.include_router(optimize_router)
 app.include_router(research_router)
-
-
-@app.get("/health")
-def health_check() -> dict[str, str]:
-    """Returns service health status for uptime checks."""
-    return {"status": "ok"}

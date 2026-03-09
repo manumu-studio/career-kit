@@ -11,7 +11,9 @@ class Settings(BaseSettings):
     """Validated application settings."""
 
     anthropic_api_key: str = ""
+    # Production: CORS_ORIGINS=http://localhost:3000,https://your-app.vercel.app
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    app_version: str = "0.5.0"
     max_file_size_mb: int = 5
     llm_provider: str = "anthropic"
     rate_limit_requests: int = 10
@@ -23,7 +25,11 @@ class Settings(BaseSettings):
         "postgresql+asyncpg://postgres:postgres@localhost:5432/ats_career_kit"
     )
 
-    model_config = SettingsConfigDict(env_file=".env", enable_decoding=False)
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        enable_decoding=False,
+        extra="ignore",
+    )
 
     @field_validator("cors_origins", mode="before")
     @classmethod

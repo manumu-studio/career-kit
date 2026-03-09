@@ -21,6 +21,8 @@ select = ["E", "F", "I", "UP", "B"]
 "app/services/cache/cache_service.py" = ["UP017", "UP035", "UP045", "UP006"]
 # History router: Optional for Python 3.9 compat (FastAPI evaluates annotations)
 "app/routers/history.py" = ["UP045"]
+# Health router: timezone.utc for Python 3.9 compat (CI uses 3.12)
+"app/routers/health.py" = ["UP017"]
 
 [tool.mypy]
 python_version = "3.12"
