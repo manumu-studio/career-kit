@@ -9,6 +9,11 @@ from app.models.schemas import CompanyProfile, CompanyResearchResult, Optimizati
 class LLMProvider(ABC):
     """Base class for LLM providers."""
 
+    @property
+    def model_name(self) -> str:
+        """Model identifier for logging and cache. Override in subclasses."""
+        return "unknown"
+
     @abstractmethod
     async def optimize(
         self,

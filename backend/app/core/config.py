@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     """Validated application settings."""
 
     anthropic_api_key: str = ""
+    openai_api_key: Optional[str] = None  # noqa: UP045
+    gemini_api_key: Optional[str] = None  # noqa: UP045
     # Production: CORS_ORIGINS=http://localhost:3000,https://your-app.vercel.app
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     app_version: str = "0.5.0"

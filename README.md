@@ -8,7 +8,7 @@ Upload your CV (PDF) + paste a job description → get a job-tailored CV, gap an
 
 - **Frontend:** Next.js 15 (App Router) · TypeScript · Tailwind v4
 - **Backend:** Python · FastAPI · Pydantic
-- **AI:** Anthropic Claude (multi-provider planned)
+- **AI:** Anthropic Claude, OpenAI GPT-4o, Google Gemini (multi-provider)
 - **PDF Parsing:** pdfplumber
 
 ## Getting Started
@@ -44,9 +44,9 @@ npm run dev
 - [x] v0.3 — Auth gate (M2 Auth OIDC, NextAuth v5, route protection)
 - [x] v0.4 — Analysis history (PostgreSQL persistence, caching, History page)
 - [x] v0.5 — Backend deployment (EC2, Nginx, HTTPS, GitHub Actions CI/CD)
-- [ ] v0.6 — i18n EN/ES (UI + LLM output + cross-language input)
-- [ ] v0.7 — Cover letter generation + PDF export
-- [ ] v0.8 — Multi-provider LLM support (Claude / OpenAI / Gemini)
+- [x] v0.6 — Multi-provider LLM support (Claude / OpenAI / Gemini)
+- [ ] v0.7 — i18n EN/ES (UI + LLM output + cross-language input)
+- [ ] v0.8 — Cover letter generation + PDF export
 - [ ] v0.9 — Testing suite
 - [ ] v0.10 — UX polish + validation + accessibility
 - [ ] v0.11 — Full production (Docker, Sentry, monitoring)

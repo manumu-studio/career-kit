@@ -7,12 +7,13 @@ import { useRouter } from "next/navigation";
 import { CvComparison } from "@/components/ui/CvComparison";
 import { GapAnalysis } from "@/components/ui/GapAnalysis";
 import { KeywordMatch } from "@/components/ui/KeywordMatch";
+import { ProviderBadge } from "@/components/ui/ProviderBadge";
 import { ScoreCard } from "@/components/ui/ScoreCard";
 import { useOptimizationContext } from "@/context/OptimizationContext";
 
 export default function ResultsPage() {
   const router = useRouter();
-  const { result } = useOptimizationContext();
+  const { result, providerUsed } = useOptimizationContext();
 
   // Keep users on the upload route when there is no optimization payload.
   useEffect(() => {
@@ -29,7 +30,15 @@ export default function ResultsPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-6 py-10 lg:py-12">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold text-white">Optimization Results</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-semibold text-white">Optimization Results</h1>
+            {(() => {
+              const p = providerUsed ?? result?.provider;
+              return p && ["anthropic", "openai", "gemini"].includes(p) ? (
+                <ProviderBadge provider={p as "anthropic" | "openai" | "gemini"} />
+              ) : null;
+            })()}
+          </div>
           <p className="text-sm text-slate-400">Your job-tailored CV improvements are ready.</p>
         </div>
         <Link

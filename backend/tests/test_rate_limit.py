@@ -15,7 +15,7 @@ from httpx import ASGITransport, AsyncClient
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
 from app.middleware.rate_limit import RateLimitMiddleware
-from app.models.schemas import CompanyResearchResult
+from app.models.schemas import CompanyResearchResult, OptimizationResult
 from app.routers.optimize import router as optimize_router
 
 
@@ -103,16 +103,18 @@ def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
         return "Candidate CV text."
 
     class _MockProvider:
+        model_name = "mock-model"
+
         async def optimize(
             self,
             cv_text: str,  # noqa: ARG002
             job_description: str,  # noqa: ARG002
             company_name: Optional[str] = None,  # noqa: ARG002, UP045
             company_context: object | None = None,  # noqa: ARG002
-        ) -> dict[str, object]:
+        ) -> OptimizationResult:
             _ = (company_name, company_context)
-            return {
-                "sections": [
+            return OptimizationResult(
+                sections=[
                     {
                         "heading": "Experience",
                         "original": "Built APIs.",
@@ -120,7 +122,7 @@ def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
                         "changes_made": ["Added job-aligned keywords"],
                     }
                 ],
-                "gap_analysis": [
+                gap_analysis=[
                     {
                         "skill": "AWS",
                         "importance": "preferred",
@@ -129,11 +131,11 @@ def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
                         ),
                     }
                 ],
-                "keyword_matches": ["Python", "FastAPI"],
-                "keyword_misses": ["AWS"],
-                "match_score": 85,
-                "summary": "Strong backend fit with one notable cloud tooling gap.",
-            }
+                keyword_matches=["Python", "FastAPI"],
+                keyword_misses=["AWS"],
+                match_score=85,
+                summary="Strong backend fit with one notable cloud tooling gap.",
+            )
 
         async def synthesize_company(
             self,

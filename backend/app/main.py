@@ -15,6 +15,7 @@ from app.models.database import engine
 from app.routers.health import router as health_router
 from app.routers.history import router as history_router
 from app.routers.optimize import router as optimize_router
+from app.routers.providers import router as providers_router
 from app.routers.research import router as research_router
 
 logger = logging.getLogger(__name__)
@@ -85,4 +86,5 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(history_router)
 app.include_router(optimize_router)
+app.include_router(providers_router)
 app.include_router(research_router)
