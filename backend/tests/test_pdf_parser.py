@@ -166,3 +166,35 @@ async def test_extract_text_from_oversized_pdf_raises_value_error(
 
     with pytest.raises(ValueError, match="maximum size"):
         await extract_text_from_pdf(upload)
+
+
+@pytest.mark.asyncio
+async def test_extract_text_from_minimal_pdf(
+    ensure_fixture_directory: Path,
+) -> None:
+    """Minimal CV fixture should extract correctly."""
+    minimal_bytes = _build_simple_pdf(
+        [["John Doe", "", "Experience", "Engineer at Acme 2020-2024"]]
+    )
+    fixture_path = ensure_fixture_directory / "sample_cv_minimal.pdf"
+    fixture_path.write_bytes(minimal_bytes)
+    upload = _upload_file_from_bytes("sample_cv_minimal.pdf", minimal_bytes)
+    text = await extract_text_from_pdf(upload)
+    assert "John Doe" in text or "Experience" in text or "Engineer" in text
+
+
+@pytest.mark.asyncio
+async def test_extract_text_from_empty_pdf_file_raises_value_error() -> None:
+    """Valid PDF with no extractable text should raise ValueError."""
+    empty_bytes = _build_simple_pdf([[""]])
+    upload = _upload_file_from_bytes("empty.pdf", empty_bytes)
+    with pytest.raises(ValueError, match="No extractable text"):
+        await extract_text_from_pdf(upload)
+
+
+@pytest.mark.asyncio
+async def test_extract_text_from_txt_file_raises_value_error() -> None:
+    """File with .pdf extension but non-PDF content should fail."""
+    upload = _upload_file_from_bytes("fake.pdf", b"Plain text content")
+    with pytest.raises(ValueError, match="valid PDF"):
+        await extract_text_from_pdf(upload)

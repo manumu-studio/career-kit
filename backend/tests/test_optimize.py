@@ -203,3 +203,60 @@ async def test_optimize_invalid_llm_json_returns_500(
 
     assert response.status_code == 500
     assert "Failed to parse LLM response" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_optimize_provider_selection_passed_to_get_provider(
+    async_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Provider form param should be passed to get_provider."""
+
+    async def _mock_extract_text_from_pdf(file: Any) -> str:
+        return "CV text."
+
+    monkeypatch.setattr(
+        "app.routers.optimize.extract_text_from_pdf", _mock_extract_text_from_pdf
+    )
+
+    def _mock_get_provider(provider_name: str = "anthropic") -> LLMProvider:
+        assert provider_name == "openai"
+        return _MockSuccessProvider()
+
+    monkeypatch.setattr("app.routers.optimize.get_provider", _mock_get_provider)
+
+    response = await async_client.post(
+        "/optimize",
+        data={"job_description": "Need Python.", "provider": "openai"},
+        files={"cv_file": _dummy_pdf_file()},
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_optimize_unknown_provider_returns_error(
+    async_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Provider not available should return 5xx error."""
+
+    async def _mock_extract_text_from_pdf(file: Any) -> str:
+        return "CV text."
+
+    def _mock_get_provider(provider_name: str = "anthropic") -> LLMProvider:
+        if provider_name == "unknown":
+            raise ValueError(
+                "Unknown provider 'unknown'. Available: anthropic, gemini, openai"
+            )
+        return _MockSuccessProvider()
+
+    monkeypatch.setattr(
+        "app.routers.optimize.extract_text_from_pdf", _mock_extract_text_from_pdf
+    )
+    monkeypatch.setattr("app.routers.optimize.get_provider", _mock_get_provider)
+
+    response = await async_client.post(
+        "/optimize",
+        data={"job_description": "Need Python.", "provider": "unknown"},
+        files={"cv_file": _dummy_pdf_file()},
+    )
+    assert response.status_code in (400, 500)
+    assert "Unknown provider" in response.json().get("detail", "")

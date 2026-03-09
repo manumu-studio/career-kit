@@ -24,6 +24,11 @@ select = ["E", "F", "I", "UP", "B"]
 # Health router: timezone.utc for Python 3.9 compat (CI uses 3.12)
 "app/routers/health.py" = ["UP017"]
 
+[tool.pytest.ini_options]
+addopts = "--cov=app --cov-report=term-missing --cov-report=html --cov-fail-under=70"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
