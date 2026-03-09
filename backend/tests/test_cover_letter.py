@@ -141,3 +141,88 @@ async def test_cover_letter_invalid_tone_returns_422(async_client: AsyncClient) 
         headers={"X-User-Id": "test-user"},
     )
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_cover_letter_conversational_tone_returns_200(
+    async_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Conversational tone should be accepted and reflected in response."""
+
+    def _mock_get_provider(provider_name: str | None = None) -> LLMProvider:
+        return _MockCoverLetterProvider()
+
+    monkeypatch.setattr("app.routers.cover_letter.get_provider", _mock_get_provider)
+
+    response = await async_client.post(
+        "/cover-letter",
+        json={
+            "cv_text": "Jane Doe",
+            "job_description": "Backend role.",
+            "company_name": "Acme",
+            "hiring_manager": None,
+            "tone": "conversational",
+        },
+        headers={"X-User-Id": "test-user"},
+    )
+    assert response.status_code == 200
+    assert response.json()["tone_used"] == "conversational"
+
+
+@pytest.mark.asyncio
+async def test_cover_letter_missing_job_description_returns_422(
+    async_client: AsyncClient,
+) -> None:
+    """Missing job_description field should fail request validation."""
+    response = await async_client.post(
+        "/cover-letter",
+        json={
+            "cv_text": "Jane Doe",
+            "company_name": "Acme",
+            "tone": "professional",
+        },
+        headers={"X-User-Id": "test-user"},
+    )
+    assert response.status_code == 422
+
+
+class _MockFailingCoverLetterProvider(LLMProvider):
+    """Mock provider that raises on generate_cover_letter."""
+
+    async def optimize(self, *args: object, **kwargs: object) -> OptimizationResult:
+        raise NotImplementedError
+
+    async def synthesize_company(
+        self, *args: object, **kwargs: object
+    ) -> CompanyResearchResult:
+        raise NotImplementedError
+
+    async def generate_cover_letter(
+        self, *args: object, **kwargs: object
+    ) -> CoverLetterResult:
+        raise RuntimeError("LLM service unavailable")
+
+
+@pytest.mark.asyncio
+async def test_cover_letter_llm_error_returns_500(
+    async_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """LLM provider error should map to HTTP 500."""
+
+    def _mock_get_provider(provider_name: str | None = None) -> LLMProvider:
+        return _MockFailingCoverLetterProvider()
+
+    monkeypatch.setattr("app.routers.cover_letter.get_provider", _mock_get_provider)
+
+    response = await async_client.post(
+        "/cover-letter",
+        json={
+            "cv_text": "Jane Doe",
+            "job_description": "Backend role.",
+            "company_name": "Acme",
+            "hiring_manager": None,
+            "tone": "professional",
+        },
+        headers={"X-User-Id": "test-user"},
+    )
+    assert response.status_code == 500

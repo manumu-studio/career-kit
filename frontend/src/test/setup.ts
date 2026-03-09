@@ -1,6 +1,8 @@
 /** Global test setup for frontend Vitest environment. */
 import "@testing-library/jest-dom/vitest";
-import { vi } from "vitest";
+import { afterAll, afterEach, beforeAll, vi } from "vitest";
+import "fake-indexeddb/auto";
+import { server } from "@/test/msw/server";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -11,3 +13,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
 }));
+
+beforeAll(() => server.listen({ onUnhandledRequest: "bypass" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
