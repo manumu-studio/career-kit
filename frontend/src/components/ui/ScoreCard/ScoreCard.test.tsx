@@ -1,6 +1,6 @@
 /** Component tests for score card rendering and thresholds. */
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/test/utils";
 import { ScoreCard } from "@/components/ui/ScoreCard";
 
 describe("ScoreCard", () => {

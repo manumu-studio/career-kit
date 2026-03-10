@@ -1,6 +1,7 @@
 "use client";
 
 /** Company research form that triggers backend research and displays results. */
+import { useTranslations } from "next-intl";
 import { handleApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
@@ -14,6 +15,7 @@ export function CompanySearch({
   onResearchError,
   onViewReport,
   userId,
+  language,
   className,
 }: CompanySearchProps) {
   const {
@@ -32,7 +34,8 @@ export function CompanySearch({
     loadCachedResearch,
     dismissCachedBanner,
     clearError,
-  } = useCompanySearch({ userId });
+  } = useCompanySearch({ userId, language });
+  const t = useTranslations("companySearch");
 
   const handleResearch = async (forceRefresh?: boolean): Promise<void> => {
     try {
@@ -60,49 +63,47 @@ export function CompanySearch({
 
   return (
     <section className={cn("space-y-4 rounded-xl border border-slate-800 bg-slate-900/40 p-5", className)}>
-      <h2 className="text-lg font-semibold text-white">Step 1: Company Research (Optional)</h2>
-      <p className="text-sm text-slate-300">
-        Research company values, culture, and interview insights before optimizing your CV.
-      </p>
+      <h2 className="text-lg font-semibold text-white">{t("step1")}</h2>
+      <p className="text-sm text-slate-300">{t("step1Desc")}</p>
 
       <div className="grid gap-3">
         <label className="grid gap-1 text-sm">
-          <span className="text-slate-200">Company Name *</span>
+          <span className="text-slate-200">{t("companyNameRequired")}</span>
           <input
-            aria-label="Company name"
+            aria-label={t("companyName")}
             className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
             onChange={(event) => {
               setCompanyName(event.target.value);
             }}
-            placeholder="Stripe"
+            placeholder={t("companyPlaceholder")}
             type="text"
             value={companyName}
           />
         </label>
 
         <label className="grid gap-1 text-sm">
-          <span className="text-slate-200">Company Website URL</span>
+          <span className="text-slate-200">{t("companyUrl")}</span>
           <input
-            aria-label="Company website URL"
+            aria-label={t("companyUrl")}
             className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
             onChange={(event) => {
               setCompanyUrl(event.target.value);
             }}
-            placeholder="https://stripe.com"
+            placeholder={t("urlPlaceholder")}
             type="url"
             value={companyUrl}
           />
         </label>
 
         <label className="grid gap-1 text-sm">
-          <span className="text-slate-200">Job Title</span>
+          <span className="text-slate-200">{t("jobTitle")}</span>
           <input
-            aria-label="Job title"
+            aria-label={t("jobTitle")}
             className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
             onChange={(event) => {
               setJobTitle(event.target.value);
             }}
-            placeholder="Software Engineer"
+            placeholder={t("jobPlaceholder")}
             type="text"
             value={jobTitle}
           />
@@ -127,7 +128,7 @@ export function CompanySearch({
           }}
           type="button"
         >
-          {isLoading ? "Researching..." : "Research Company"}
+          {isLoading ? t("researching") : t("researchButton")}
         </button>
         {error ? (
           <button
@@ -135,7 +136,7 @@ export function CompanySearch({
             onClick={clearError}
             type="button"
           >
-            Dismiss
+            {t("dismiss")}
           </button>
         ) : null}
       </div>

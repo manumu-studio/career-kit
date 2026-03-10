@@ -2,8 +2,8 @@
 
 /** Results page showing match score, comparison details, keywords, and gaps. */
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { CompanyInfo } from "@/components/ui/CompanyInfo";
 import { CoverLetterDisplay } from "@/components/ui/CoverLetterDisplay";
 import { CvComparison } from "@/components/ui/CvComparison";
@@ -28,6 +28,7 @@ function buildCvTextFromSections(
 }
 
 export default function ResultsPage() {
+  const locale = useLocale() as "en" | "es";
   const router = useRouter();
   const { data: session } = useSession();
   const {
@@ -64,9 +65,11 @@ export default function ResultsPage() {
     }
   }, [result, router]);
 
+  const t = useTranslations("results");
+
   const handleGenerateCoverLetter = useCallback(async () => {
     if (!result || !formState.jobDescription.trim() || !coverCompanyName.trim()) {
-      setCoverError("Company name and job description are required.");
+      setCoverError(t("companyRequired"));
       return;
     }
     setCoverError(null);
@@ -80,6 +83,7 @@ export default function ResultsPage() {
           company_name: coverCompanyName.trim(),
           hiring_manager: coverHiringManager?.trim() || null,
           tone: coverTone,
+          language: locale,
         },
         session?.user?.externalId,
       );
@@ -97,9 +101,11 @@ export default function ResultsPage() {
     coverCompanyName,
     coverHiringManager,
     coverTone,
+    locale,
     session?.user?.externalId,
     setCoverLetter,
     toastError,
+    t,
   ]);
 
   if (!result) {
@@ -112,7 +118,7 @@ export default function ResultsPage() {
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold text-white sm:text-3xl">
-              Optimization Results
+              {t("title")}
             </h1>
             {(() => {
               const p = providerUsed ?? result?.provider;
@@ -121,7 +127,7 @@ export default function ResultsPage() {
               ) : null;
             })()}
           </div>
-          <p className="text-sm text-slate-400">Your job-tailored CV improvements are ready.</p>
+          <p className="text-sm text-slate-400">{t("readyMessage")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="hidden md:contents">
@@ -134,7 +140,7 @@ export default function ResultsPage() {
             className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 hover:text-white"
             href="/home"
           >
-            Back to Upload
+            {t("backToUpload")}
           </Link>
         </div>
       </header>
@@ -172,11 +178,9 @@ export default function ResultsPage() {
       {!coverLetter ? (
         <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
           <h2 className="mb-4 text-lg font-semibold text-white">
-            Generate Cover Letter (optional)
+            {t("generateOptional")}
           </h2>
-          <p className="mb-4 text-sm text-slate-400">
-            Create a tailored cover letter from your CV and job description.
-          </p>
+          <p className="mb-4 text-sm text-slate-400">{t("generateDesc")}</p>
           <div className="space-y-4">
             <CompanyInfo
               companyName={coverCompanyName}
@@ -206,10 +210,10 @@ export default function ResultsPage() {
               {isGenerating ? (
                 <>
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
-                  Generating...
+                  {t("generating")}
                 </>
               ) : (
-                "Generate Cover Letter"
+                t("generateCoverLetter")
               )}
             </button>
           </div>

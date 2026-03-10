@@ -1,6 +1,6 @@
 /** Component tests for CV comparison section rendering. */
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/test/utils";
 import { CvComparison } from "@/components/ui/CvComparison";
 import { mockCvSection } from "@/test/mocks";
 

@@ -2,7 +2,8 @@
 
 import json
 import logging
-from typing import Annotated, Optional
+import re
+from typing import Annotated, Literal, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import ValidationError
@@ -10,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.dependencies import get_user_id
+from app.core.i18n import get_error_message, normalize_locale
 from app.models.database import get_db
 from app.models.schemas import CompanyProfile, ErrorResponse, OptimizationResult
 from app.services.cache import CacheService
@@ -34,21 +36,37 @@ async def optimize_cv(
     company_profile_json: Annotated[Optional[str], Form()] = None,  # noqa: UP045
     force_refresh: Annotated[bool, Form()] = False,
     provider: Annotated[Optional[str], Form()] = None,  # noqa: UP045
+    language: Annotated[Optional[Literal["en", "es"]], Form()] = None,  # noqa: UP045
 ) -> OptimizationResult:
     """Parse CV and invoke the configured LLM provider."""
+    loc = normalize_locale(language)
     filename = cv_file.filename or ""
     if not filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Uploaded file must be a PDF.")
+        raise HTTPException(
+            status_code=400,
+            detail=get_error_message(loc, "invalid_pdf"),
+        )
 
     try:
-        cv_text = await extract_text_from_pdf(cv_file)
+        cv_text = await extract_text_from_pdf(cv_file, locale=loc)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     try:
         llm_provider = get_provider(provider or settings.llm_provider)
     except ValueError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        err_msg = str(exc)
+        if "Unknown provider" in err_msg:
+            match = re.search(r"Unknown provider '([^']+)'\. Available: (.+)", err_msg)
+            name = match.group(1) if match else "unknown"
+            available = match.group(2) if match else "anthropic, openai, gemini"
+            raise HTTPException(
+                status_code=500,
+                detail=get_error_message(
+                    loc, "unknown_provider", name=name, available=available
+                ),
+            ) from exc
+        raise HTTPException(status_code=500, detail=err_msg) from exc
 
     company_context: Optional[CompanyProfile] = None  # noqa: UP045
     if company_profile_json:
@@ -58,7 +76,9 @@ async def optimize_cv(
         except (json.JSONDecodeError, ValidationError) as exc:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid company context payload: {exc}",
+                detail=get_error_message(
+                    loc, "invalid_company_context", detail=str(exc)
+                ),
             ) from exc
 
     company_url: Optional[str] = None  # noqa: UP045
@@ -90,6 +110,7 @@ async def optimize_cv(
             job_description=job_description,
             company_name=company_name,
             company_context=company_context,
+            language=loc,
         )
         provider_name = provider or settings.llm_provider
         result.provider = provider_name
@@ -114,10 +135,10 @@ async def optimize_cv(
     except ValueError as exc:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to parse LLM response: {exc}",
+            detail=get_error_message(loc, "llm_parse_failed", detail=str(exc)),
         ) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=502,
-            detail="LLM provider request failed.",
+            detail=get_error_message(loc, "llm_provider_failed"),
         ) from exc

@@ -1,12 +1,13 @@
 "use client";
 
 /** History page listing past analyses with search, filters, and pagination. */
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { HistoryList, useHistoryList } from "@/components/ui/HistoryList";
 import { useSession } from "@/features/auth";
 
 export default function HistoryPage() {
+  const t = useTranslations("history");
   const router = useRouter();
   const { data: session } = useSession();
   const userId = session?.user?.externalId;
@@ -35,16 +36,14 @@ export default function HistoryPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-10">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-white">Analysis History</h1>
-          <p className="mt-1 text-slate-400">
-            View and manage your past company research and CV optimizations.
-          </p>
+          <h1 className="text-3xl font-semibold text-white">{t("title")}</h1>
+          <p className="mt-1 text-slate-400">{t("subtitle")}</p>
         </div>
         <Link
           className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 hover:text-white"
           href="/home"
         >
-          ← Back to Upload
+          {t("backToUpload")}
         </Link>
       </header>
 

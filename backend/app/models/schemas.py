@@ -161,6 +161,7 @@ class CompanyResearchRequest(BaseModel):
     company_url: Optional[str] = None  # noqa: UP045
     job_title: Optional[str] = None  # noqa: UP045
     force_refresh: bool = False  # Skip cache and run fresh research
+    language: Literal["en", "es"] = "en"
 
 
 # --- History API schemas ---
@@ -254,6 +255,7 @@ class CoverLetterRequest(BaseModel):
     company_name: str
     hiring_manager: Optional[str] = None
     tone: Literal["professional", "conversational", "enthusiastic"] = "professional"
+    language: Literal["en", "es"] = "en"
 
 
 class CoverLetterResult(BaseModel):

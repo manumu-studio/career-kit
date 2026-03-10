@@ -1,8 +1,10 @@
 /** Provides helper labels for CV comparison rendering. */
-export function useCvComparison() {
+type TranslationFn = (key: string) => string;
+
+export function useCvComparison(t: TranslationFn) {
   return {
-    originalLabel: "Original",
-    optimizedLabel: "Optimized",
-    changesLabel: "Changes made",
+    originalLabel: t("original"),
+    optimizedLabel: t("optimized"),
+    changesLabel: t("changesMade"),
   };
 }

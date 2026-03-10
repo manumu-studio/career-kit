@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Optional
+from typing import Optional, cast
 
 from anthropic import AsyncAnthropic
 
 from app.core.config import get_settings
+from app.core.i18n import Locale
 from app.core.prompts import (
     build_company_system_prompt,
     build_company_user_prompt,
@@ -50,9 +51,10 @@ class AnthropicProvider(LLMProvider):
         job_description: str,
         company_name: Optional[str] = None,  # noqa: UP045
         company_context: Optional[CompanyProfile] = None,  # noqa: UP045
+        language: str = "en",
     ) -> OptimizationResult:
         """Generate and validate CV optimization output."""
-        system = build_system_prompt()
+        system = build_system_prompt(language=cast(Locale, language))
         user_prompt = build_user_prompt(
             cv_text=cv_text,
             job_description=job_description,
@@ -108,6 +110,7 @@ class AnthropicProvider(LLMProvider):
         website_content: str,
         search_results: str,
         job_title: Optional[str] = None,  # noqa: UP045
+        language: str = "en",
     ) -> CompanyResearchResult:
         """Generate and validate structured company research output."""
         user_prompt = build_company_user_prompt(
@@ -116,10 +119,11 @@ class AnthropicProvider(LLMProvider):
             website_content=website_content,
             search_results=search_results,
         )
+        system = build_company_system_prompt(language=cast(Locale, language))
         response = await self._client.messages.create(
             model=self._model,
             max_tokens=4096,
-            system=build_company_system_prompt(),
+            system=system,
             messages=[{"role": "user", "content": user_prompt}],
         )
         self._log_usage(response)
@@ -135,7 +139,7 @@ class AnthropicProvider(LLMProvider):
         retry_response = await self._client.messages.create(
             model=self._model,
             max_tokens=4096,
-            system=build_company_system_prompt(),
+            system=system,
             messages=[
                 {"role": "user", "content": user_prompt},
                 {"role": "assistant", "content": cleaned_text},
@@ -164,6 +168,7 @@ class AnthropicProvider(LLMProvider):
         company_name: str,
         hiring_manager: str | None,
         tone: str,
+        language: str = "en",
     ) -> CoverLetterResult:
         """Generate and validate cover letter output."""
         hiring_manager_or_default = hiring_manager or "Hiring Manager"
@@ -174,10 +179,11 @@ class AnthropicProvider(LLMProvider):
             hiring_manager_or_default=hiring_manager_or_default,
             tone=tone,
         )
+        system = build_cover_letter_system_prompt(language=cast(Locale, language))
         response = await self._client.messages.create(
             model=self._model,
             max_tokens=4096,
-            system=build_cover_letter_system_prompt(),
+            system=system,
             messages=[{"role": "user", "content": user_prompt}],
         )
         self._log_usage(response)
@@ -193,7 +199,7 @@ class AnthropicProvider(LLMProvider):
         retry_response = await self._client.messages.create(
             model=self._model,
             max_tokens=4096,
-            system=build_cover_letter_system_prompt(),
+            system=system,
             messages=[
                 {"role": "user", "content": user_prompt},
                 {"role": "assistant", "content": cleaned_text},

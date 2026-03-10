@@ -47,7 +47,7 @@ async def test_compare_requires_at_least_two_providers(
 ) -> None:
     """POST /compare requires at least 2 providers."""
 
-    async def _mock_extract(_: object) -> str:
+    async def _mock_extract(_: object, locale: object = None) -> str:
         return "CV text"
 
     monkeypatch.setattr(

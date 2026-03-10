@@ -63,11 +63,14 @@ interface OptimizeCompanyContext {
   companyProfile: CompanyProfile;
 }
 
+type Locale = "en" | "es";
+
 interface OptimizeCvOptions {
   companyContext?: OptimizeCompanyContext;
   userId?: string;
   forceRefresh?: boolean;
   provider?: string;
+  language?: Locale;
 }
 
 function buildOptimizeFormData(
@@ -123,7 +126,10 @@ export async function generateCoverLetter(
   if (userId) {
     headers["X-User-Id"] = userId;
   }
-  const body = JSON.stringify(request);
+  const body = JSON.stringify({
+    ...request,
+    language: request.language ?? "en",
+  });
 
   const response = await fetchWithRetry(() =>
     fetch(`${env.NEXT_PUBLIC_API_URL}${COVER_LETTER_ENDPOINT}`, {
@@ -147,12 +153,16 @@ export async function compareProviders(
   cvFile: File,
   jobDescription: string,
   providers: string[],
+  language?: Locale,
 ): Promise<ComparisonResult> {
   const response = await fetchWithRetry(() => {
     const formData = new FormData();
     formData.append("cv_file", cvFile);
     formData.append("job_description", jobDescription);
     formData.append("providers", providers.join(","));
+    if (language) {
+      formData.append("language", language);
+    }
     return fetch(`${env.NEXT_PUBLIC_API_URL}/compare`, {
       method: "POST",
       body: formData,
@@ -165,6 +175,7 @@ export async function compareProviders(
 interface ResearchCompanyOptions {
   userId?: string;
   forceRefresh?: boolean;
+  language?: Locale;
 }
 
 export async function researchCompany(
@@ -179,6 +190,7 @@ export async function researchCompany(
   const body: CompanyResearchRequest = {
     ...request,
     force_refresh: options?.forceRefresh ?? false,
+    language: options?.language ?? request.language ?? "en",
   };
 
   const response = await fetchWithRetry(() =>

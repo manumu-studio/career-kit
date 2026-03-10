@@ -1,6 +1,6 @@
 /** Component tests for keyword match summary and styling. */
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/test/utils";
 import { KeywordMatch } from "@/components/ui/KeywordMatch";
 
 describe("KeywordMatch", () => {

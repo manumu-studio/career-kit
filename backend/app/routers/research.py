@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.dependencies import get_user_id
+from app.core.i18n import Locale, get_error_message, normalize_locale
 from app.models.database import get_db
 from app.models.schemas import (
     CompanyResearchRequest,
@@ -44,16 +45,23 @@ async def research_company(
     user_id: Annotated[str, Depends(get_user_id)],
 ) -> CompanyResearchResult:
     """Run company research pipeline with timeout and graceful fallbacks."""
+    loc = normalize_locale(request.language)
     try:
-        return await asyncio.wait_for(_run_pipeline(request, db, user_id), timeout=90.0)
+        return await asyncio.wait_for(
+            _run_pipeline(request, db, user_id, loc), timeout=90.0
+        )
     except TimeoutError as exc:
-        raise HTTPException(status_code=504, detail="Research timed out.") from exc
+        raise HTTPException(
+            status_code=504,
+            detail=get_error_message(loc, "research_timed_out"),
+        ) from exc
 
 
 async def _run_pipeline(
     request: CompanyResearchRequest,
     db: AsyncSession,
     user_id: str,
+    locale: Locale,
 ) -> CompanyResearchResult:
     """Execute concurrent scrape/search and perform synthesis."""
     if request.company_url and not request.force_refresh:
@@ -81,7 +89,7 @@ async def _run_pipeline(
     if website_content.raw_text_length == 0 and len(search_result.results) == 0:
         raise HTTPException(
             status_code=422,
-            detail="Insufficient data to research this company.",
+            detail=get_error_message(locale, "insufficient_data"),
         )
 
     try:
@@ -94,6 +102,7 @@ async def _run_pipeline(
             llm_provider=provider,
             provider_used=search_result.provider_used,
             base_url=request.company_url,
+            language=locale,
         )
         if request.company_url:
             try:
@@ -117,7 +126,7 @@ async def _run_pipeline(
         )
         raise HTTPException(
             status_code=500,
-            detail="Research synthesis failed.",
+            detail=get_error_message(locale, "research_synthesis_failed"),
         ) from exc
 
 

@@ -1,6 +1,7 @@
 "use client";
 
 /** Controlled textarea for entering a target job description. */
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { JobDescriptionProps } from "./JobDescription.types";
 
@@ -14,11 +15,13 @@ export function JobDescription({
   minLength = DEFAULT_MIN,
   maxLength = DEFAULT_MAX,
 }: JobDescriptionProps) {
+  const t = useTranslations("home");
+  const tValidation = useTranslations("validation");
   const isOverMax = value.length > maxLength;
 
   return (
     <section className="w-full space-y-3">
-      <h2 className="text-lg font-semibold text-white">Job Description</h2>
+      <h2 className="text-lg font-semibold text-white">{t("jobDescLabel")}</h2>
 
       <div className="relative">
         <textarea
@@ -34,7 +37,7 @@ export function JobDescription({
           onChange={(event) => {
             onChange(event.target.value);
           }}
-          placeholder="Paste the job description here..."
+          placeholder={t("jobDescPlaceholder")}
           value={value}
         />
 
@@ -54,7 +57,10 @@ export function JobDescription({
         </p>
       ) : value.length > 0 && value.length < minLength ? (
         <p className="text-sm text-amber-400">
-          Add at least {minLength - value.length} more characters (min {minLength})
+          {tValidation("addMoreChars", {
+            remaining: minLength - value.length,
+            min: minLength,
+          })}
         </p>
       ) : null}
     </section>

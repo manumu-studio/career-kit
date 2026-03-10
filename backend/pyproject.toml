@@ -15,12 +15,17 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.ruff.lint.per-file-ignores]
 # SQLAlchemy Mapped: Optional/Dict for Python 3.9 compat (annotation eval at runtime)
 "app/models/database.py" = ["UP035", "UP045", "UP006"]
+# i18n, pdf_parser: Optional for Python 3.9 compat (CI/runtime may use 3.9)
+"app/core/i18n.py" = ["UP045", "UP007"]
+"app/services/pdf_parser.py" = ["UP045", "UP007"]
 # Pydantic schemas: Optional for Python 3.9 compat
 "app/models/schemas.py" = ["UP045"]
 # Cache service: Optional, timezone.utc for Python 3.9 compat
 "app/services/cache/cache_service.py" = ["UP017", "UP035", "UP045", "UP006"]
 # History router: Optional for Python 3.9 compat (FastAPI evaluates annotations)
 "app/routers/history.py" = ["UP045"]
+# Providers router: Optional for Python 3.9 compat (FastAPI Form param)
+"app/routers/providers.py" = ["UP045", "UP007"]
 # Health router: timezone.utc for Python 3.9 compat (CI uses 3.12)
 "app/routers/health.py" = ["UP017"]
 

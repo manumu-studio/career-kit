@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import json
 import re
+from typing import cast
 
 from google import genai
 from google.genai import types
 
 from app.core.config import get_settings
+from app.core.i18n import Locale
 from app.core.prompts import (
     build_company_system_prompt,
     build_company_user_prompt,
@@ -56,9 +58,10 @@ class GeminiProvider(LLMProvider):
         job_description: str,
         company_name: str | None = None,
         company_context: CompanyProfile | None = None,
+        language: str = "en",
     ) -> OptimizationResult:
         """Generate and validate CV optimization output."""
-        system = build_system_prompt()
+        system = build_system_prompt(language=cast(Locale, language))
         user_prompt = build_user_prompt(
             cv_text=cv_text,
             job_description=job_description,
@@ -110,9 +113,10 @@ class GeminiProvider(LLMProvider):
         website_content: str,
         search_results: str,
         job_title: str | None = None,
+        language: str = "en",
     ) -> CompanyResearchResult:
         """Generate and validate structured company research output."""
-        system = build_company_system_prompt()
+        system = build_company_system_prompt(language=cast(Locale, language))
         user_prompt = build_company_user_prompt(
             company_name=company_name,
             job_title=job_title or "Not specified",
@@ -165,6 +169,7 @@ class GeminiProvider(LLMProvider):
         company_name: str,
         hiring_manager: str | None,
         tone: str,
+        language: str = "en",
     ) -> CoverLetterResult:
         """Generate and validate cover letter output."""
         hiring_manager_or_default = hiring_manager or "Hiring Manager"
@@ -175,7 +180,8 @@ class GeminiProvider(LLMProvider):
             hiring_manager_or_default=hiring_manager_or_default,
             tone=tone,
         )
-        full_prompt = f"{build_cover_letter_system_prompt()}\n\n{user_prompt}"
+        sys_prompt = build_cover_letter_system_prompt(language=cast(Locale, language))
+        full_prompt = f"{sys_prompt}\n\n{user_prompt}"
         response = await self._client.aio.models.generate_content(
             model=self._model,
             contents=full_prompt,

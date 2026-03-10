@@ -1,8 +1,9 @@
 "use client";
 
 /** Upload page where users submit CV + job description for optimization. */
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
 import { CompanySearch } from "@/components/ui/CompanySearch";
 import { FileUpload } from "@/components/ui/FileUpload";
@@ -21,16 +22,21 @@ import {
 import type { CachedMatchInfo } from "@/types/history";
 import type { CompanyResearchResult } from "@/types/company";
 
-const OPTIMIZATION_STEPS = [
-  "Uploading PDF",
-  "Parsing PDF",
-  "Analyzing CV",
-  "Generating results",
-] as const;
-
 export default function Home() {
+  const locale = useLocale() as "en" | "es";
+  const t = useTranslations("home");
   const { data: session } = useSession();
   const router = useRouter();
+  const OPTIMIZATION_STEPS = useMemo(
+    () =>
+      [
+        t("stepUploading"),
+        t("stepParsing"),
+        t("stepAnalyzing"),
+        t("stepGenerating"),
+      ] as const,
+    [t],
+  );
   const {
     companyResearch,
     setCompanyResearch,
@@ -89,8 +95,9 @@ export default function Home() {
       setIsSubmitting(true);
       setProgressStep(0);
       let stepInterval: ReturnType<typeof setInterval> | null = null;
+      const steps = OPTIMIZATION_STEPS;
       stepInterval = setInterval(() => {
-        setProgressStep((s) => Math.min(s + 1, OPTIMIZATION_STEPS.length - 1));
+        setProgressStep((s) => Math.min(s + 1, steps.length - 1));
       }, 3000);
       try {
         const result = await optimizeCV(file, jobDescription.trim(), {
@@ -103,6 +110,7 @@ export default function Home() {
           userId: session?.user?.externalId,
           forceRefresh,
           provider: selected ?? undefined,
+          language: locale,
         });
         setResult(result, selected ?? undefined);
         router.push("/results");
@@ -125,6 +133,8 @@ export default function Home() {
       setResult,
       selected,
       toastError,
+      OPTIMIZATION_STEPS,
+      locale,
     ],
   );
 
@@ -185,6 +195,7 @@ export default function Home() {
         file,
         jobDescription.trim(),
         Array.from(compareSelected),
+        locale,
       );
       setComparisonResult(result);
       router.push("/compare");
@@ -200,8 +211,8 @@ export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-6 px-4 py-10 sm:px-6 sm:py-12">
       <header className="space-y-2">
-        <h1 className="text-4xl font-semibold tracking-tight text-white">Career Kit</h1>
-        <p className="text-base text-slate-300">Optimize your CV for any job posting</p>
+        <h1 className="text-4xl font-semibold tracking-tight text-white">{t("title")}</h1>
+        <p className="text-base text-slate-300">{t("subtitle")}</p>
       </header>
 
       <CompanySearch
@@ -213,10 +224,11 @@ export default function Home() {
           router.push("/report");
         }}
         userId={session?.user?.externalId}
+        language={locale}
       />
 
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Step 2: Upload CV + Job Description</h2>
+        <h2 className="text-lg font-semibold text-white">{t("step2")}</h2>
         <button
           className="text-sm text-slate-300 underline"
           onClick={() => {
@@ -224,16 +236,15 @@ export default function Home() {
           }}
           type="button"
         >
-          Skip research
+          {t("skipResearch")}
         </button>
       </div>
 
       <FileUpload onFileChange={handleFileChange} />
       {!file && formState.fileName ? (
         <p className="text-sm text-slate-400">
-          Previously selected:{" "}
-          <span className="font-medium text-slate-200">{formState.fileName}</span> — please
-          re-select your file.
+          {t("previouslySelected")}{" "}
+          <span className="font-medium text-slate-200">{formState.fileName}</span> — {t("reSelectFile")}
         </p>
       ) : null}
       <JobDescription
@@ -241,9 +252,9 @@ export default function Home() {
         value={jobDescription}
         error={
           jobDescTrimmed.length > 0 && jobDescTrimmed.length < 50
-            ? "Job description must be at least 50 characters"
+            ? t("minCharsError")
             : jobDescTrimmed.length > 10000
-              ? "Job description must be under 10,000 characters"
+              ? t("maxCharsError")
               : null
         }
         minLength={50}
@@ -279,22 +290,18 @@ export default function Home() {
         <button
           aria-label={
             !isReadyToSubmit
-              ? "Upload a PDF and enter at least 50 characters in the job description to enable"
-              : "Optimize My CV"
+              ? t("ariaOptimizeDisabled")
+              : t("ariaOptimizeReady")
           }
           className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-sky-500 px-5 py-2.5 font-medium text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
           disabled={!isReadyToSubmit}
           onClick={() => {
             void handleSubmit();
           }}
-          title={
-            !isReadyToSubmit
-              ? "Upload a PDF and enter at least 50 characters in the job description"
-              : undefined
-          }
+          title={!isReadyToSubmit ? t("ariaOptimizeDisabled") : undefined}
           type="button"
         >
-          Optimize My CV
+          {t("optimizeButton")}
         </button>
       )}
 
@@ -304,13 +311,11 @@ export default function Home() {
           onClick={() => setCompareExpanded((e) => !e)}
           type="button"
         >
-          {compareExpanded ? "Hide" : "Compare"} providers
+          {compareExpanded ? t("hideProviders") : t("compareProviders")}
         </button>
         {compareExpanded ? (
           <div className="mt-3 space-y-3">
-            <p className="text-sm text-slate-400">
-              Run the same CV + JD through 2+ providers and compare results.
-            </p>
+            <p className="text-sm text-slate-400">{t("compareDesc")}</p>
             <div className="flex flex-wrap gap-4">
               {(["anthropic", "openai", "gemini"] as const).map((name) => (
                 <label
@@ -324,7 +329,7 @@ export default function Home() {
                     type="checkbox"
                   />
                   {name}
-                  {!available.includes(name) ? " (not configured)" : ""}
+                  {!available.includes(name) ? ` ${t("notConfigured")}` : ""}
                 </label>
               ))}
             </div>
@@ -336,7 +341,7 @@ export default function Home() {
               onClick={() => void handleCompare()}
               type="button"
             >
-              {isComparing ? "Comparing..." : "Run comparison"}
+              {isComparing ? t("comparing") : t("runComparison")}
             </button>
           </div>
         ) : null}

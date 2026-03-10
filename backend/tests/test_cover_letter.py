@@ -38,8 +38,9 @@ class _MockCoverLetterProvider(LLMProvider):
         website_content: str,
         search_results: str,
         job_title: str | None = None,
+        language: str = "en",
     ) -> CompanyResearchResult:
-        _ = (company_name, website_content, search_results, job_title)
+        _ = (company_name, website_content, search_results, job_title, language)
         raise NotImplementedError
 
     async def generate_cover_letter(
@@ -49,6 +50,7 @@ class _MockCoverLetterProvider(LLMProvider):
         company_name: str,
         hiring_manager: str | None,
         tone: str,
+        language: str = "en",
     ) -> CoverLetterResult:
         _ = (cv_text, job_description, company_name, hiring_manager, tone)
         return CoverLetterResult(

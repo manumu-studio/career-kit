@@ -1,7 +1,8 @@
 """Prompt builders for CV optimization, company research, and cover letter workflows."""
 
-from typing import Optional
+from typing import Literal, Optional
 
+from app.core.i18n import LANGUAGE_NAMES
 from app.models.schemas import (
     CompanyProfile,
     CompanyResearchResult,
@@ -73,10 +74,18 @@ Rules:
 
 Respond ONLY with valid JSON matching the provided schema."""
 
+LANGUAGE_INSTRUCTION = (
+    "\n\nIMPORTANT: Generate all output text (sections, summaries, "
+    "suggestions, etc.) in {language_name}."
+)
 
-def build_system_prompt() -> str:
+
+def build_system_prompt(
+    language: Literal["en", "es"] = "en",
+) -> str:
     """Return the system instruction for the LLM."""
-    return SYSTEM_PROMPT
+    lang_name = LANGUAGE_NAMES.get(language, "English")
+    return SYSTEM_PROMPT + LANGUAGE_INSTRUCTION.format(language_name=lang_name)
 
 
 def build_user_prompt(
@@ -106,9 +115,14 @@ def build_user_prompt(
     )
 
 
-def build_company_system_prompt() -> str:
+def build_company_system_prompt(
+    language: Literal["en", "es"] = "en",
+) -> str:
     """Return the system instruction for company research synthesis."""
-    return COMPANY_RESEARCH_SYSTEM_PROMPT
+    lang_name = LANGUAGE_NAMES.get(language, "English")
+    return COMPANY_RESEARCH_SYSTEM_PROMPT + LANGUAGE_INSTRUCTION.format(
+        language_name=lang_name
+    )
 
 
 COVER_LETTER_SYSTEM_PROMPT = (  # noqa: E501
@@ -138,9 +152,14 @@ No markdown, no explanation outside the JSON."""
 )
 
 
-def build_cover_letter_system_prompt() -> str:
+def build_cover_letter_system_prompt(
+    language: Literal["en", "es"] = "en",
+) -> str:
     """Return the system instruction for cover letter generation."""
-    return COVER_LETTER_SYSTEM_PROMPT
+    lang_name = LANGUAGE_NAMES.get(language, "English")
+    return COVER_LETTER_SYSTEM_PROMPT + LANGUAGE_INSTRUCTION.format(
+        language_name=lang_name
+    )
 
 
 def build_cover_letter_user_prompt(

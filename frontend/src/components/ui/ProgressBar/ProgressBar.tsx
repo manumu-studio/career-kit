@@ -1,10 +1,13 @@
 /** Multi-step progress indicator for optimization flow. */
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { cn } from "@/lib/utils";
 import type { ProgressBarProps } from "./ProgressBar.types";
 
 export function ProgressBar({ steps, currentStep }: ProgressBarProps) {
+  const tCommon = useTranslations("common");
   return (
     <div
       role="progressbar"
@@ -45,7 +48,7 @@ export function ProgressBar({ steps, currentStep }: ProgressBarProps) {
         ))}
       </div>
       <p className="text-center text-sm text-slate-400">
-        {steps[currentStep] ?? "Processing..."}
+        {steps[currentStep] ?? tCommon("processing")}
       </p>
     </div>
   );

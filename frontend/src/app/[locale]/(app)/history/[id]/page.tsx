@@ -2,8 +2,9 @@
 
 /** History detail page showing full research and/or optimization results. */
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
+import { useParams } from "next/navigation";
 import {
   LoadingSkeleton,
   ResultsSectionSkeleton,
@@ -45,6 +46,7 @@ function isOptimizationResult(value: unknown): value is OptimizationResult {
 }
 
 export default function HistoryDetailPage() {
+  const t = useTranslations("history");
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
@@ -92,10 +94,10 @@ export default function HistoryDetailPage() {
   if (error || !detail) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-4 px-6 py-12">
-        <h1 className="text-2xl font-semibold text-white">Analysis not found</h1>
-        <p className="text-slate-300">{error ?? "This analysis may have been deleted."}</p>
+        <h1 className="text-2xl font-semibold text-white">{t("analysisNotFound")}</h1>
+        <p className="text-slate-300">{error ?? t("mayHaveBeenDeleted")}</p>
         <Link className="text-sky-300 underline" href="/history">
-          ← Back to History
+          {t("backToHistory")}
         </Link>
       </main>
     );
@@ -118,10 +120,10 @@ export default function HistoryDetailPage() {
   if (!hasContent) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-4 px-6 py-12">
-        <h1 className="text-2xl font-semibold text-white">No results to display</h1>
-        <p className="text-slate-300">This analysis has no stored research or optimization data.</p>
+        <h1 className="text-2xl font-semibold text-white">{t("noResults")}</h1>
+        <p className="text-slate-300">{t("noStoredData")}</p>
         <Link className="text-sky-300 underline" href="/history">
-          ← Back to History
+          {t("backToHistory")}
         </Link>
       </main>
     );
@@ -132,13 +134,13 @@ export default function HistoryDetailPage() {
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-white">
-            {detail.company_name ?? "Analysis"} {detail.job_title ? `— ${detail.job_title}` : ""}
+            {detail.company_name ?? t("analysis")} {detail.job_title ? `— ${detail.job_title}` : ""}
           </h1>
           <p className="mt-1 text-sm text-slate-400">
             {new Date(detail.created_at).toLocaleString()}
             {detail.cache_hit ? (
               <span className="ml-2 rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-300">
-                Loaded from cache
+                {t("loadedFromCache")}
               </span>
             ) : null}
           </p>
@@ -149,28 +151,28 @@ export default function HistoryDetailPage() {
               className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 hover:text-white"
               href={`/history/compare?a=${id}`}
             >
-              Compare with another
+              {t("compareWithAnother")}
             </Link>
           ) : null}
           <Link
             className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 hover:text-white"
             href="/history"
           >
-            ← Back to History
+            {t("backToHistory")}
           </Link>
         </div>
       </header>
 
       {companyResearch ? (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-slate-100">Company Research</h2>
+          <h2 className="text-xl font-semibold text-slate-100">{t("companyResearch")}</h2>
           <CompanyReport research={companyResearch} />
         </section>
       ) : null}
 
       {optimizationResult ? (
         <section className="space-y-6">
-          <h2 className="text-xl font-semibold text-slate-100">CV Optimization</h2>
+          <h2 className="text-xl font-semibold text-slate-100">{t("cvOptimization")}</h2>
           <p className="text-slate-300">{optimizationResult.summary}</p>
           <div className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
             <div className="space-y-8">

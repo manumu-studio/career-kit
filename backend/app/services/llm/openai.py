@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import json
 import re
+from typing import cast
 
 from openai import AsyncOpenAI
 
 from app.core.config import get_settings
+from app.core.i18n import Locale
 from app.core.prompts import (
     build_company_system_prompt,
     build_company_user_prompt,
@@ -55,9 +57,10 @@ class OpenAIProvider(LLMProvider):
         job_description: str,
         company_name: str | None = None,
         company_context: CompanyProfile | None = None,
+        language: str = "en",
     ) -> OptimizationResult:
         """Generate and validate CV optimization output."""
-        system = build_system_prompt()
+        system = build_system_prompt(language=cast(Locale, language))
         user_prompt = build_user_prompt(
             cv_text=cv_text,
             job_description=job_description,
@@ -114,9 +117,10 @@ class OpenAIProvider(LLMProvider):
         website_content: str,
         search_results: str,
         job_title: str | None = None,
+        language: str = "en",
     ) -> CompanyResearchResult:
         """Generate and validate structured company research output."""
-        system = build_company_system_prompt()
+        system = build_company_system_prompt(language=cast(Locale, language))
         user_prompt = build_company_user_prompt(
             company_name=company_name,
             job_title=job_title or "Not specified",
@@ -174,6 +178,7 @@ class OpenAIProvider(LLMProvider):
         company_name: str,
         hiring_manager: str | None,
         tone: str,
+        language: str = "en",
     ) -> CoverLetterResult:
         """Generate and validate cover letter output."""
         hiring_manager_or_default = hiring_manager or "Hiring Manager"
@@ -184,11 +189,12 @@ class OpenAIProvider(LLMProvider):
             hiring_manager_or_default=hiring_manager_or_default,
             tone=tone,
         )
+        sys_prompt = build_cover_letter_system_prompt(language=cast(Locale, language))
         response = await self._client.chat.completions.create(
             model=self._model,
             max_tokens=4096,
             messages=[
-                {"role": "system", "content": build_cover_letter_system_prompt()},
+                {"role": "system", "content": sys_prompt},
                 {"role": "user", "content": user_prompt},
             ],
             response_format={"type": "json_object"},
@@ -206,7 +212,7 @@ class OpenAIProvider(LLMProvider):
             model=self._model,
             max_tokens=4096,
             messages=[
-                {"role": "system", "content": build_cover_letter_system_prompt()},
+                {"role": "system", "content": sys_prompt},
                 {"role": "user", "content": user_prompt},
                 {"role": "assistant", "content": cleaned_text},
                 {

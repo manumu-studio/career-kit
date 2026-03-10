@@ -2,6 +2,7 @@
 
 /** PDF drag-and-drop upload component with validation feedback. */
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { FileUploadProps } from "./FileUpload.types";
 import { useFileUpload } from "./useFileUpload";
@@ -12,6 +13,7 @@ function formatFileSize(bytes: number): string {
 }
 
 export function FileUpload({ onFileChange }: FileUploadProps) {
+  const t = useTranslations("fileUpload");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const {
     file,
@@ -38,10 +40,10 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
 
   return (
     <section className="w-full space-y-3">
-      <h2 className="text-lg font-semibold text-white">Upload Your CV (PDF)</h2>
+      <h2 className="text-lg font-semibold text-white">{t("uploadLabel")}</h2>
 
       <label
-        aria-label="Upload your CV as a PDF file, maximum 5MB"
+        aria-label={t("ariaLabel")}
         className={cn(
           "flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition md:mx-auto md:max-w-xl md:py-10",
           isDragging ? "border-sky-400 bg-sky-500/10" : "border-slate-700 bg-slate-900/60",
@@ -61,12 +63,8 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
 
         {!file ? (
           <div className="space-y-2">
-            <p className="text-base font-medium text-slate-100">
-              Drag and drop your PDF here
-            </p>
-            <p className="text-sm text-slate-400">
-              or click to browse (max 5MB)
-            </p>
+            <p className="text-base font-medium text-slate-100">{t("dragDrop")}</p>
+            <p className="text-sm text-slate-400">{t("clickToBrowse")}</p>
           </div>
         ) : (
           <div className="space-y-1">
@@ -82,7 +80,7 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
           onClick={handleRemove}
           type="button"
         >
-          Remove file
+          {t("removeFile")}
         </button>
       ) : null}
 

@@ -19,9 +19,9 @@ describe("CompanySearch", () => {
     expect(
       screen.getByRole("heading", { name: "Step 1: Company Research (Optional)" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Company name" })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Company website URL" })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Job title" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Company Name" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Company Website URL" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Job Title" })).toBeInTheDocument();
   });
 
   it("disables Research button when company name is empty", () => {
@@ -44,7 +44,7 @@ describe("CompanySearch", () => {
       />,
     );
 
-    await user.type(screen.getByRole("textbox", { name: "Company name" }), "Acme");
+    await user.type(screen.getByRole("textbox", { name: "Company Name" }), "Acme");
     expect(screen.getByRole("button", { name: "Research Company" })).not.toBeDisabled();
   });
 
@@ -57,7 +57,7 @@ describe("CompanySearch", () => {
       />,
     );
 
-    await user.type(screen.getByRole("textbox", { name: "Company name" }), "Acme");
+    await user.type(screen.getByRole("textbox", { name: "Company Name" }), "Acme");
     await user.click(screen.getByRole("button", { name: "Research Company" }));
 
     await screen.findByText("Acme Corp", {}, { timeout: 3000 });

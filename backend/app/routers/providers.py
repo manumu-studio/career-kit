@@ -3,11 +3,12 @@
 import asyncio
 import logging
 import time
-from typing import Annotated
+from typing import Annotated, Literal, Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.core.config import settings
+from app.core.i18n import get_error_message, normalize_locale
 from app.services.llm.factory import get_available_providers, get_provider
 from app.services.pdf_parser import extract_text_from_pdf
 
@@ -30,14 +31,19 @@ async def compare_providers(
     cv_file: Annotated[UploadFile, File(...)],
     job_description: Annotated[str, Form(...)],
     providers: Annotated[str, Form(...)],
+    language: Annotated[Optional[Literal["en", "es"]], Form()] = None,  # noqa: UP045
 ) -> dict[str, object]:
     """Run optimize through multiple providers and return side-by-side results."""
+    loc = normalize_locale(language)
     filename = cv_file.filename or ""
     if not filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Uploaded file must be a PDF.")
+        raise HTTPException(
+            status_code=400,
+            detail=get_error_message(loc, "invalid_pdf"),
+        )
 
     try:
-        cv_text = await extract_text_from_pdf(cv_file)
+        cv_text = await extract_text_from_pdf(cv_file, locale=loc)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -45,7 +51,7 @@ async def compare_providers(
     if len(provider_names) < 2:
         raise HTTPException(
             status_code=400,
-            detail="At least 2 providers required (e.g. anthropic,openai).",
+            detail=get_error_message(loc, "at_least_2_providers"),
         )
 
     available = set(get_available_providers())
@@ -64,6 +70,7 @@ async def compare_providers(
             result = await provider.optimize(
                 cv_text=cv_text,
                 job_description=job_description,
+                language=loc,
             )
             elapsed_ms = (time.monotonic() - start) * 1000
             return (name, result.model_dump(), elapsed_ms)

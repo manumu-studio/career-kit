@@ -2,7 +2,7 @@
 
 /** Compare page showing side-by-side results from multiple LLM providers. */
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { ProviderComparison } from "@/components/ui/ProviderComparison";
 import { useOptimizationContext } from "@/context/OptimizationContext";
 
