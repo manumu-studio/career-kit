@@ -27,7 +27,7 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-white">Provider Comparison</h2>
         <Link
-          className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500"
+          className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
           href="/home"
         >
           Back to Upload

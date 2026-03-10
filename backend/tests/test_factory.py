@@ -32,6 +32,10 @@ class TestGetProvider:
             "app.services.llm.factory.get_settings",
             lambda: mock_settings,
         )
+        monkeypatch.setattr(
+            "app.services.llm.openai.get_settings",
+            lambda: mock_settings,
+        )
         provider = get_provider("openai")
         assert provider is not None
         assert isinstance(provider, OpenAIProvider)

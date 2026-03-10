@@ -2,9 +2,21 @@
 
 /** Dropdown to select LLM provider for CV optimization. */
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { LLMProviderName } from "@/types/provider";
 import type { ProviderSelectorProps } from "./ProviderSelector.types";
+
+const PROVIDERS: readonly LLMProviderName[] = [
+  "anthropic",
+  "openai",
+  "gemini",
+] as const;
 
 export function ProviderSelector({
   value,
@@ -18,31 +30,33 @@ export function ProviderSelector({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-slate-300">
+      <label className="block text-sm font-medium text-foreground">
         {t("aiProvider")}
       </label>
-      <select
-        className={cn(
-          "w-full max-w-xs rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200",
-          "focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500",
-          disabled && "cursor-not-allowed opacity-60",
-        )}
+      <Select
         value={effectiveValue}
-        onChange={(e) => onChange(e.target.value as LLMProviderName)}
+        onValueChange={(v) => onChange(v as LLMProviderName)}
         disabled={disabled}
-        aria-label={t("selectProvider")}
       >
-        {(["anthropic", "openai", "gemini"] as const).map((name) => (
-          <option
-            key={name}
-            value={name}
-            disabled={!available.includes(name)}
-          >
-            {t(name)}
-            {!available.includes(name) ? ` ${t("notConfigured")}` : ""}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger
+          className="w-full max-w-xs"
+          aria-label={t("selectProvider")}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {PROVIDERS.map((name) => (
+            <SelectItem
+              key={name}
+              value={name}
+              disabled={!available.includes(name)}
+            >
+              {t(name)}
+              {!available.includes(name) ? ` ${t("notConfigured")}` : ""}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

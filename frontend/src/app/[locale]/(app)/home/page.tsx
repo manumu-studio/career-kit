@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
 import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
 import { CompanySearch } from "@/components/ui/CompanySearch";
 import { FileUpload } from "@/components/ui/FileUpload";
@@ -208,43 +209,27 @@ export default function Home() {
     }
   };
 
-  return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-6 px-4 py-10 sm:px-6 sm:py-12">
-      <header className="space-y-2">
-        <h1 className="text-4xl font-semibold tracking-tight text-white">{t("title")}</h1>
-        <p className="text-base text-slate-300">{t("subtitle")}</p>
-      </header>
-
-      <CompanySearch
-        onResearchComplete={handleResearchComplete}
-        onResearchError={(error) => {
-          setSubmissionError(error);
-        }}
-        onViewReport={() => {
-          router.push("/report");
-        }}
-        userId={session?.user?.externalId}
-        language={locale}
-      />
-
+  const step2Content = (
+    <>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">{t("step2")}</h2>
-        <button
-          className="text-sm text-slate-300 underline"
+        <h2 className="text-lg font-semibold text-foreground">{t("step2")}</h2>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground underline hover:text-foreground"
           onClick={() => {
             setCompanyResearch(null);
           }}
-          type="button"
         >
           {t("skipResearch")}
-        </button>
+        </Button>
       </div>
 
       <FileUpload onFileChange={handleFileChange} />
       {!file && formState.fileName ? (
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-muted-foreground">
           {t("previouslySelected")}{" "}
-          <span className="font-medium text-slate-200">{formState.fileName}</span> — {t("reSelectFile")}
+          <span className="font-medium text-foreground">{formState.fileName}</span> — {t("reSelectFile")}
         </p>
       ) : null}
       <JobDescription
@@ -280,47 +265,46 @@ export default function Home() {
         />
       ) : null}
 
-      {submissionError ? <p className="text-sm text-rose-300">{submissionError}</p> : null}
+      {submissionError ? <p className="text-sm text-destructive">{submissionError}</p> : null}
 
       {isSubmitting ? (
-        <div className="w-full rounded-xl border border-slate-700 bg-slate-900/60 p-6">
+        <div className="w-full rounded-xl border border-border bg-card p-6">
           <ProgressBar steps={OPTIMIZATION_STEPS} currentStep={progressStep} />
         </div>
       ) : (
-        <button
+        <Button
           aria-label={
             !isReadyToSubmit
               ? t("ariaOptimizeDisabled")
               : t("ariaOptimizeReady")
           }
-          className="inline-flex items-center justify-center gap-2 self-start rounded-md bg-sky-500 px-5 py-2.5 font-medium text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
           disabled={!isReadyToSubmit}
           onClick={() => {
             void handleSubmit();
           }}
           title={!isReadyToSubmit ? t("ariaOptimizeDisabled") : undefined}
-          type="button"
         >
           {t("optimizeButton")}
-        </button>
+        </Button>
       )}
 
-      <div className="border-t border-slate-800 pt-6">
-        <button
-          className="text-sm text-slate-400 underline hover:text-slate-300"
+      <div className="border-t border-border pt-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground"
           onClick={() => setCompareExpanded((e) => !e)}
-          type="button"
         >
           {compareExpanded ? t("hideProviders") : t("compareProviders")}
-        </button>
+        </Button>
         {compareExpanded ? (
           <div className="mt-3 space-y-3">
-            <p className="text-sm text-slate-400">{t("compareDesc")}</p>
+            <p className="text-sm text-muted-foreground">{t("compareDesc")}</p>
             <div className="flex flex-wrap gap-4">
               {(["anthropic", "openai", "gemini"] as const).map((name) => (
                 <label
                   key={name}
-                  className="flex cursor-pointer items-center gap-2 text-sm text-slate-300"
+                  className="flex cursor-pointer items-center gap-2 text-sm text-foreground"
                 >
                   <input
                     checked={compareSelected.has(name)}
@@ -333,18 +317,46 @@ export default function Home() {
                 </label>
               ))}
             </div>
-            <button
-              className="rounded-md border border-slate-600 px-3 py-1.5 text-sm text-slate-300 transition hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            <Button
+              variant="outline"
+              size="sm"
               disabled={
                 !isReadyToSubmit || isComparing || compareSelected.size < 2
               }
               onClick={() => void handleCompare()}
-              type="button"
             >
               {isComparing ? t("comparing") : t("runComparison")}
-            </button>
+            </Button>
           </div>
         ) : null}
+      </div>
+    </>
+  );
+
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-6 px-4 py-10 sm:px-6 sm:py-12">
+      <header>
+        <p className="text-lg text-muted-foreground">{t("subtitle")}</p>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8">
+        <div className="lg:sticky lg:top-20">
+          <CompanySearch
+            onResearchComplete={handleResearchComplete}
+            onResearchError={(error) => {
+              setSubmissionError(error);
+            }}
+            onViewReport={() => {
+              router.push("/report");
+            }}
+            userId={session?.user?.externalId}
+            language={locale}
+          />
+        </div>
+
+        <section className="space-y-4 rounded-xl border border-border bg-card p-5">
+          {step2Content}
+        </section>
       </div>
     </main>
   );

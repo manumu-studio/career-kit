@@ -1,6 +1,6 @@
 /**
  * Captures navbar + dashboard screenshots for 30+ CV/resume sites (UI/UX research).
- * Run: npx playwright test capture-cv-pages-30 --config=e2e/playwright-cv-capture-30.config.ts
+ * Run from repo root: npx playwright test capture-cv-pages-30 --config=e2e-captures/playwright-cv-capture-30.config.ts
  */
 import { test } from "@playwright/test";
 import path from "path";
@@ -8,7 +8,7 @@ import fs from "fs";
 
 const SCREENSHOTS_DIR = path.join(
   process.cwd(),
-  "../docs/research/screenshots/cv-pages-30"
+  "docs/research/screenshots/cv-pages-30"
 );
 
 type SiteConfig = {

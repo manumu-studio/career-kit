@@ -2,6 +2,8 @@
 
 /** Compact card for a single analysis history entry. */
 import { useTranslations } from "next-intl";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { HistoryCardProps } from "./HistoryCard.types";
 
@@ -39,68 +41,59 @@ export function HistoryCard({
   return (
     <section
       className={cn(
-        "rounded-lg border p-4 transition",
-        isExpired
-          ? "border-amber-800/50 bg-slate-900/40"
-          : "border-slate-800 bg-slate-900/60",
+        "rounded-lg border border-border bg-card p-4 transition",
+        isExpired && "border-warning/50 bg-muted/40",
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 flex-1 space-y-1">
-          <h3 className="truncate text-base font-semibold text-white">
+          <h3 className="truncate text-base font-semibold text-foreground">
             {item.company_name ?? t("unknownCompany")}
           </h3>
           {item.job_title ? (
-            <p className="truncate text-sm text-slate-300">{item.job_title}</p>
+            <p className="truncate text-sm text-muted-foreground">{item.job_title}</p>
           ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
-          <span
+          <Badge
+            variant="secondary"
             className={cn(
-              "rounded-full px-2 py-1 text-xs font-medium",
-              item.analysis_type === "research" && "bg-sky-500/20 text-sky-300",
-              item.analysis_type === "optimize" && "bg-emerald-500/20 text-emerald-300",
-              item.analysis_type === "both" && "bg-violet-500/20 text-violet-300",
+              item.analysis_type === "research" && "bg-primary/20 text-primary",
+              item.analysis_type === "optimize" && "bg-success/20 text-success",
+              item.analysis_type === "both" && "bg-primary/20 text-primary",
             )}
           >
             {typeLabel}
-          </span>
+          </Badge>
           {item.cache_hit ? (
-            <span className="rounded-full bg-slate-700 px-2 py-1 text-xs text-slate-200">
-              {t("cached")}
-            </span>
+            <Badge variant="secondary">{t("cached")}</Badge>
           ) : null}
           {item.match_score !== null ? (
-            <span className="rounded-full bg-slate-700 px-2 py-1 text-xs font-medium text-slate-200">
-              {item.match_score}% ATS
-            </span>
+            <Badge variant="secondary">{item.match_score}% ATS</Badge>
           ) : null}
         </div>
       </div>
 
-      <p className="mt-2 text-sm text-slate-400">
+      <p className="mt-2 text-sm text-muted-foreground">
         {relativeDate}
         {isExpired ? (
-          <span className="ml-2 text-amber-400">{t("mayBeOutdated")}</span>
+          <span className="ml-2 text-warning">{t("mayBeOutdated")}</span>
         ) : null}
       </p>
 
       <div className="mt-4 flex gap-2">
-        <button
-          className="rounded-md bg-sky-500 px-3 py-1.5 text-sm font-medium text-slate-950 transition hover:bg-sky-400"
-          onClick={() => onView(item.id)}
-          type="button"
-        >
+        <Button size="sm" onClick={() => onView(item.id)}>
           {t("view")}
-        </button>
-        <button
-          className="rounded-md border border-slate-600 px-3 py-1.5 text-sm text-slate-300 transition hover:border-rose-500 hover:text-rose-300 disabled:opacity-50"
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
           disabled={isDeleting}
           onClick={() => onDelete(item.id)}
-          type="button"
+          className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           {isDeleting ? t("deleting") : t("delete")}
-        </button>
+        </Button>
       </div>
     </section>
   );

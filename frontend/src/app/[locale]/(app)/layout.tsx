@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/features/auth/auth";
 import { OptimizationProvider } from "@/context/OptimizationContext";
-import { UserBar } from "@/components/ui/UserBar";
+import { Navbar } from "@/components/ui/Navbar";
 import type { ReactNode } from "react";
 
 const E2E_BYPASS =
@@ -29,8 +29,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <SessionProvider session={session}>
-      <UserBar userName={user.name} userEmail={user.email} />
-      <OptimizationProvider>{children}</OptimizationProvider>
+      <Navbar
+        mode="app"
+        userName={user.name}
+        userEmail={user.email}
+      />
+      <main className="min-h-screen pt-14">
+        <OptimizationProvider>{children}</OptimizationProvider>
+      </main>
     </SessionProvider>
   );
 }

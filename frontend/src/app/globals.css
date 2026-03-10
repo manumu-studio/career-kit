@@ -1,12 +1,14 @@
-@import "tailwindcss";
+/** Global styles — theme, fonts, custom utilities. */
+@import "@fontsource-variable/raleway";
+@import "../../tailwind.css";
 
 * {
   box-sizing: border-box;
 }
 
-/* Visible focus rings for keyboard navigation (WCAG 2.4.7) */
+/* Visible focus rings for keyboard navigation (WCAG 2.4.7) — uses design token */
 :focus-visible {
-  outline: 2px solid rgb(56 189 248);
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
@@ -19,13 +21,33 @@
   }
 }
 
+@keyframes ai-gradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 .animate-shimmer {
   animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.animate-ai-gradient {
+  background: linear-gradient(80deg, #0070f3, #7c3aed, #0070f3);
+  background-size: 400% 100%;
+  animation: ai-gradient 8s ease infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-shimmer {
     animation: none;
-    background: rgb(51 65 85);
+    background: var(--muted);
+  }
+  .animate-ai-gradient {
+    animation: none;
+    background: var(--primary);
   }
 }

@@ -2,6 +2,7 @@
 
 /** Controlled textarea for entering a target job description. */
 import { useTranslations } from "next-intl";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { JobDescriptionProps } from "./JobDescription.types";
 
@@ -21,17 +22,15 @@ export function JobDescription({
 
   return (
     <section className="w-full space-y-3">
-      <h2 className="text-lg font-semibold text-white">{t("jobDescLabel")}</h2>
+      <h2 className="text-lg font-semibold text-foreground">{t("jobDescLabel")}</h2>
 
       <div className="relative">
-        <textarea
+        <Textarea
           aria-invalid={!!error}
           aria-describedby={error ? "job-desc-error" : undefined}
           className={cn(
-            "min-h-[200px] w-full resize-y rounded-xl border bg-slate-900/60 p-4 text-sm text-slate-100 outline-none transition focus:ring-2",
-            error
-              ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500/30"
-              : "border-slate-700 focus:border-sky-500 focus:ring-sky-500/30",
+            "min-h-[200px] resize-y rounded-xl",
+            error && "border-destructive focus-visible:ring-destructive/30",
           )}
           maxLength={maxLength}
           onChange={(event) => {
@@ -44,7 +43,7 @@ export function JobDescription({
         <p
           className={cn(
             "pointer-events-none absolute bottom-3 right-3 text-xs",
-            isOverMax ? "text-rose-400" : "text-slate-400",
+            isOverMax ? "text-destructive" : "text-muted-foreground",
           )}
         >
           {value.length} / {maxLength}
@@ -52,11 +51,11 @@ export function JobDescription({
       </div>
 
       {error ? (
-        <p className="text-sm text-rose-300" id="job-desc-error" role="alert">
+        <p className="text-sm text-destructive" id="job-desc-error" role="alert">
           {error}
         </p>
       ) : value.length > 0 && value.length < minLength ? (
-        <p className="text-sm text-amber-400">
+        <p className="text-sm text-warning">
           {tValidation("addMoreChars", {
             remaining: minLength - value.length,
             min: minLength,

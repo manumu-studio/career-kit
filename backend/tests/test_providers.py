@@ -5,6 +5,7 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
+from app.middleware.rate_limit import RateLimitMiddleware
 
 
 @pytest_asyncio.fixture
@@ -54,6 +55,9 @@ async def test_compare_requires_at_least_two_providers(
         "app.routers.providers.extract_text_from_pdf",
         _mock_extract,
     )
+    # Bypass rate limiter so prior test requests don't cause 429
+    monkeypatch.setattr(RateLimitMiddleware, "_LIMITED_PATHS", set())
+
     response = await async_client.post(
         "/compare",
         data={"job_description": "JD", "providers": "anthropic"},

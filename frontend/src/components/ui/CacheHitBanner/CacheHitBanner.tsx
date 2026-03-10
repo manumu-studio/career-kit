@@ -1,6 +1,7 @@
 "use client";
 
 /** Subtle banner prompting user to use cached results or run again. */
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { CacheHitBannerProps } from "./CacheHitBanner.types";
 
@@ -36,26 +37,18 @@ export function CacheHitBanner({
   return (
     <div
       className={cn(
-        "rounded-lg border border-sky-800/60 bg-sky-950/40 px-4 py-3",
+        "rounded-lg border border-primary/30 bg-primary/10 px-4 py-3",
         className,
       )}
     >
-      <p className="mb-3 text-sm text-slate-200">{message}</p>
+      <p className="mb-3 text-sm text-foreground">{message}</p>
       <div className="flex flex-wrap gap-2">
-        <button
-          className="rounded-md bg-sky-500 px-3 py-1.5 text-sm font-medium text-slate-950 transition hover:bg-sky-400"
-          onClick={onUseCached}
-          type="button"
-        >
+        <Button size="sm" onClick={onUseCached}>
           {primaryLabel}
-        </button>
-        <button
-          className="rounded-md border border-slate-600 px-3 py-1.5 text-sm text-slate-300 transition hover:border-slate-500 hover:text-slate-200"
-          onClick={onRunAgain}
-          type="button"
-        >
+        </Button>
+        <Button variant="outline" size="sm" onClick={onRunAgain}>
           {secondaryLabel}
-        </button>
+        </Button>
       </div>
     </div>
   );

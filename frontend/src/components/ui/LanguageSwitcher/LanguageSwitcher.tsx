@@ -23,7 +23,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 
   return (
     <div
-      className={cn("flex rounded-md border border-slate-700 bg-slate-900/60", className)}
+      className={cn("flex rounded-md border border-border bg-muted/60", className)}
       role="group"
       aria-label="Switch language"
     >
@@ -35,8 +35,8 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
           className={cn(
             "px-3 py-1.5 text-sm font-medium transition",
             currentLocale === code
-              ? "bg-sky-500/20 text-sky-300"
-              : "text-slate-400 hover:text-slate-200",
+              ? "bg-primary/20 text-primary"
+              : "text-muted-foreground hover:text-foreground",
           )}
           aria-pressed={currentLocale === code}
           aria-label={`Switch to ${label}`}

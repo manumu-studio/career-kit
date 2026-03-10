@@ -40,13 +40,15 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
 
   return (
     <section className="w-full space-y-3">
-      <h2 className="text-lg font-semibold text-white">{t("uploadLabel")}</h2>
+      <h2 className="text-lg font-semibold text-foreground">{t("uploadLabel")}</h2>
 
       <label
         aria-label={t("ariaLabel")}
         className={cn(
           "flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition md:mx-auto md:max-w-xl md:py-10",
-          isDragging ? "border-sky-400 bg-sky-500/10" : "border-slate-700 bg-slate-900/60",
+          isDragging
+            ? "border-primary bg-primary/10"
+            : "border-border bg-muted/50",
         )}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -63,20 +65,20 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
 
         {!file ? (
           <div className="space-y-2">
-            <p className="text-base font-medium text-slate-100">{t("dragDrop")}</p>
-            <p className="text-sm text-slate-400">{t("clickToBrowse")}</p>
+            <p className="text-base font-medium text-foreground">{t("dragDrop")}</p>
+            <p className="text-sm text-muted-foreground">{t("clickToBrowse")}</p>
           </div>
         ) : (
           <div className="space-y-1">
-            <p className="text-base font-medium text-slate-100">{file.name}</p>
-            <p className="text-sm text-slate-400">{formatFileSize(file.size)}</p>
+            <p className="text-base font-medium text-foreground">{file.name}</p>
+            <p className="text-sm text-muted-foreground">{formatFileSize(file.size)}</p>
           </div>
         )}
       </label>
 
       {file ? (
         <button
-          className="text-sm font-medium text-rose-300 transition hover:text-rose-200"
+          className="text-sm font-medium text-destructive transition hover:text-destructive/80"
           onClick={handleRemove}
           type="button"
         >
@@ -85,7 +87,7 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
       ) : null}
 
       {error ? (
-        <p className="text-sm text-rose-300" id="file-upload-error" role="alert">
+        <p className="text-sm text-destructive" id="file-upload-error" role="alert">
           {error}
         </p>
       ) : null}

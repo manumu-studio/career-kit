@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { auth, signIn } from "@/features/auth/auth";
 import { Link as LocaleLink } from "@/i18n/navigation";
-import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { Button } from "@/components/ui/button";
 
 interface LandingPageProps {
   params: Promise<{ locale: string }>;
@@ -22,26 +22,26 @@ export default async function LandingPage({
   const callbackUrl = `/${locale}/home`;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6">
-      <div className="absolute right-6 top-6">
-        <LanguageSwitcher />
-      </div>
-      <div className="max-w-xl text-center">
-        <h1 className="text-5xl font-bold tracking-tight text-white">{t("title")}</h1>
-        <p className="mt-4 text-lg text-slate-300">{t("subtitle")}</p>
+    <main className="flex min-h-[calc(100dvh-3.5rem)] flex-col items-center justify-center px-4 py-12 sm:px-6 md:py-16">
+      <div className="w-full max-w-xl text-center">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+          {t("title")}
+        </h1>
+        <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+          {t("subtitle")}
+        </p>
 
         <div className="mt-8">
           {session?.user ? (
-            <LocaleLink
-              href="/home"
-              className="inline-block rounded-lg bg-sky-500 px-8 py-3 text-lg font-semibold text-slate-950 transition hover:bg-sky-400"
-            >
-              {t("goToApp")}
+            <LocaleLink href="/home">
+              <Button size="lg" className="w-full sm:w-auto sm:px-8">
+                {t("goToApp")}
+              </Button>
             </LocaleLink>
           ) : (
             <>
               {error ? (
-                <div className="mx-auto mb-6 max-w-md rounded-md border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-300">
+                <div className="mx-auto mb-6 max-w-md rounded-md border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
                   {t("authFailed")}
                 </div>
               ) : null}
@@ -53,17 +53,17 @@ export default async function LandingPage({
                 }}
                 className="mx-auto max-w-md"
               >
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-sky-500 px-8 py-3 text-lg font-semibold text-slate-950 transition hover:bg-sky-400"
-                >
+                <Button type="submit" size="lg" className="w-full sm:px-8">
                   {t("signIn")}
-                </button>
+                </Button>
               </form>
 
-              <p className="mt-4 text-sm text-slate-400">
+              <p className="mt-4 text-sm text-muted-foreground">
                 {t("noAccount")}{" "}
-                <Link href="/api/auth/signup" className="text-sky-400 hover:underline">
+                <Link
+                  href="/api/auth/signup"
+                  className="text-primary underline-offset-4 hover:underline"
+                >
                   {t("createAccount")}
                 </Link>
               </p>

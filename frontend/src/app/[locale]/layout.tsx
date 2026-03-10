@@ -8,11 +8,11 @@ import type { ReactNode } from "react";
 
 const LOCALE_METADATA = {
   en: {
-    title: "Career Kit",
+    title: "Career Kit by ManuMu Studio",
     description: "Optimize your CV for job applications.",
   },
   es: {
-    title: "Career Kit",
+    title: "Career Kit by ManuMu Studio",
     description: "Optimiza tu CV para ofertas de empleo.",
   },
 } as const satisfies Record<string, { title: string; description: string }>;

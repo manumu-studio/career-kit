@@ -1,13 +1,13 @@
 /**
  * Captures dashboard screenshots from reference sites for UI/UX research.
- * Run from frontend: npx playwright test capture-dashboards --config=e2e/playwright-dashboard-capture.config.ts
+ * Run from repo root: npx playwright test capture-dashboards --config=e2e-captures/playwright-dashboard-capture.config.ts
  */
 import { test } from "@playwright/test";
 import path from "path";
 
 const SCREENSHOTS_DIR = path.join(
   process.cwd(),
-  "../docs/research/screenshots"
+  "docs/research/screenshots"
 );
 
 const DASHBOARDS: Array<{
