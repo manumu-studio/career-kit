@@ -13,10 +13,13 @@ export interface CoverLetterResult {
   word_count: number;
 }
 
+export type Locale = "en" | "es";
+
 export interface CoverLetterRequest {
   cv_text: string;
   job_description: string;
   company_name: string;
   hiring_manager: string | null;
   tone: CoverLetterTone;
+  language?: Locale;
 }

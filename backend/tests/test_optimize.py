@@ -29,9 +29,10 @@ class _MockSuccessProvider(LLMProvider):
         job_description: str,
         company_name: Optional[str] = None,  # noqa: UP045
         company_context: object | None = None,
+        language: str = "en",
     ) -> OptimizationResult:
         """Return deterministic successful output for endpoint tests."""
-        _ = (cv_text, job_description, company_name, company_context)
+        _ = (cv_text, job_description, company_name, company_context, language)
         return OptimizationResult(
             sections=[
                 {
@@ -60,8 +61,9 @@ class _MockSuccessProvider(LLMProvider):
         website_content: str,
         search_results: str,
         job_title: Optional[str] = None,  # noqa: UP045
+        language: str = "en",
     ) -> CompanyResearchResult:
-        _ = (company_name, website_content, search_results, job_title)
+        _ = (company_name, website_content, search_results, job_title, language)
         raise NotImplementedError
 
     async def generate_cover_letter(
@@ -71,8 +73,9 @@ class _MockSuccessProvider(LLMProvider):
         company_name: str,
         hiring_manager: str | None,
         tone: str,
+        language: str = "en",
     ) -> CoverLetterResult:
-        _ = (cv_text, job_description, company_name, hiring_manager, tone)
+        _ = (cv_text, job_description, company_name, hiring_manager, tone, language)
         raise NotImplementedError
 
 
@@ -85,9 +88,10 @@ class _MockInvalidJsonProvider(LLMProvider):
         job_description: str,
         company_name: Optional[str] = None,  # noqa: UP045
         company_context: object | None = None,
+        language: str = "en",
     ) -> OptimizationResult:
         """Raise ValueError to emulate invalid JSON returned by the LLM."""
-        _ = (cv_text, job_description, company_name, company_context)
+        _ = (cv_text, job_description, company_name, company_context, language)
         raise ValueError("LLM returned non-JSON output.")
 
     async def synthesize_company(
@@ -96,8 +100,9 @@ class _MockInvalidJsonProvider(LLMProvider):
         website_content: str,
         search_results: str,
         job_title: Optional[str] = None,  # noqa: UP045
+        language: str = "en",
     ) -> CompanyResearchResult:
-        _ = (company_name, website_content, search_results, job_title)
+        _ = (company_name, website_content, search_results, job_title, language)
         raise NotImplementedError
 
     async def generate_cover_letter(
@@ -107,8 +112,9 @@ class _MockInvalidJsonProvider(LLMProvider):
         company_name: str,
         hiring_manager: str | None,
         tone: str,
+        language: str = "en",
     ) -> CoverLetterResult:
-        _ = (cv_text, job_description, company_name, hiring_manager, tone)
+        _ = (cv_text, job_description, company_name, hiring_manager, tone, language)
         raise NotImplementedError
 
 
@@ -131,7 +137,7 @@ async def test_optimize_valid_request_returns_200(
 ) -> None:
     """Valid multipart request should return a typed optimization payload."""
 
-    async def _mock_extract_text_from_pdf(file: Any) -> str:
+    async def _mock_extract_text_from_pdf(file: Any, locale: Any = None) -> str:
         return "Candidate CV text."
 
     monkeypatch.setattr(
@@ -183,7 +189,7 @@ async def test_optimize_invalid_llm_json_returns_500(
 ) -> None:
     """Provider parse errors should map to HTTP 500 for endpoint clients."""
 
-    async def _mock_extract_text_from_pdf(file: Any) -> str:
+    async def _mock_extract_text_from_pdf(file: Any, locale: Any = None) -> str:
         return "Candidate CV text."
 
     monkeypatch.setattr(
@@ -211,7 +217,7 @@ async def test_optimize_provider_selection_passed_to_get_provider(
 ) -> None:
     """Provider form param should be passed to get_provider."""
 
-    async def _mock_extract_text_from_pdf(file: Any) -> str:
+    async def _mock_extract_text_from_pdf(file: Any, locale: Any = None) -> str:
         return "CV text."
 
     monkeypatch.setattr(
@@ -238,7 +244,7 @@ async def test_optimize_unknown_provider_returns_error(
 ) -> None:
     """Provider not available should return 5xx error."""
 
-    async def _mock_extract_text_from_pdf(file: Any) -> str:
+    async def _mock_extract_text_from_pdf(file: Any, locale: Any = None) -> str:
         return "CV text."
 
     def _mock_get_provider(provider_name: str = "anthropic") -> LLMProvider:
@@ -259,4 +265,10 @@ async def test_optimize_unknown_provider_returns_error(
         files={"cv_file": _dummy_pdf_file()},
     )
     assert response.status_code in (400, 500)
-    assert "Unknown provider" in response.json().get("detail", "")
+    detail = response.json().get("detail", "")
+    assert (
+        "Unknown provider" in detail
+        or "desconocido" in detail
+        or "proveedor" in detail.lower()
+        or "provider" in detail.lower()
+    )

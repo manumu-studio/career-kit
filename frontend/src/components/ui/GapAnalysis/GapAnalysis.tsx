@@ -2,11 +2,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { GapAnalysisProps } from "@/components/ui/GapAnalysis/GapAnalysis.types";
 import { useGapAnalysis } from "@/components/ui/GapAnalysis/useGapAnalysis";
 
 export function GapAnalysis({ gaps }: Readonly<GapAnalysisProps>) {
+  const t = useTranslations("results");
   const { sortedGaps, getBadgeClassName } = useGapAnalysis(gaps);
   const [expanded, setExpanded] = useState(false);
 
@@ -14,10 +16,8 @@ export function GapAnalysis({ gaps }: Readonly<GapAnalysisProps>) {
     <section className="space-y-4">
       <div className="flex items-center justify-between md:block">
         <div>
-          <h2 className="text-xl font-semibold text-white">Gap Analysis</h2>
-          <p className="text-sm text-slate-400">
-            Prioritized skills to strengthen for this role.
-          </p>
+          <h2 className="text-xl font-semibold text-white">{t("gapAnalysis")}</h2>
+          <p className="text-sm text-slate-400">{t("gapSubtitle")}</p>
         </div>
         <button
           type="button"
@@ -26,7 +26,7 @@ export function GapAnalysis({ gaps }: Readonly<GapAnalysisProps>) {
           aria-expanded={expanded}
           aria-controls="gap-analysis-list"
         >
-          {expanded ? "Collapse" : "Expand"}
+          {expanded ? t("collapse") : t("expand")}
         </button>
       </div>
 

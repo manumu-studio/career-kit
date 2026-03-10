@@ -2,7 +2,8 @@
 
 /** Compare two optimization results side-by-side. */
 import { Suspense, useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { ComparisonView } from "@/components/ui/ComparisonView";
 import { useSession } from "@/features/auth";
@@ -31,6 +32,7 @@ function isOptimizationResult(value: unknown): value is OptimizationResult {
 }
 
 function ComparePageContent() {
+  const t = useTranslations("compare");
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const idA = searchParams.get("a");
@@ -38,21 +40,19 @@ function ComparePageContent() {
 
   const [resultA, setResultA] = useState<OptimizationResult | null>(null);
   const [resultB, setResultB] = useState<OptimizationResult | null>(null);
-  const [labelA, setLabelA] = useState<string>("Version A");
-  const [labelB, setLabelB] = useState<string>("Version B");
+  const [labelA, setLabelA] = useState<string>(() => t("versionA"));
+  const [labelB, setLabelB] = useState<string>(() => t("versionB"));
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadBoth = useCallback(async () => {
     if (!idA || !idB) {
-      setError(
-        "Provide two analysis IDs in the URL: /history/compare?a=id1&b=id2. You can copy IDs from the History page.",
-      );
+      setError(t("provideIds"));
       setIsLoading(false);
       return;
     }
     if (idA === idB) {
-      setError("Select two different analyses to compare.");
+      setError(t("selectDifferent"));
       setIsLoading(false);
       return;
     }
@@ -69,11 +69,11 @@ function ComparePageContent() {
       const optB = detailB.optimization_result_json;
 
       if (!optA || !isOptimizationResult(optA)) {
-        setError("Analysis A has no optimization data.");
+        setError(t("noDataA"));
         return;
       }
       if (!optB || !isOptimizationResult(optB)) {
-        setError("Analysis B has no optimization data.");
+        setError(t("noDataB"));
         return;
       }
 
@@ -82,19 +82,19 @@ function ComparePageContent() {
       setLabelA(
         detailA.company_name && detailA.job_title
           ? `${detailA.company_name} — ${detailA.job_title}`
-          : detailA.company_name ?? "Version A",
+          : detailA.company_name ?? t("versionA"),
       );
       setLabelB(
         detailB.company_name && detailB.job_title
           ? `${detailB.company_name} — ${detailB.job_title}`
-          : detailB.company_name ?? "Version B",
+          : detailB.company_name ?? t("versionB"),
       );
     } catch (err) {
       setError(handleApiError(err));
     } finally {
       setIsLoading(false);
     }
-  }, [idA, idB, session?.user?.externalId]);
+  }, [idA, idB, session?.user?.externalId, t]);
 
   useEffect(() => {
     void loadBoth();
@@ -111,10 +111,10 @@ function ComparePageContent() {
   if (error || !resultA || !resultB) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-4 px-6 py-12">
-        <h1 className="text-2xl font-semibold text-white">Compare optimizations</h1>
-        <p className="text-slate-300">{error ?? "Could not load both analyses."}</p>
+        <h1 className="text-2xl font-semibold text-white">{t("title")}</h1>
+        <p className="text-slate-300">{error ?? t("couldNotLoad")}</p>
         <Link className="text-sky-300 underline" href="/history">
-          ← Back to History
+          {t("backToHistory")}
         </Link>
       </main>
     );
@@ -124,16 +124,14 @@ function ComparePageContent() {
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-6 py-10">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Compare optimizations</h1>
-          <p className="mt-1 text-slate-400">
-            Side-by-side view of two CV optimization results for the same job description.
-          </p>
+          <h1 className="text-2xl font-semibold text-white">{t("title")}</h1>
+          <p className="mt-1 text-slate-400">{t("subtitle")}</p>
         </div>
         <Link
           className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 hover:text-white"
           href="/history"
         >
-          ← Back to History
+          {t("backToHistory")}
         </Link>
       </header>
 

@@ -1,27 +1,9 @@
 "use client";
 
 /** Compact card for a single analysis history entry. */
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { HistoryCardProps } from "./HistoryCard.types";
-
-function formatRelativeDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return date.toLocaleDateString();
-}
-
-function analysisTypeLabel(type: string): string {
-  if (type === "research") return "Research";
-  if (type === "optimize") return "Optimization";
-  return "Both";
-}
 
 export function HistoryCard({
   item,
@@ -29,7 +11,30 @@ export function HistoryCard({
   onDelete,
   isDeleting = false,
 }: HistoryCardProps) {
+  const t = useTranslations("historyCard");
   const isExpired = new Date(item.expires_at) < new Date();
+
+  const date = new Date(item.created_at);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const relativeDate =
+    diffDays === 0
+      ? t("today")
+      : diffDays === 1
+        ? t("yesterday")
+        : diffDays < 7
+          ? t("daysAgo", { count: diffDays })
+          : diffDays < 30
+            ? t("weeksAgo", { count: Math.floor(diffDays / 7) })
+            : date.toLocaleDateString();
+
+  const typeLabel =
+    item.analysis_type === "research"
+      ? t("research")
+      : item.analysis_type === "optimize"
+        ? t("optimization")
+        : t("both");
 
   return (
     <section
@@ -43,7 +48,7 @@ export function HistoryCard({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 flex-1 space-y-1">
           <h3 className="truncate text-base font-semibold text-white">
-            {item.company_name ?? "Unknown company"}
+            {item.company_name ?? t("unknownCompany")}
           </h3>
           {item.job_title ? (
             <p className="truncate text-sm text-slate-300">{item.job_title}</p>
@@ -58,11 +63,11 @@ export function HistoryCard({
               item.analysis_type === "both" && "bg-violet-500/20 text-violet-300",
             )}
           >
-            {analysisTypeLabel(item.analysis_type)}
+            {typeLabel}
           </span>
           {item.cache_hit ? (
             <span className="rounded-full bg-slate-700 px-2 py-1 text-xs text-slate-200">
-              Cached
+              {t("cached")}
             </span>
           ) : null}
           {item.match_score !== null ? (
@@ -74,9 +79,9 @@ export function HistoryCard({
       </div>
 
       <p className="mt-2 text-sm text-slate-400">
-        {formatRelativeDate(item.created_at)}
+        {relativeDate}
         {isExpired ? (
-          <span className="ml-2 text-amber-400">(may be outdated)</span>
+          <span className="ml-2 text-amber-400">{t("mayBeOutdated")}</span>
         ) : null}
       </p>
 
@@ -86,7 +91,7 @@ export function HistoryCard({
           onClick={() => onView(item.id)}
           type="button"
         >
-          View
+          {t("view")}
         </button>
         <button
           className="rounded-md border border-slate-600 px-3 py-1.5 text-sm text-slate-300 transition hover:border-rose-500 hover:text-rose-300 disabled:opacity-50"
@@ -94,7 +99,7 @@ export function HistoryCard({
           onClick={() => onDelete(item.id)}
           type="button"
         >
-          {isDeleting ? "Deleting…" : "Delete"}
+          {isDeleting ? t("deleting") : t("delete")}
         </button>
       </div>
     </section>

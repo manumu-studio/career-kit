@@ -103,7 +103,7 @@ def _dummy_pdf_file() -> tuple[str, bytes, str]:
 def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
     """Mock parser/provider dependencies so tests avoid external API calls."""
 
-    async def _mock_extract_text_from_pdf(_: object) -> str:
+    async def _mock_extract_text_from_pdf(_: object, locale: object = None) -> str:
         return "Candidate CV text."
 
     class _MockProvider:
@@ -115,8 +115,9 @@ def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
             job_description: str,  # noqa: ARG002
             company_name: Optional[str] = None,  # noqa: ARG002, UP045
             company_context: object | None = None,  # noqa: ARG002
+            language: str = "en",  # noqa: ARG002
         ) -> OptimizationResult:
-            _ = (company_name, company_context)
+            _ = (company_name, company_context, language)
             return OptimizationResult(
                 sections=[
                     {
@@ -147,8 +148,9 @@ def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
             website_content: str,
             search_results: str,
             job_title: Optional[str] = None,  # noqa: UP045
+            language: str = "en",
         ) -> CompanyResearchResult:
-            _ = (company_name, website_content, search_results, job_title)
+            _ = (company_name, website_content, search_results, job_title, language)
             raise NotImplementedError
 
         async def generate_cover_letter(
@@ -158,8 +160,9 @@ def mock_optimize_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
             company_name: str,
             hiring_manager: str | None,
             tone: str,
+            language: str = "en",
         ) -> CoverLetterResult:
-            _ = (cv_text, job_description, company_name, hiring_manager, tone)
+            _ = (cv_text, job_description, company_name, hiring_manager, tone, language)
             raise NotImplementedError
 
     def _mock_get_provider(provider_name: str = "anthropic") -> _MockProvider:  # noqa: ARG001

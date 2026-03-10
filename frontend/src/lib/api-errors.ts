@@ -26,10 +26,13 @@ export class ApiError extends Error {
   }
 }
 
+/** Generic fallback error message (English) — use for i18n matching. */
+export const GENERIC_ERROR_EN = "Something went wrong. Please try again.";
+
 /** Maps API error codes and messages to user-friendly strings. */
 export function handleApiError(error: unknown): string {
   if (!(error instanceof ApiError)) {
-    return "Something went wrong. Please try again.";
+    return GENERIC_ERROR_EN;
   }
 
   const msg = error.rawMessage.toLowerCase();
@@ -67,5 +70,5 @@ export function handleApiError(error: unknown): string {
     return error.rawMessage;
   }
 
-  return "Something went wrong. Please try again.";
+  return GENERIC_ERROR_EN;
 }

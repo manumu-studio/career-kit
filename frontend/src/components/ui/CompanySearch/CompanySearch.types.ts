@@ -6,5 +6,6 @@ export interface CompanySearchProps {
   onResearchError: (error: string) => void;
   onViewReport?: () => void;
   userId?: string;
+  language?: "en" | "es";
   className?: string;
 }

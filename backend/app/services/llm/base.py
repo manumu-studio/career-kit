@@ -28,6 +28,7 @@ class LLMProvider(ABC):
         job_description: str,
         company_name: Optional[str] = None,  # noqa: UP045
         company_context: Optional[CompanyProfile] = None,  # noqa: UP045
+        language: str = "en",
     ) -> OptimizationResult:
         """Analyze CV and job description, then return structured optimization data.
 
@@ -50,6 +51,7 @@ class LLMProvider(ABC):
         website_content: str,
         search_results: str,
         job_title: Optional[str] = None,  # noqa: UP045
+        language: str = "en",
     ) -> CompanyResearchResult:
         """Synthesize scraped company research data into structured output."""
         ...
@@ -62,6 +64,7 @@ class LLMProvider(ABC):
         company_name: str,
         hiring_manager: str | None,
         tone: str,
+        language: str = "en",
     ) -> CoverLetterResult:
         """Generate a tailored cover letter from CV + JD + company context."""
         ...

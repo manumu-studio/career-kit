@@ -24,6 +24,7 @@ class CompanySynthesizer:
         llm_provider: LLMProvider,
         provider_used: str,
         base_url: Optional[str] = None,  # noqa: UP045
+        language: str = "en",
     ) -> CompanyResearchResult:
         """Synthesize website/search data and enrich with metadata fields."""
         website_text = self._format_website_content(website_content)
@@ -38,6 +39,7 @@ class CompanySynthesizer:
             website_content=website_context,
             search_results=search_context,
             job_title=job_title,
+            language=language,
         )
         sources = self._collect_sources(search_results, base_url)
         quality = self._assess_quality(website_content, search_results, provider_used)

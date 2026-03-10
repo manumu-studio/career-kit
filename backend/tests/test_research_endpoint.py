@@ -46,8 +46,9 @@ class _MockSynthesisProvider(LLMProvider):
         website_content: str,
         search_results: str,
         job_title: Optional[str] = None,  # noqa: UP045
+        language: str = "en",
     ) -> CompanyResearchResult:
-        _ = (website_content, search_results, job_title)
+        _ = (website_content, search_results, job_title, language)
         return CompanyResearchResult(
             profile=CompanyProfile(
                 name=company_name,
@@ -113,8 +114,9 @@ class _FailingSynthesisProvider(LLMProvider):
         website_content: str,
         search_results: str,
         job_title: Optional[str] = None,  # noqa: UP045
+        language: str = "en",
     ) -> CompanyResearchResult:
-        _ = (company_name, website_content, search_results, job_title)
+        _ = (company_name, website_content, search_results, job_title, language)
         raise ValueError("synthetic LLM failure")
 
     async def generate_cover_letter(

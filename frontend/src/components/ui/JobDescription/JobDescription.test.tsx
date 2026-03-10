@@ -1,6 +1,6 @@
 /** Component tests for job description textarea behavior. */
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/test/utils";
 import userEvent from "@testing-library/user-event";
 import { JobDescription } from "@/components/ui/JobDescription";
 

@@ -12,6 +12,7 @@ import type { CompanyResearchResult, ResearchStep } from "@/types/company";
 
 interface UseCompanySearchOptions {
   userId?: string;
+  language?: "en" | "es";
 }
 
 interface UseCompanySearchReturn {
@@ -177,7 +178,7 @@ export function useCompanySearch(
           company_url: companyUrl.trim() || null,
           job_title: jobTitle.trim() || null,
         },
-        { userId: options?.userId, forceRefresh },
+        { userId: options?.userId, forceRefresh, language: options?.language },
       );
 
       setResult(response);
@@ -191,7 +192,7 @@ export function useCompanySearch(
     } finally {
       setIsLoading(false);
     }
-  }, [companyName, companyUrl, isLoading, jobTitle, options?.userId]);
+  }, [companyName, companyUrl, isLoading, jobTitle, options?.userId, options?.language]);
 
   return {
     companyName,

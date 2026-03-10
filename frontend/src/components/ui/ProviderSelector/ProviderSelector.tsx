@@ -1,15 +1,10 @@
 "use client";
 
 /** Dropdown to select LLM provider for CV optimization. */
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { LLMProviderName } from "@/types/provider";
 import type { ProviderSelectorProps } from "./ProviderSelector.types";
-
-const PROVIDER_LABELS: Record<string, string> = {
-  anthropic: "Claude (Haiku) — Fast · $",
-  openai: "GPT-4o — Medium · $$",
-  gemini: "Gemini Flash — Fast · $",
-};
 
 export function ProviderSelector({
   value,
@@ -18,12 +13,13 @@ export function ProviderSelector({
   defaultProvider,
   disabled,
 }: ProviderSelectorProps) {
+  const t = useTranslations("providers");
   const effectiveValue = value ?? (defaultProvider as LLMProviderName);
 
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-slate-300">
-        AI Provider
+        {t("aiProvider")}
       </label>
       <select
         className={cn(
@@ -34,7 +30,7 @@ export function ProviderSelector({
         value={effectiveValue}
         onChange={(e) => onChange(e.target.value as LLMProviderName)}
         disabled={disabled}
-        aria-label="Select AI provider"
+        aria-label={t("selectProvider")}
       >
         {(["anthropic", "openai", "gemini"] as const).map((name) => (
           <option
@@ -42,8 +38,8 @@ export function ProviderSelector({
             value={name}
             disabled={!available.includes(name)}
           >
-            {PROVIDER_LABELS[name] ?? name}
-            {!available.includes(name) ? " (not configured)" : ""}
+            {t(name)}
+            {!available.includes(name) ? ` ${t("notConfigured")}` : ""}
           </option>
         ))}
       </select>

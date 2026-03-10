@@ -54,11 +54,14 @@ export interface CompanyResearchResult {
   researched_at: string;
 }
 
+export type Locale = "en" | "es";
+
 export interface CompanyResearchRequest {
   company_name: string;
   company_url: string | null;
   job_title: string | null;
   force_refresh?: boolean;
+  language?: Locale;
 }
 
 export type ResearchStep =

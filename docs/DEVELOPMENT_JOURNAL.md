@@ -13,3 +13,4 @@ Log of feature work and releases.
 | 7 | [ENTRY-7 — Cover Letter Generation + PDF Export](journal/ENTRY-7.md) | [PR-0.7.0](pull-requests/PR-0.7.0.md) | 2026-03-09 |
 | 8 | [ENTRY-8 — Testing Suite](journal/ENTRY-8.md) | [PR-0.8.0](pull-requests/PR-0.8.0.md) | 2026-03-09 |
 | 9 | [ENTRY-9 — UX Polish & Error Handling](journal/ENTRY-9.md) | [PR-0.10.0](pull-requests/PR-0.10.0.md) | 2026-03-09 |
+| 10 | [ENTRY-10 — Internationalization (EN/ES)](journal/ENTRY-10.md) | [PR-0.11.0](pull-requests/PR-0.11.0.md) | 2026-03-10 |

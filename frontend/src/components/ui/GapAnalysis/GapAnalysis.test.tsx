@@ -1,6 +1,6 @@
 /** Component tests for gap analysis ordering and content. */
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/test/utils";
 import { GapAnalysis } from "@/components/ui/GapAnalysis";
 import type { Gap } from "@/types/optimization";
 

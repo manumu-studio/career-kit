@@ -1,15 +1,19 @@
 /** Displays original and optimized CV sections side-by-side. */
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { CvComparisonProps } from "@/components/ui/CvComparison/CvComparison.types";
 import { useCvComparison } from "@/components/ui/CvComparison/useCvComparison";
 
 export function CvComparison({ sections }: Readonly<CvComparisonProps>) {
-  const { originalLabel, optimizedLabel, changesLabel } = useCvComparison();
+  const t = useTranslations("results");
+  const { originalLabel, optimizedLabel, changesLabel } = useCvComparison(t);
 
   return (
     <section className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-white">CV Comparison</h2>
-        <p className="text-sm text-slate-400">Review what changed in each section of your CV.</p>
+        <h2 className="text-xl font-semibold text-white">{t("cvComparison")}</h2>
+        <p className="text-sm text-slate-400">{t("cvComparisonSubtitle")}</p>
       </div>
 
       <div className="space-y-4">

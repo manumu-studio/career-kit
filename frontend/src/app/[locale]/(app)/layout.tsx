@@ -25,9 +25,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     redirect("/");
   }
 
+  const user = session.user;
+
   return (
     <SessionProvider session={session}>
-      <UserBar userName={session.user.name} userEmail={session.user.email} />
+      <UserBar userName={user.name} userEmail={user.email} />
       <OptimizationProvider>{children}</OptimizationProvider>
     </SessionProvider>
   );

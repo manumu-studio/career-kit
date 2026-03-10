@@ -1,6 +1,6 @@
 /** Component tests for file upload interactions and callbacks. */
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/test/utils";
 import userEvent from "@testing-library/user-event";
 import { FileUpload } from "@/components/ui/FileUpload";
 
