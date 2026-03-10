@@ -1,0 +1,74 @@
+#!/bin/sh
+# Pre-push hook — mirrors GitHub Actions CI checks locally.
+# Prevents pushing code that will fail frontend-ci or backend-ci.
+
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+echo ""
+echo "══════════════════════════════════════════"
+echo "  🚀 Pre-push CI check"
+echo "══════════════════════════════════════════"
+
+# ─── Frontend CI (mirrors .github/workflows/frontend-ci.yml) ───
+
+FRONTEND_CHANGED=$(git diff --name-only HEAD @{push} 2>/dev/null -- frontend/ || git diff --name-only HEAD~1 HEAD -- frontend/)
+
+if [ -n "$FRONTEND_CHANGED" ]; then
+  echo ""
+  echo "── Frontend CI ──────────────────────────"
+
+  cd "$ROOT/frontend"
+
+  echo "🔎 TypeScript typecheck..."
+  npx tsc --noEmit
+
+  echo "🧪 Unit tests with coverage..."
+  npm run test:coverage
+
+  echo "🏗️  Build..."
+  npm run build
+
+  echo "🔍 Lint..."
+  npm run lint
+
+  echo "✅ Frontend CI passed"
+  cd "$ROOT"
+else
+  echo "⏭️  No frontend changes — skipping frontend CI"
+fi
+
+# ─── Backend CI (mirrors .github/workflows/backend-ci.yml) ───
+
+BACKEND_CHANGED=$(git diff --name-only HEAD @{push} 2>/dev/null -- backend/ || git diff --name-only HEAD~1 HEAD -- backend/)
+
+if [ -n "$BACKEND_CHANGED" ]; then
+  echo ""
+  echo "── Backend CI ───────────────────────────"
+
+  cd "$ROOT/backend"
+
+  echo "🔍 Ruff lint..."
+  .venv/bin/ruff check .
+
+  echo "📐 Ruff format..."
+  .venv/bin/ruff format --check .
+
+  echo "🔎 Mypy strict..."
+  .venv/bin/mypy app/
+
+  echo "🧪 Pytest with coverage..."
+  .venv/bin/pytest --cov=app --cov-report=term-missing --cov-fail-under=70
+
+  echo "✅ Backend CI passed"
+  cd "$ROOT"
+else
+  echo "⏭️  No backend changes — skipping backend CI"
+fi
+
+echo ""
+echo "══════════════════════════════════════════"
+echo "  ✅ All CI checks passed — pushing"
+echo "══════════════════════════════════════════"
+echo ""

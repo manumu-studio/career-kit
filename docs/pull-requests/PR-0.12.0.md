@@ -1,7 +1,7 @@
-# PR-0.12.0 — Design System Foundation
+# PR-0.12.0 — Landing Page Redesign & CV Language Auto-Detection
 
-**Branch:** `feature/design-system` → `main`
-**Version:** 0.12.0
+**Branch:** `feature/landing-redesign` → `main`
+**Version:** `0.12.0`
 **Date:** 2026-03-10
 **Status:** ✅ Ready to merge
 
@@ -9,63 +9,47 @@
 
 ## Summary
 
-Introduces a design system for Career Kit: ShadCN/ui components, next-themes for dark/light mode, Framer Motion, and Raleway typography. Adds a new Navbar with ThemeToggle and mobile drawer. Migrates core components to ShadCN primitives and design tokens.
+Redesigned the landing page into a conversion-optimized entry point with hero, feature showcase, how-it-works, providers, CTA footer, and site footer. Added automatic CV language detection on the backend so Spanish CVs produce Spanish output even when the UI is in English.
 
 ## Files Changed
 
-| File | Action | Notes |
-|------|--------|-------|
-| `frontend/package.json` | Modified | next-themes, framer-motion, @fontsource-variable/raleway, ShadCN |
-| `frontend/components.json` | Created | ShadCN config |
-| `frontend/tailwind.css` | Created | Theme variables |
-| `frontend/src/app/globals.css` | Modified | Font, tailwind import, ai-gradient |
-| `frontend/src/app/layout.tsx` | Modified | ThemeProvider, TooltipProvider |
-| `frontend/src/app/[locale]/(app)/layout.tsx` | Modified | Navbar replaces UserBar |
-| `frontend/src/app/[locale]/(public)/layout.tsx` | Modified | Navbar (public) |
-| `frontend/src/components/providers/theme-provider.tsx` | Created | next-themes wrapper |
-| `frontend/src/components/ui/Navbar/*` | Created | Navbar, useNavbar |
-| `frontend/src/components/ui/ThemeToggle/*` | Created | ThemeToggle |
-| `frontend/src/components/ui/ProviderSelector/ProviderSelector.tsx` | Modified | ShadCN Select |
-| `frontend/src/components/ui/LoadingSkeleton/LoadingSkeleton.tsx` | Modified | ShadCN Skeleton |
-| `frontend/src/components/ui/JobDescription/JobDescription.tsx` | Modified | ShadCN Textarea |
-| `frontend/src/components/ui/LanguageSwitcher/LanguageSwitcher.tsx` | Modified | Design tokens |
-| `frontend/src/components/ui/CacheHitBanner/CacheHitBanner.tsx` | Modified | ShadCN Button |
-| `frontend/src/components/ui/HistoryList/HistoryList.tsx` | Modified | ShadCN Input, Button |
-| `frontend/src/components/ui/HistoryCard/HistoryCard.tsx` | Modified | ShadCN Button, Badge |
-| `frontend/src/components/ui/ExportToolbar/ExportToolbar.tsx` | Modified | ShadCN Button |
-| `frontend/src/app/[locale]/(app)/home/page.tsx` | Modified | ShadCN Button |
-| `frontend/messages/en.json` | Modified | navbar translations |
-| `frontend/messages/es.json` | Modified | navbar translations |
-| `frontend/src/components/ui/ProviderSelector/ProviderSelector.test.tsx` | Modified | Test updates |
+| File                                                                         | Action   | Notes                                         |
+| ---------------------------------------------------------------------------- | -------- | --------------------------------------------- |
+| .husky/pre-push                                                              | Created  | Pre-push hook mirrors CI (frontend + backend) |
+| AnimatedText, FeatureCard, StepCard, Footer                                  | Created  | UI components                                 |
+| LandingHero, FeatureShowcase, HowItWorks, ProvidersSection, CtaFooterSection | Created  | Landing sections                              |
+| (public)/page.tsx, (public)/layout.tsx                                       | Modified | Page + SEO metadata                           |
+| en.json, es.json                                                             | Modified | Landing translations                          |
+| language_detector.py                                                         | Created  | Heuristic en/es detection                     |
+| i18n.py, optimize, cover_letter, providers, schemas                          | Modified | Language resolution                           |
+| test_language_detector.py                                                    | Created  | 9 unit tests                                  |
 
 ## Architecture Decisions
 
-| Decision | Why |
-|----------|-----|
-| ShadCN base-nova | Tailwind v4 + React 19 compatible; @base-ui/react primitives |
-| next-themes | System preference support, persistence, minimal bundle |
-| Raleway variable font | Single file, weights 100–900 |
-| Navbar replaces UserBar | Unified app shell with theme toggle, language, user menu |
+| Decision                                   | Why                                                                     |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| Pre-push hook mirrors CI                   | Runs frontend/backend checks locally before push; skips unchanged areas |
+| LazyMotion + domAnimation                  | Reduces Framer Motion bundle size                                       |
+| Stopword-based language detection          | Zero LLM cost, < 10ms, good for en/es                                   |
+| Resolution: override > detected > fallback | User choice wins; CV language beats UI locale                           |
+| generateMetadata in (public) layout        | SEO for landing; OG, Twitter, canonical                                 |
 
 ## Testing Checklist
 
-- [ ] Toggle dark/light mode on home, history, results pages
-- [ ] Test mobile nav drawer (hamburger → sheet)
-- [ ] Verify Raleway font renders
-- [ ] Check ProviderSelector dropdown works
-- [ ] Verify all buttons, inputs use ShadCN styling
-- [ ] Run `cd frontend && npm run test`
+- [x] Hero renders, animations play, CTAs work
+- [x] Feature cards and How It Works scroll animations
+- [x] Providers, CTA footer, Footer render
+- [x] Spanish CV → Spanish output; English CV → English output
+- [x] EN/ES locale switching
+- [x] Frontend build, lint, tests pass
+- [x] Backend pytest pass
 
 ## Deployment Notes
 
-No backend changes. Frontend only.
+- Set `NEXT_PUBLIC_APP_URL` for correct OG/canonical URLs
+- Add `/og-image.png` for social sharing (placeholder path used)
 
 ## Validation (commands + results)
 
-```bash
-cd frontend && npx tsc --noEmit && npm run build && npm run lint && npm run test
-# ✓ Compiled successfully
-# ✔ No ESLint warnings or errors
-# Test Files  36 passed (36)
-#      Tests  160 passed (160)
-```
+- Frontend: `npx tsc --noEmit && npm run build && npm run lint && npm run test` — pass
+- Backend: `pytest` — 124 passed

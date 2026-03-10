@@ -1,7 +1,7 @@
-# PR-0.11.0 — Internationalization (EN/ES)
+# PR-0.11.0 — Design System Foundation
 
-**Branch:** `feature/i18n-en-es` → `main`
-**Version:** `0.11.0`
+**Branch:** `feature/design-system` → `main`
+**Version:** 0.11.0
 **Date:** 2026-03-10
 **Status:** ✅ Ready to merge
 
@@ -9,57 +9,63 @@
 
 ## Summary
 
-Adds full English/Spanish language support. Users can switch languages via a header toggle; preference is persisted in a cookie. All UI strings, form labels, error messages, and validation feedback render in the selected locale. URL reflects locale (`/en/...`, `/es/...`). Backend accepts `language` on optimize, cover-letter, research, and compare endpoints; API errors and LLM outputs (CV, cover letter, research) are generated in the user's language.
+Introduces a design system for Career Kit: ShadCN/ui components, next-themes for dark/light mode, Framer Motion, and Raleway typography. Adds a new Navbar with ThemeToggle and mobile drawer. Migrates core components to ShadCN primitives and design tokens.
 
 ## Files Changed
 
-| File | Action | Notes |
-|------|--------|------|
-| middleware.ts | Modified | next-intl locale detection |
-| i18n/request.ts, routing.ts, navigation.ts | Created | i18n config |
-| messages/en.json, es.json | Created | Translations |
-| app/layout.tsx, [locale]/layout.tsx | Modified | Locale provider |
-| app/not-found.tsx, [locale]/not-found.tsx | Created | 404 pages |
-| LanguageSwitcher/ | Created | Toggle + cookie |
-| UserBar, CompanySearch, ProviderSelector | Modified | Translations |
-| HistoryList, HistoryCard | Modified | Translations |
-| FileUpload, JobDescription, ProgressBar | Modified | Translations |
-| ScoreCard, GapAnalysis, KeywordMatch | Modified | Translations |
-| CvComparison, ExportToolbar | Modified | Translations |
-| home, results, history, report, auth/error pages | Modified | Translations |
-| api.ts | Modified | language param on API calls |
-| api-errors.ts | Modified | GENERIC_ERROR_EN export |
-| backend/core/i18n.py | Created | Error translations |
-| backend/routers/*, services/llm/*, prompts.py | Modified | language param, LLM prompts |
+| File                                                                    | Action   | Notes                                                            |
+| ----------------------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `frontend/package.json`                                                 | Modified | next-themes, framer-motion, @fontsource-variable/raleway, ShadCN |
+| `frontend/components.json`                                              | Created  | ShadCN config                                                    |
+| `frontend/tailwind.css`                                                 | Created  | Theme variables                                                  |
+| `frontend/src/app/globals.css`                                          | Modified | Font, tailwind import, ai-gradient                               |
+| `frontend/src/app/layout.tsx`                                           | Modified | ThemeProvider, TooltipProvider                                   |
+| `frontend/src/app/[locale]/(app)/layout.tsx`                            | Modified | Navbar replaces UserBar                                          |
+| `frontend/src/app/[locale]/(public)/layout.tsx`                         | Modified | Navbar (public)                                                  |
+| `frontend/src/components/providers/theme-provider.tsx`                  | Created  | next-themes wrapper                                              |
+| `frontend/src/components/ui/Navbar/*`                                   | Created  | Navbar, useNavbar                                                |
+| `frontend/src/components/ui/ThemeToggle/*`                              | Created  | ThemeToggle                                                      |
+| `frontend/src/components/ui/ProviderSelector/ProviderSelector.tsx`      | Modified | ShadCN Select                                                    |
+| `frontend/src/components/ui/LoadingSkeleton/LoadingSkeleton.tsx`        | Modified | ShadCN Skeleton                                                  |
+| `frontend/src/components/ui/JobDescription/JobDescription.tsx`          | Modified | ShadCN Textarea                                                  |
+| `frontend/src/components/ui/LanguageSwitcher/LanguageSwitcher.tsx`      | Modified | Design tokens                                                    |
+| `frontend/src/components/ui/CacheHitBanner/CacheHitBanner.tsx`          | Modified | ShadCN Button                                                    |
+| `frontend/src/components/ui/HistoryList/HistoryList.tsx`                | Modified | ShadCN Input, Button                                             |
+| `frontend/src/components/ui/HistoryCard/HistoryCard.tsx`                | Modified | ShadCN Button, Badge                                             |
+| `frontend/src/components/ui/ExportToolbar/ExportToolbar.tsx`            | Modified | ShadCN Button                                                    |
+| `frontend/src/app/[locale]/(app)/home/page.tsx`                         | Modified | ShadCN Button                                                    |
+| `frontend/messages/en.json`                                             | Modified | navbar translations                                              |
+| `frontend/messages/es.json`                                             | Modified | navbar translations                                              |
+| `frontend/src/components/ui/ProviderSelector/ProviderSelector.test.tsx` | Modified | Test updates                                                     |
 
 ## Architecture Decisions
 
-| Decision | Why |
-|----------|-----|
-| next-intl with [locale] routing | App Router compatible, URL reflects language |
-| Cookie for language preference | Persists across sessions |
-| Explicit language param on API | Clearer than Accept-Language header |
-| LLM prompts parameterized | Ensures CV, cover letter, research in user language |
+| Decision                | Why                                                          |
+| ----------------------- | ------------------------------------------------------------ |
+| ShadCN base-nova        | Tailwind v4 + React 19 compatible; @base-ui/react primitives |
+| next-themes             | System preference support, persistence, minimal bundle       |
+| Raleway variable font   | Single file, weights 100–900                                 |
+| Navbar replaces UserBar | Unified app shell with theme toggle, language, user menu     |
 
 ## Testing Checklist
 
-- [ ] Switch to ES, verify all UI strings in Spanish
-- [ ] Run optimization in ES, verify LLM output in Spanish
-- [ ] Switch back to EN, verify everything reverts
-- [ ] Check URL changes (/en/... vs /es/...)
-- [ ] Verify language persists after refresh
-- [ ] Test API error messages in both languages
+- [ ] Toggle dark/light mode on home, history, results pages
+- [ ] Test mobile nav drawer (hamburger → sheet)
+- [ ] Verify Raleway font renders
+- [ ] Check ProviderSelector dropdown works
+- [ ] Verify all buttons, inputs use ShadCN styling
+- [ ] Run `cd frontend && npm run test`
 
 ## Deployment Notes
 
-No new env vars. Frontend and backend both modified.
+No backend changes. Frontend only.
 
 ## Validation (commands + results)
 
 ```bash
-cd frontend && npx tsc --noEmit && npm run build && npm run lint
-# ✓ All pass
-
-cd backend && ruff check . && ruff format --check .
-# ✓ All pass
+cd frontend && npx tsc --noEmit && npm run build && npm run lint && npm run test
+# ✓ Compiled successfully
+# ✔ No ESLint warnings or errors
+# Test Files  36 passed (36)
+#      Tests  160 passed (160)
 ```

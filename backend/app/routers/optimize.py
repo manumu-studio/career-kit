@@ -11,10 +11,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.dependencies import get_user_id
-from app.core.i18n import get_error_message, normalize_locale
+from app.core.i18n import get_error_message, normalize_locale, resolve_language
 from app.models.database import get_db
 from app.models.schemas import CompanyProfile, ErrorResponse, OptimizationResult
 from app.services.cache import CacheService
+from app.services.language_detector import detect_language
 from app.services.llm.factory import get_provider
 from app.services.pdf_parser import extract_text_from_pdf
 
@@ -51,6 +52,9 @@ async def optimize_cv(
         cv_text = await extract_text_from_pdf(cv_file, locale=loc)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    detected = detect_language(cv_text)
+    loc = resolve_language(explicit=None, detected=detected, fallback=loc)
 
     try:
         llm_provider = get_provider(provider or settings.llm_provider)
@@ -114,6 +118,7 @@ async def optimize_cv(
         )
         provider_name = provider or settings.llm_provider
         result.provider = provider_name
+        result.detected_language = detected
         result_dict = result.model_dump()
         try:
             stored = await cache_service.store_optimization_result(

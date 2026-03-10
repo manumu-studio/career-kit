@@ -4,6 +4,29 @@ from typing import Literal, Optional
 
 Locale = Literal["en", "es"]
 
+
+def resolve_language(
+    explicit: Optional[Locale] = None,
+    detected: Optional[Locale] = None,
+    fallback: Locale = "en",
+) -> Locale:
+    """Resolve output language with priority: explicit override > detected > fallback.
+
+    Args:
+        explicit: User override (e.g. from language switcher).
+        detected: Language detected from CV text.
+        fallback: Default when neither explicit nor detected available.
+
+    Returns:
+        Resolved locale.
+    """
+    if explicit in ("en", "es"):
+        return explicit
+    if detected in ("en", "es"):
+        return detected
+    return fallback
+
+
 LANGUAGE_NAMES: dict[Locale, str] = {
     "en": "English",
     "es": "Spanish",

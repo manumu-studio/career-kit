@@ -49,6 +49,12 @@ export default defineConfig({
         "src/components/ui/LoadingSkeleton/**",
         "src/components/ui/Navbar/**",
         "src/components/ui/ProgressBar/**",
+        // Landing page — presentational, tested via E2E
+        "src/components/landing/**",
+        "src/components/ui/AnimatedText/**",
+        "src/components/ui/FeatureCard/**",
+        "src/components/ui/StepCard/**",
+        "src/components/ui/Footer/**",
         "src/components/ui/ThemeToggle/**",
         "src/components/ui/Toast/**",
         "src/lib/validation.ts",

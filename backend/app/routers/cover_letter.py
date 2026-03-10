@@ -7,8 +7,9 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.config import settings
 from app.core.dependencies import get_user_id
-from app.core.i18n import get_error_message, normalize_locale
+from app.core.i18n import get_error_message, normalize_locale, resolve_language
 from app.models.schemas import CoverLetterRequest, CoverLetterResult, ErrorResponse
+from app.services.language_detector import detect_language
 from app.services.llm.factory import get_provider
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,9 @@ async def generate_cover_letter(
 ) -> CoverLetterResult:
     """Generate cover letter from CV, job description, and company context."""
     _ = user_id
-    loc = normalize_locale(body.language)
+    fallback = normalize_locale(body.language)
+    detected = detect_language(body.cv_text)
+    loc = resolve_language(explicit=None, detected=detected, fallback=fallback)
     try:
         provider = get_provider(settings.llm_provider)
     except ValueError as exc:

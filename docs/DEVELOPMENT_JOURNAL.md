@@ -12,6 +12,7 @@ Log of feature work and releases.
 | 6 | [ENTRY-6 — Multi-Provider LLM Support](journal/ENTRY-6.md) | [PR-0.6.0](pull-requests/PR-0.6.0.md) | 2026-03-09 |
 | 7 | [ENTRY-7 — Cover Letter Generation + PDF Export](journal/ENTRY-7.md) | [PR-0.7.0](pull-requests/PR-0.7.0.md) | 2026-03-09 |
 | 8 | [ENTRY-8 — Testing Suite](journal/ENTRY-8.md) | [PR-0.8.0](pull-requests/PR-0.8.0.md) | 2026-03-09 |
-| 9 | [ENTRY-9 — UX Polish & Error Handling](journal/ENTRY-9.md) | [PR-0.10.0](pull-requests/PR-0.10.0.md) | 2026-03-09 |
-| 10 | [ENTRY-10 — Internationalization (EN/ES)](journal/ENTRY-10.md) | [PR-0.11.0](pull-requests/PR-0.11.0.md) | 2026-03-10 |
-| 11 | [ENTRY-11 — Design System Foundation](journal/ENTRY-11.md) | [PR-0.12.0](pull-requests/PR-0.12.0.md) | 2026-03-10 |
+| 9 | [ENTRY-9 — UX Polish & Error Handling](journal/ENTRY-9.md) | — | 2026-03-09 |
+| 10 | [ENTRY-10 — Internationalization (EN/ES)](journal/ENTRY-10.md) | [PR-0.10.0](pull-requests/PR-0.10.0.md) | 2026-03-10 |
+| 11 | [ENTRY-11 — Design System Foundation](journal/ENTRY-11.md) | [PR-0.11.0](pull-requests/PR-0.11.0.md) | 2026-03-10 |
+| 12 | [ENTRY-12 — Landing Page Redesign & CV Language Auto-Detection](journal/ENTRY-12.md) | [PR-0.12.0](pull-requests/PR-0.12.0.md) | 2026-03-10 |
