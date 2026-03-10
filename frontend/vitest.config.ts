@@ -46,9 +46,12 @@ export default defineConfig({
         "src/components/ui/tooltip.tsx",
         "src/components/ui/ErrorBoundary/**",
         "src/components/ui/FormField/**",
+        "src/components/ui/LinkWithSpinner/**",
         "src/components/ui/LoadingSkeleton/**",
         "src/components/ui/Navbar/**",
+        "src/components/ui/PageTransition/**",
         "src/components/ui/ProgressBar/**",
+        "src/components/ui/SubmitButtonWithSpinner/**",
         // Landing page — presentational, tested via E2E
         "src/components/landing/**",
         "src/components/ui/AnimatedText/**",
