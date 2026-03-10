@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: __dirname,
-  testMatch: "capture-rezi-login.spec.ts",
+  testMatch: ["capture-rezi-login.spec.ts", "capture-rezi-import-component.spec.ts"],
   fullyParallel: false,
   workers: 1,
   retries: 0,
