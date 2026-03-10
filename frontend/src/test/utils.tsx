@@ -3,12 +3,15 @@ import { render, type RenderOptions } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { OptimizationProvider } from "@/context/OptimizationContext";
+import { ToastProvider } from "@/components/ui/Toast";
 import en from "../../messages/en.json";
 
 function Wrapper({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <NextIntlClientProvider locale="en" messages={en}>
-      <OptimizationProvider>{children}</OptimizationProvider>
+      <ToastProvider>
+        <OptimizationProvider>{children}</OptimizationProvider>
+      </ToastProvider>
     </NextIntlClientProvider>
   );
 }

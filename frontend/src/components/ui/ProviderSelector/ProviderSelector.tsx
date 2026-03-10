@@ -1,14 +1,8 @@
 "use client";
 
-/** Dropdown to select LLM provider for CV optimization. */
+/** Pill/segment selector for LLM provider used in CV optimization. */
 import { useTranslations } from "next-intl";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import type { LLMProviderName } from "@/types/provider";
 import type { ProviderSelectorProps } from "./ProviderSelector.types";
 
@@ -33,30 +27,37 @@ export function ProviderSelector({
       <label className="block text-sm font-medium text-foreground">
         {t("aiProvider")}
       </label>
-      <Select
-        value={effectiveValue}
-        onValueChange={(v) => onChange(v as LLMProviderName)}
-        disabled={disabled}
+      <div
+        className="flex flex-wrap gap-2"
+        role="group"
+        aria-label={t("selectProvider")}
       >
-        <SelectTrigger
-          className="w-full max-w-xs"
-          aria-label={t("selectProvider")}
-        >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {PROVIDERS.map((name) => (
-            <SelectItem
+        {PROVIDERS.map((name) => {
+          const isAvailable = available.includes(name);
+          const isSelected = effectiveValue === name;
+          return (
+            <button
               key={name}
-              value={name}
-              disabled={!available.includes(name)}
+              type="button"
+              disabled={disabled || !isAvailable}
+              aria-pressed={isSelected}
+              aria-label={`${t(name)}${!isAvailable ? ` ${t("notConfigured")}` : ""}`}
+              onClick={() => isAvailable && onChange(name)}
+              className={cn(
+                "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "disabled:pointer-events-none disabled:opacity-50",
+                isSelected
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80",
+              )}
             >
               {t(name)}
-              {!available.includes(name) ? ` ${t("notConfigured")}` : ""}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+              {!isAvailable ? ` ${t("notConfigured")}` : ""}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

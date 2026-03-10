@@ -17,7 +17,7 @@ describe("ScoreCard", () => {
   it("clamps score to 0–100", () => {
     render(<ScoreCard score={150} />);
     expect(screen.getByText("100")).toBeInTheDocument();
-    const { rerender } = render(<ScoreCard score={-10} />);
+    render(<ScoreCard score={-10} />);
     expect(screen.getByText("0")).toBeInTheDocument();
   });
 });

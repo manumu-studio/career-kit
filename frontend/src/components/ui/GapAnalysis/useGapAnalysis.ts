@@ -7,21 +7,31 @@ const IMPORTANCE_WEIGHT: Record<Gap["importance"], number> = {
   nice_to_have: 2,
 };
 
-const IMPORTANCE_STYLES: Record<Gap["importance"], string> = {
-  critical: "bg-rose-500/20 text-rose-300 border border-rose-500/30",
-  preferred: "bg-amber-500/20 text-amber-300 border border-amber-500/30",
-  nice_to_have: "bg-slate-700/60 text-slate-200 border border-slate-600",
+/** Severity label keys for i18n. */
+export const SEVERITY_KEYS: Record<Gap["importance"], "severityCritical" | "severityImportant" | "severityNiceToHave"> = {
+  critical: "severityCritical",
+  preferred: "severityImportant",
+  nice_to_have: "severityNiceToHave",
 };
 
-export function useGapAnalysis(gaps: Gap[]) {
-  const sortedGaps = [...gaps].sort(
-    (left, right) => IMPORTANCE_WEIGHT[left.importance] - IMPORTANCE_WEIGHT[right.importance],
-  );
+/** Badge color classes: Critical (rose), Important (amber), Nice-to-have (sky). */
+export const SEVERITY_BADGE_CLASSES: Record<Gap["importance"], string> = {
+  critical: "bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30",
+  preferred: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30",
+  nice_to_have: "bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-500/30",
+};
 
-  const getBadgeClassName = (importance: Gap["importance"]): string => IMPORTANCE_STYLES[importance];
+export type SortMode = "severity" | "name";
+
+export function useGapAnalysis(gaps: Gap[], sortMode: SortMode = "severity") {
+  const sortedGaps = [...gaps].sort((left, right) => {
+    if (sortMode === "name") {
+      return left.skill.localeCompare(right.skill);
+    }
+    return IMPORTANCE_WEIGHT[left.importance] - IMPORTANCE_WEIGHT[right.importance];
+  });
 
   return {
     sortedGaps,
-    getBadgeClassName,
   };
 }

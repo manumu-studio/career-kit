@@ -1,8 +1,10 @@
 /** Public landing page — hero, features, sign-in CTA. */
 import { getTranslations } from "next-intl/server";
 import { auth, signIn } from "@/features/auth/auth";
-import { Link as LocaleLink } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { getFirstNameForGreeting } from "@/lib/name-utils";
+import { cn } from "@/lib/utils";
+import { LinkWithSpinner } from "@/components/ui/LinkWithSpinner";
+import { SubmitButtonWithSpinner } from "@/components/ui/SubmitButtonWithSpinner";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { FeatureShowcase } from "@/components/landing/FeatureShowcase";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -30,11 +32,16 @@ export default async function LandingPage({
     "w-full animate-ai-gradient border-0 bg-clip-padding text-white hover:opacity-90 sm:w-auto sm:px-8";
 
   const primaryCta = session?.user ? (
-    <LocaleLink href="/home">
-      <Button size="lg" className={gradientButtonClass}>
-        {t("goToApp")}
-      </Button>
-    </LocaleLink>
+    <LinkWithSpinner
+      href="/home"
+      useLocale
+      className={cn(
+        "h-9 min-h-9 rounded-lg px-2.5 font-medium sm:px-8",
+        gradientButtonClass,
+      )}
+    >
+      {t("goToApp")}
+    </LinkWithSpinner>
   ) : (
     <form
       action={async () => {
@@ -42,18 +49,39 @@ export default async function LandingPage({
         await signIn("manumustudio", { callbackUrl });
       }}
     >
-      <Button type="submit" size="lg" className={gradientButtonClass}>
+      <SubmitButtonWithSpinner size="lg" className={gradientButtonClass}>
         {t("ctaPrimary")}
-      </Button>
+      </SubmitButtonWithSpinner>
     </form>
   );
 
+  const welcomeBackText = session?.user?.name
+    ? t("welcomeBack", { name: getFirstNameForGreeting(session.user.name) })
+    : undefined;
+
+  const signOutClass =
+    "cursor-pointer h-9 min-w-[180px] rounded-lg border-2 border-border bg-background px-2.5 text-sm font-medium transition-all duration-200 hover:scale-[1.02] hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-input dark:bg-input/30 dark:hover:border-destructive/40 dark:hover:bg-destructive/10 dark:hover:text-destructive";
+
+  const secondaryCta = session?.user ? (
+    <LinkWithSpinner
+      href="/api/auth/federated-signout?local_only=1"
+      className={signOutClass}
+    >
+      {t("signOut")}
+    </LinkWithSpinner>
+  ) : undefined;
+
   const ctaFooterPrimaryCta = session?.user ? (
-    <LocaleLink href="/home">
-      <Button size="lg" className={gradientButtonClass}>
-        {t("goToApp")}
-      </Button>
-    </LocaleLink>
+    <LinkWithSpinner
+      href="/home"
+      useLocale
+      className={cn(
+        "h-9 min-h-9 rounded-lg px-2.5 font-medium sm:px-8",
+        gradientButtonClass,
+      )}
+    >
+      {t("goToApp")}
+    </LinkWithSpinner>
   ) : (
     <form
       action={async () => {
@@ -61,9 +89,9 @@ export default async function LandingPage({
         await signIn("manumustudio", { callbackUrl });
       }}
     >
-      <Button type="submit" size="lg" className={gradientButtonClass}>
+      <SubmitButtonWithSpinner size="lg" className={gradientButtonClass}>
         {t("ctaFooterButton")}
-      </Button>
+      </SubmitButtonWithSpinner>
     </form>
   );
 
@@ -75,6 +103,8 @@ export default async function LandingPage({
         heroSubtitle={t("heroSubtitle")}
         ctaSecondaryLabel={t("ctaSecondary")}
         socialProof={t("socialProof")}
+        welcomeBackText={welcomeBackText}
+        secondaryCta={secondaryCta}
       />
 
       {error && !session?.user ? (

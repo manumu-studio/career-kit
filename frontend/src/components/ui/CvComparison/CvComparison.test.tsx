@@ -1,16 +1,19 @@
 /** Component tests for CV comparison section rendering. */
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@/test/utils";
+import userEvent from "@testing-library/user-event";
 import { CvComparison } from "@/components/ui/CvComparison";
 import { mockCvSection } from "@/test/mocks";
 
 describe("CvComparison", () => {
-  it("renders headings, original and optimized content", () => {
+  it("renders headings, original and optimized content", async () => {
+    const user = userEvent.setup();
     const section = mockCvSection();
     render(<CvComparison sections={[section]} />);
 
     expect(screen.getByText("Experience")).toBeInTheDocument();
     expect(screen.getByText(section.original)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Optimized CV/i }));
     expect(screen.getByText(section.optimized)).toBeInTheDocument();
   });
 

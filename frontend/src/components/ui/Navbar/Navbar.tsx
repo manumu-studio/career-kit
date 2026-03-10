@@ -24,7 +24,7 @@ import type { NavbarProps } from "./Navbar.types";
 const NAV_ITEMS = [
   { href: "/home", key: "home" as const },
   { href: "/history", key: "history" as const },
-  // { href: "/history/compare", key: "compare" as const }, // silenced until compare page is ready
+  { href: "/compare", key: "compare" as const },
 ] as const;
 
 function NavLinks({ onClick }: { onClick?: () => void }) {
@@ -76,7 +76,7 @@ export function Navbar({ mode, userName, userEmail, className }: NavbarProps) {
   const showNavLinks = mode === "app";
 
   const handleSignOut = () => {
-    window.location.href = "/api/auth/federated-signout?local_only=1";
+    window.location.href = "/api/auth/federated-signout";
   };
 
   return (

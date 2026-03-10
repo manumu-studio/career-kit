@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   LoadingSkeleton,
   ResultsSectionSkeleton,
@@ -131,35 +133,47 @@ export default function HistoryDetailPage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10">
+      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <Link
+          href="/history"
+          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          <ChevronLeft className="h-4 w-4" aria-hidden />
+          {t("backToHistory")}
+        </Link>
+        <span aria-hidden>/</span>
+        <span className="text-foreground">
+          {detail.company_name ?? t("analysis")} {detail.job_title ? `— ${detail.job_title}` : ""}
+        </span>
+      </div>
+
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">
+          <h1 className="text-2xl font-semibold text-foreground">
             {detail.company_name ?? t("analysis")} {detail.job_title ? `— ${detail.job_title}` : ""}
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             {new Date(detail.created_at).toLocaleString()}
             {detail.cache_hit ? (
-              <span className="ml-2 rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-300">
+              <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                 {t("loadedFromCache")}
               </span>
             ) : null}
           </p>
         </div>
         <div className="flex gap-2">
+          <Link href="/home">
+            <Button variant="outline" size="sm">
+              {t("reRunAnalysis")}
+            </Button>
+          </Link>
           {optimizationResult ? (
-            <Link
-              className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
-              href={`/history/compare?a=${id}`}
-            >
-              {t("compareWithAnother")}
+            <Link href={`/history/compare?a=${id}`}>
+              <Button variant="outline" size="sm">
+                {t("compareWithAnother")}
+              </Button>
             </Link>
           ) : null}
-          <Link
-            className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
-            href="/history"
-          >
-            {t("backToHistory")}
-          </Link>
         </div>
       </header>
 

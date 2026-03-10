@@ -1,9 +1,13 @@
 "use client";
 
-/** Copyable keyword chips for CV/cover-letter phrase reuse. */
+/** Copyable keyword chips for CV/cover-letter phrase reuse with tooltip and stagger animation. */
 import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { KeywordChipsProps } from "./KeywordChips.types";
+
+const CHIP_STAGGER = 0.05;
 
 export function KeywordChips({
   keywords,
@@ -11,6 +15,7 @@ export function KeywordChips({
   className,
 }: KeywordChipsProps) {
   const [copiedKeyword, setCopiedKeyword] = useState<string | null>(null);
+  const reducedMotion = useReducedMotion();
 
   const handleCopy = async (keyword: string): Promise<void> => {
     await navigator.clipboard.writeText(keyword);
@@ -22,20 +27,38 @@ export function KeywordChips({
 
   return (
     <section className={cn("space-y-3", className)}>
-      <h3 className="text-base font-semibold text-slate-100">{label}</h3>
+      <h3 className="text-base font-semibold text-foreground">{label}</h3>
       <div className="flex flex-wrap gap-2">
-        {keywords.map((keyword) => (
-          <button
-            key={keyword}
-            className="inline-flex items-center gap-2 rounded-full bg-slate-800 px-3 py-1.5 text-xs text-slate-200 transition hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-            onClick={() => {
-              void handleCopy(keyword);
-            }}
-            type="button"
-          >
-            <span>{keyword}</span>
-            <span className="text-slate-400">{copiedKeyword === keyword ? "Copied!" : "Copy"}</span>
-          </button>
+        {keywords.map((keyword, i) => (
+          <Tooltip key={keyword}>
+            <TooltipTrigger
+              render={
+                <motion.span
+                  initial={reducedMotion ? false : { opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={
+                    reducedMotion ? { duration: 0 } : { delay: i * CHIP_STAGGER, duration: 0.2 }
+                  }
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-xs text-foreground transition hover:bg-muted/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => void handleCopy(keyword)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      void handleCopy(keyword);
+                    }
+                  }}
+                />
+              }
+            >
+              <span>{keyword}</span>
+              <span className="text-muted-foreground">
+                {copiedKeyword === keyword ? "Copied!" : "Copy"}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top">{keyword}</TooltipContent>
+          </Tooltip>
         ))}
       </div>
     </section>

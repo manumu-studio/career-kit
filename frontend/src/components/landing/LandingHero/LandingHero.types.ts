@@ -8,8 +8,12 @@ export interface LandingHeroProps {
   heroTitle: string;
   /** Subheadline text. */
   heroSubtitle: string;
-  /** Secondary CTA label (scroll to features). */
+  /** Secondary CTA label (scroll to features) — used when secondaryCta not provided. */
   ctaSecondaryLabel: string;
   /** Social proof text. */
   socialProof: string;
+  /** Optional welcome text above headline (e.g. "Hi John, welcome back!"). */
+  welcomeBackText?: string;
+  /** Optional secondary CTA (e.g. Sign out button when logged in). When provided, replaces default scroll button. */
+  secondaryCta?: ReactNode;
 }

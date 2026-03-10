@@ -6,6 +6,13 @@
   box-sizing: border-box;
 }
 
+/* Pointer cursor for interactive elements */
+button,
+[role="button"],
+a[href] {
+  cursor: pointer;
+}
+
 /* Visible focus rings for keyboard navigation (WCAG 2.4.7) — uses design token */
 :focus-visible {
   outline: 2px solid var(--ring);
