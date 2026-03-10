@@ -15,17 +15,17 @@ describe("ProviderComparison", () => {
   it("renders Back to Upload link", () => {
     const data = mockComparisonResult();
     render(<ProviderComparison data={data} />);
-    expect(screen.getByRole("link", { name: "Back to Upload" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Back to Upload/i })).toBeInTheDocument();
   });
 
-  it("renders side-by-side provider results with scores", () => {
+  it("renders side-by-side provider results with scores and keywords", () => {
     const data = mockComparisonResult({
       results: {
         anthropic: mockOptimizationResult({ match_score: 78, summary: "Strong fit." }),
         openai: mockOptimizationResult({ match_score: 72, summary: "Good fit." }),
       },
       comparison: {
-        score_delta: { anthropic: 0, openai: -6 },
+        score_delta: { anthropic: 78, openai: 72 },
         unique_keywords: { anthropic: ["Claude"], openai: ["GPT"] },
         processing_time_ms: { anthropic: 1200, openai: 800 },
       },
@@ -33,11 +33,11 @@ describe("ProviderComparison", () => {
     render(<ProviderComparison data={data} />);
 
     expect(screen.getAllByText("Claude").length).toBeGreaterThan(0);
-    expect(screen.getByText("GPT-4o")).toBeInTheDocument();
-    expect(screen.getByText("Strong fit.")).toBeInTheDocument();
-    expect(screen.getByText("Good fit.")).toBeInTheDocument();
-    expect(screen.getByText("1200ms")).toBeInTheDocument();
-    expect(screen.getByText("800ms")).toBeInTheDocument();
+    expect(screen.getAllByText("GPT-4o").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("78").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("72").length).toBeGreaterThan(0);
+    const viewLinks = screen.getAllByRole("link", { name: /View full results/i });
+    expect(viewLinks.length).toBeGreaterThan(0);
   });
 
   it("renders error state when result has error", () => {

@@ -18,6 +18,8 @@ export function LandingHero({
   heroSubtitle,
   ctaSecondaryLabel,
   socialProof,
+  welcomeBackText,
+  secondaryCta,
 }: LandingHeroProps) {
   const reduceMotion = useReducedMotion() ?? false;
 
@@ -27,6 +29,11 @@ export function LandingHero({
       aria-labelledby="hero-heading"
     >
       <div className="mx-auto w-full max-w-3xl text-center">
+        {welcomeBackText ? (
+          <p className="mb-4 text-xl font-semibold text-foreground sm:text-2xl">
+            {welcomeBackText}
+          </p>
+        ) : null}
         <div className="relative">
           <h1
             id="hero-heading"
@@ -66,16 +73,18 @@ export function LandingHero({
           <div className="[&_button]:min-w-[180px] [&_a]:min-w-[180px]">
             {primaryCta}
           </div>
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={scrollToFeatures}
-            className="min-w-[180px] border-2"
-            aria-label={ctaSecondaryLabel}
-          >
-            {ctaSecondaryLabel}
-            <ChevronDown className="ml-2 size-4" aria-hidden />
-          </Button>
+          {secondaryCta ?? (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={scrollToFeatures}
+              className="min-w-[180px] border-2"
+              aria-label={ctaSecondaryLabel}
+            >
+              {ctaSecondaryLabel}
+              <ChevronDown className="ml-2 size-4" aria-hidden />
+            </Button>
+          )}
         </div>
 
         <LazyMotion features={domAnimation} strict>

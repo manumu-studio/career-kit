@@ -1,13 +1,12 @@
-/** Full circular score gauge — 4 segments (red/orange/yellow/green), needle, center score. */
+/** Full circular score gauge — 3 segments (red 25% / orange 50% / green 25%), needle, center score. */
 "use client";
 
 import type { ScoreGaugeProps } from "./ScoreGauge.types";
 
-const SEGMENT_COLORS = [
-  { color: "#ef4444" },
-  { color: "#f97316" },
-  { color: "#eab308" },
-  { color: "#22c55e" },
+const SEGMENTS = [
+  { color: "#ef4444", share: 0.25 },
+  { color: "#f97316", share: 0.5 },
+  { color: "#22c55e", share: 0.25 },
 ] as const;
 
 function clampScore(score: number): number {
@@ -22,7 +21,6 @@ export function ScoreGauge({ score, size = 140, label = "Job Match" }: ScoreGaug
   const cy = size / 2;
 
   const circumference = 2 * Math.PI * radius;
-  const segmentLength = circumference / 4;
 
   const needleAngle = ((90 - (clampedScore / 100) * 360) * Math.PI) / 180;
   const needleLength = radius - strokeWidth / 2;
@@ -47,22 +45,26 @@ export function ScoreGauge({ score, size = 140, label = "Job Match" }: ScoreGaug
           strokeWidth={strokeWidth}
           className="text-muted/30"
         />
-        {/* Colored segments */}
-        {SEGMENT_COLORS.map((seg, i) => (
-          <circle
-            key={seg.color}
-            r={radius}
-            cx={cx}
-            cy={cy}
-            fill="none"
-            stroke={seg.color}
-            strokeWidth={strokeWidth}
-            strokeDasharray={`${segmentLength} ${circumference - segmentLength}`}
-            strokeDashoffset={-i * segmentLength}
-            strokeLinecap="butt"
-            transform={`rotate(-90 ${cx} ${cy})`}
-          />
-        ))}
+        {/* Colored segments: red 25%, orange 50%, green 25% */}
+        {SEGMENTS.map((seg, i) => {
+          const segmentLength = seg.share * circumference;
+          const offset = SEGMENTS.slice(0, i).reduce((sum, s) => sum + s.share, 0) * -circumference;
+          return (
+            <circle
+              key={seg.color}
+              r={radius}
+              cx={cx}
+              cy={cy}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${segmentLength} ${circumference - segmentLength}`}
+              strokeDashoffset={offset}
+              strokeLinecap="butt"
+              transform={`rotate(-90 ${cx} ${cy})`}
+            />
+          );
+        })}
         {/* Needle */}
         <line
           x1={cx}

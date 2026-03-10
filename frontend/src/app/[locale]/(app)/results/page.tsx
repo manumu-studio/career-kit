@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import { motion, useReducedMotion } from "framer-motion";
 import { CompanyInfo } from "@/components/ui/CompanyInfo";
 import { CoverLetterDisplay } from "@/components/ui/CoverLetterDisplay";
 import { CvComparison } from "@/components/ui/CvComparison";
@@ -15,9 +16,12 @@ import { ScoreCard } from "@/components/ui/ScoreCard";
 import { ToneSelector } from "@/components/ui/ToneSelector";
 import { useOptimizationContext } from "@/context/OptimizationContext";
 import { useSession } from "@/features/auth";
+import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 import { useToast } from "@/components/ui/Toast";
 import { generateCoverLetter, handleApiError } from "@/lib/api";
 import type { CoverLetterTone } from "@/types/cover-letter";
+
+const SECTION_STAGGER = 0.2;
 
 function buildCvTextFromSections(
   sections: { heading: string; original: string }[],
@@ -108,16 +112,44 @@ export default function ResultsPage() {
     t,
   ]);
 
+  const reducedMotion = useReducedMotion();
+  const companyName =
+    companyResearch?.profile?.name ?? formState.companyName ?? coverCompanyName;
+  const roleName = formState.jobTitle || null;
+
   if (!result) {
-    return null;
+    return (
+      <main className="mx-auto min-h-screen w-full max-w-6xl px-6 py-10">
+        <LoadingSkeleton variant="results" />
+      </main>
+    );
   }
 
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: reducedMotion
+        ? { duration: 0 }
+        : { delay: i * SECTION_STAGGER, duration: 0.3 },
+    }),
+  };
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-4 pb-24 py-8 sm:px-6 md:pb-0 md:py-10 lg:py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-4 pb-24 py-8 sm:px-6 md:pb-24 md:py-10 lg:py-12">
+      {/* Floating export toolbar */}
+      <div className="fixed bottom-0 inset-x-0 z-30 border-t border-border bg-background/90 py-3 backdrop-blur-md">
+        <ExportToolbar
+          optimizationResult={result}
+          coverLetter={coverLetter}
+        />
+      </div>
+
       <header className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold text-white sm:text-3xl">
+            <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">
               {t("title")}
             </h1>
             {(() => {
@@ -127,60 +159,84 @@ export default function ResultsPage() {
               ) : null;
             })()}
           </div>
-          <p className="text-sm text-slate-400">{t("readyMessage")}</p>
+          <p className="text-sm text-muted-foreground">{t("readyMessage")}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="hidden md:contents">
-            <ExportToolbar
-              optimizationResult={result}
-              coverLetter={coverLetter}
-            />
-          </div>
-          <Link
-            className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
-            href="/home"
-          >
-            {t("backToUpload")}
-          </Link>
-        </div>
+        <Link
+          className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
+          href="/home"
+        >
+          {t("backToUpload")}
+        </Link>
       </header>
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center gap-2 border-t border-slate-800 bg-slate-950/95 p-3 backdrop-blur md:hidden">
-        <ExportToolbar
-          optimizationResult={result}
-          coverLetter={coverLetter}
-        />
-      </div>
-
-      <section
+      <motion.section
         aria-live="polite"
         aria-label="Optimization summary"
-        className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5"
+        className="rounded-xl border border-border bg-card p-5"
+        custom={0}
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
       >
-        <p className="text-sm leading-relaxed text-slate-200">{result.summary}</p>
-      </section>
+        <p className="text-sm leading-relaxed text-foreground">{result.summary}</p>
+      </motion.section>
 
+      {/* Order: Keywords → Gaps → CV Comparison → Cover Letter → Score gauge (last) */}
       <div
         aria-label="Optimization results"
         className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]"
       >
         <div className="space-y-8">
-          <ScoreCard score={result.match_score} />
-          <KeywordMatch matches={result.keyword_matches} misses={result.keyword_misses} />
-          <GapAnalysis gaps={result.gap_analysis} />
+          <motion.div
+            custom={1}
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+          >
+            <KeywordMatch matches={result.keyword_matches} misses={result.keyword_misses} />
+          </motion.div>
+          <motion.div
+            custom={2}
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+          >
+            <GapAnalysis gaps={result.gap_analysis} />
+          </motion.div>
+          <motion.div
+            custom={5}
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+          >
+            <ScoreCard score={result.match_score} />
+          </motion.div>
         </div>
-
-        <div className="max-h-[70vh] overflow-y-auto pr-1">
-          <CvComparison sections={result.sections} />
+        <div className="space-y-8">
+          <motion.div
+            custom={3}
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+            className="max-h-[70vh] overflow-y-auto pr-1"
+          >
+            <CvComparison sections={result.sections} />
+          </motion.div>
         </div>
       </div>
 
       {!coverLetter ? (
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-          <h2 className="mb-4 text-lg font-semibold text-white">
+        <motion.section
+          className="rounded-xl border border-border bg-card p-5"
+          custom={2}
+          initial="hidden"
+          animate="visible"
+          variants={sectionVariants}
+        >
+          <h2 className="mb-4 text-lg font-semibold text-foreground">
             {t("generateOptional")}
           </h2>
-          <p className="mb-4 text-sm text-slate-400">{t("generateDesc")}</p>
+          <p className="mb-4 text-sm text-muted-foreground">{t("generateDesc")}</p>
           <div className="space-y-4">
             <CompanyInfo
               companyName={coverCompanyName}
@@ -195,10 +251,10 @@ export default function ResultsPage() {
               disabled={isGenerating}
             />
             {coverError ? (
-              <p className="text-sm text-rose-300">{coverError}</p>
+              <p className="text-sm text-destructive">{coverError}</p>
             ) : null}
             <button
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-sky-500 px-4 py-2 font-medium text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={
                 isGenerating ||
                 !coverCompanyName.trim() ||
@@ -209,7 +265,7 @@ export default function ResultsPage() {
             >
               {isGenerating ? (
                 <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                   {t("generating")}
                 </>
               ) : (
@@ -217,11 +273,22 @@ export default function ResultsPage() {
               )}
             </button>
           </div>
-        </section>
+        </motion.section>
       ) : null}
 
       {coverLetter ? (
-        <CoverLetterDisplay coverLetter={coverLetter} />
+        <motion.div
+          custom={3}
+          initial="hidden"
+          animate="visible"
+          variants={sectionVariants}
+        >
+          <CoverLetterDisplay
+            coverLetter={coverLetter}
+            companyName={companyName || undefined}
+            roleName={roleName}
+          />
+        </motion.div>
       ) : null}
     </main>
   );

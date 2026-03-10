@@ -17,7 +17,7 @@ describe("ProviderSelector", () => {
     expect(screen.getByText("AI Provider")).toBeInTheDocument();
   });
 
-  it("renders provider options", () => {
+  it("renders provider options as pills", () => {
     render(
       <ProviderSelector
         value="anthropic"
@@ -26,8 +26,9 @@ describe("ProviderSelector", () => {
         defaultProvider="anthropic"
       />,
     );
-    const combobox = screen.getByRole("combobox", { name: "Select AI provider" });
-    expect(combobox).toHaveTextContent("anthropic");
+    const anthropicButton = screen.getByRole("button", { name: /Claude \(Haiku\)/ });
+    expect(anthropicButton).toBeInTheDocument();
+    expect(anthropicButton).toHaveAttribute("aria-pressed", "true");
   });
 
   it("calls onChange when selection changes", async () => {
@@ -41,10 +42,8 @@ describe("ProviderSelector", () => {
         defaultProvider="anthropic"
       />,
     );
-    const combobox = screen.getByRole("combobox", { name: "Select AI provider" });
-    await user.click(combobox);
-    const openaiOption = await screen.findByText(/GPT-4o/);
-    await user.click(openaiOption);
+    const openaiButton = screen.getByRole("button", { name: /GPT-4o/ });
+    await user.click(openaiButton);
     expect(onChange).toHaveBeenCalledWith("openai");
   });
 
@@ -53,15 +52,15 @@ describe("ProviderSelector", () => {
       <ProviderSelector
         value={null}
         onChange={() => {}}
-        available={["anthropic"]}
+        available={["anthropic", "openai"]}
         defaultProvider="openai"
       />,
     );
-    const combobox = screen.getByRole("combobox", { name: "Select AI provider" });
-    expect(combobox).toHaveTextContent("openai");
+    const openaiButton = screen.getByRole("button", { name: /GPT-4o/ });
+    expect(openaiButton).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("disables select when disabled prop is true", () => {
+  it("disables buttons when disabled prop is true", () => {
     render(
       <ProviderSelector
         value="anthropic"
@@ -71,6 +70,7 @@ describe("ProviderSelector", () => {
         disabled
       />,
     );
-    expect(screen.getByRole("combobox")).toBeDisabled();
+    const anthropicButton = screen.getByRole("button", { name: /Claude \(Haiku\)/ });
+    expect(anthropicButton).toBeDisabled();
   });
 });

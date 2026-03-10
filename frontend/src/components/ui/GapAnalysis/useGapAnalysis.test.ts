@@ -19,10 +19,12 @@ describe("useGapAnalysis", () => {
     ]);
   });
 
-  it("returns style classes per importance", () => {
-    const state = useGapAnalysis([]);
-    expect(state.getBadgeClassName("critical")).toContain("text-rose-300");
-    expect(state.getBadgeClassName("preferred")).toContain("text-amber-300");
-    expect(state.getBadgeClassName("nice_to_have")).toContain("text-slate-200");
+  it("sorts gaps by name when sortMode is name", () => {
+    const gaps: Gap[] = [
+      { skill: "Docker", importance: "critical", suggestion: "Mention containers." },
+      { skill: "AWS", importance: "preferred", suggestion: "Add cloud experience." },
+    ];
+    const state = useGapAnalysis(gaps, "name");
+    expect(state.sortedGaps.map((gap) => gap.skill)).toEqual(["AWS", "Docker"]);
   });
 });

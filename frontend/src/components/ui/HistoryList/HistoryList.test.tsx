@@ -42,17 +42,15 @@ describe("HistoryList", () => {
 
   it("shows empty state when items are empty and not loading", () => {
     render(<HistoryList {...defaultProps} />);
-    expect(
-      screen.getByText(
-        "No analyses yet. Run company research or CV optimization to see your history.",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByText("No analyses yet")).toBeInTheDocument();
+    expect(screen.getByText("Upload your first CV to get started")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Start your first analysis" })).toBeInTheDocument();
   });
 
-  it("shows loading spinner when isLoading is true", () => {
+  it("shows loading skeleton when isLoading is true", () => {
     render(<HistoryList {...defaultProps} isLoading />);
-    const spinner = document.querySelector(".animate-spin");
-    expect(spinner).toBeInTheDocument();
+    const skeletons = document.querySelectorAll("[data-slot='skeleton']");
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it("shows error message when error is set", () => {

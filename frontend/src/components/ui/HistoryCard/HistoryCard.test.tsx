@@ -40,7 +40,7 @@ describe("HistoryCard", () => {
     const item = mockHistoryEntry({ match_score: 75 });
     render(<HistoryCard item={item} onView={onView} onDelete={onDelete} />);
 
-    expect(screen.getByText("75% ATS")).toBeInTheDocument();
+    expect(screen.getByText("75")).toBeInTheDocument();
   });
 
   it("renders Cached badge when cache_hit is true", () => {

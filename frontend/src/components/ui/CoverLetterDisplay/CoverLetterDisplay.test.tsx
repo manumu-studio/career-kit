@@ -31,7 +31,7 @@ describe("CoverLetterDisplay", () => {
     });
     render(<CoverLetterDisplay coverLetter={coverLetter} />);
 
-    expect(screen.getByText("Key selling points")).toBeInTheDocument();
+    expect(screen.getByText("Key Selling Points")).toBeInTheDocument();
     expect(screen.getByText("5+ years Python")).toBeInTheDocument();
     expect(screen.getByText("FastAPI experience")).toBeInTheDocument();
   });
@@ -40,7 +40,7 @@ describe("CoverLetterDisplay", () => {
     const coverLetter = mockCoverLetterResult({ key_selling_points: [] });
     render(<CoverLetterDisplay coverLetter={coverLetter} />);
 
-    expect(screen.queryByText("Key selling points")).not.toBeInTheDocument();
+    expect(screen.queryByText("Key Selling Points")).not.toBeInTheDocument();
   });
 
   it("renders word count and tone", () => {

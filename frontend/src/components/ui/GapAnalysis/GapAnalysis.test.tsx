@@ -17,7 +17,7 @@ describe("GapAnalysis", () => {
     render(<GapAnalysis gaps={gaps} />);
 
     expect(screen.getByText("Kubernetes")).toBeInTheDocument();
-    expect(screen.getByText("preferred")).toBeInTheDocument();
+    expect(screen.getByText("Important")).toBeInTheDocument();
     expect(screen.getByText("Add one production deployment bullet.")).toBeInTheDocument();
   });
 

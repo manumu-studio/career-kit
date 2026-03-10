@@ -1,133 +1,301 @@
 "use client";
 
-/** Full-page company research report presentation component. */
+/** Full-page company research report with card-based intelligence sections. */
+import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  Building2,
+  Target,
+  MessageSquare,
+  AlertTriangle,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { KeywordChips } from "@/components/ui/KeywordChips";
 import { cn } from "@/lib/utils";
 import type { CompanyReportProps } from "./CompanyReport.types";
+import type { CompanyResearchResult } from "@/types/company";
 
-export function CompanyReport({ research, className }: CompanyReportProps) {
-  const { profile, report, research_quality: quality, sources_used: sources } = research;
+const DESKTOP_BREAKPOINT = 768;
+const STAGGER_DELAY = 0.15;
+
+type SectionId = "culture" | "role" | "interview" | "risk" | "strategy";
+
+function useIsDesktop(): boolean {
+  const [isDesktop, setIsDesktop] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`);
+    const handler = () => setIsDesktop(mq.matches);
+    handler();
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isDesktop;
+}
+
+function ConfidenceBadge({
+  quality,
+  t,
+}: {
+  quality: CompanyResearchResult["research_quality"];
+  t: (key: string) => string;
+}) {
+  const label =
+    quality === "high"
+      ? t("confidenceHigh")
+      : quality === "medium"
+        ? t("confidenceMedium")
+        : quality === "low"
+          ? t("confidenceLow")
+          : t("confidenceUnknown");
+
+  const variantClass =
+    quality === "high"
+      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+      : quality === "medium"
+        ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+        : quality === "low"
+          ? "bg-slate-500/20 text-slate-400 border-slate-500/30"
+          : "bg-muted text-muted-foreground";
 
   return (
-    <article className={cn("space-y-8", className)}>
+    <Badge variant="outline" className={cn("border text-xs", variantClass)}>
+      {label}
+    </Badge>
+  );
+}
+
+export function CompanyReport({ research, className }: CompanyReportProps) {
+  const t = useTranslations("report");
+  const { profile, report, research_quality: quality, sources_used: sources } = research;
+  const reducedMotion = useReducedMotion();
+  const isDesktop = useIsDesktop();
+
+  const [expandedSection, setExpandedSection] = useState<SectionId | null>("culture");
+
+  const isExpanded = (id: SectionId) =>
+    isDesktop ? true : expandedSection === id;
+
+  const toggleSection = (id: SectionId) => {
+    if (!isDesktop)
+      setExpandedSection((prev) => (prev === id ? null : id));
+  };
+
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: reducedMotion ? 0 : STAGGER_DELAY,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: reducedMotion ? {} : { opacity: 0, y: 12 },
+    visible: reducedMotion ? {} : { opacity: 1, y: 0 },
+  };
+
+  const sections: Array<{
+    id: SectionId;
+    titleKey: string;
+    icon: React.ElementType;
+    iconClass: string;
+    content: React.ReactNode;
+    hasSources: boolean;
+  }> = [
+    {
+      id: "culture",
+      titleKey: "cultureReality",
+      icon: Building2,
+      iconClass: "text-sky-400",
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">{report.culture_and_values}</p>
+          <div className="flex flex-wrap gap-2">
+            {profile.core_values.map((value) => (
+              <span
+                key={value}
+                className="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-200"
+              >
+                {value}
+              </span>
+            ))}
+          </div>
+        </div>
+      ),
+      hasSources: false,
+    },
+    {
+      id: "role",
+      titleKey: "roleExpectations",
+      icon: Target,
+      iconClass: "text-emerald-400",
+      content: (
+        <p className="text-sm text-muted-foreground">{report.what_they_look_for}</p>
+      ),
+      hasSources: false,
+    },
+    {
+      id: "interview",
+      titleKey: "interviewSignals",
+      icon: MessageSquare,
+      iconClass: "text-amber-400",
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">{report.interview_preparation}</p>
+          <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+            {profile.interview_insights.map((insight) => (
+              <li key={`${insight.source}-${insight.tip}`}>
+                {insight.tip} ({insight.source})
+              </li>
+            ))}
+          </ul>
+        </div>
+      ),
+      hasSources: false,
+    },
+    {
+      id: "risk",
+      titleKey: "riskFlags",
+      icon: AlertTriangle,
+      iconClass: "text-rose-400",
+      content: (
+        <ul className="list-disc space-y-1 pl-5 text-sm text-amber-300">
+          {report.red_flags.map((redFlag) => (
+            <li key={redFlag}>{redFlag}</li>
+          ))}
+        </ul>
+      ),
+      hasSources: false,
+    },
+    {
+      id: "strategy",
+      titleKey: "candidateStrategy",
+      icon: Lightbulb,
+      iconClass: "text-violet-400",
+      content: (
+        <div className="space-y-4">
+          <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+            {report.talking_points.map((talkingPoint) => (
+              <li key={talkingPoint}>{talkingPoint}</li>
+            ))}
+          </ol>
+          <KeywordChips keywords={report.keywords_to_mirror} />
+        </div>
+      ),
+      hasSources: sources.length > 0,
+    },
+  ];
+
+  return (
+    <article className={cn("space-y-6", className)}>
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold text-white">{profile.name}</h1>
         <p className="text-sm text-slate-300">
           {profile.industry} • {profile.size_estimate}
         </p>
-        <span className="inline-flex rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-300">
-          Research quality: {quality}
-        </span>
+        <p className="text-sm text-slate-300">{report.executive_summary}</p>
       </header>
 
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-slate-100">Executive Summary</h2>
-        <p className="text-slate-300">{report.executive_summary}</p>
-      </section>
+      <motion.div
+        className="flex flex-col gap-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {sections.map((section) => {
+          const Icon = section.icon;
+          const expanded = isExpanded(section.id);
 
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-slate-100">Culture & Values</h2>
-        <p className="text-slate-300">{report.culture_and_values}</p>
-        <div className="flex flex-wrap gap-2">
-          {profile.core_values.map((value) => (
-            <span
-              key={value}
-              className="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-200"
-            >
-              {value}
-            </span>
-          ))}
-        </div>
-      </section>
+          return (
+            <motion.div key={section.id} variants={cardVariants}>
+              <Card
+                className={cn(
+                  "overflow-hidden transition-colors",
+                  !isDesktop && "cursor-pointer hover:bg-muted/30",
+                )}
+              >
+                <CardHeader
+                  className="flex flex-row items-center justify-between gap-2 py-4"
+                  onClick={() => !isDesktop && toggleSection(section.id)}
+                  role={!isDesktop ? "button" : undefined}
+                  aria-expanded={expanded}
+                  tabIndex={!isDesktop ? 0 : undefined}
+                  onKeyDown={
+                    !isDesktop
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            toggleSection(section.id);
+                          }
+                        }
+                      : undefined
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className={cn("size-5 shrink-0", section.iconClass)} aria-hidden />
+                    <CardTitle className="text-base font-semibold">
+                      {t(section.titleKey)}
+                    </CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ConfidenceBadge quality={quality} t={t} />
+                    {!isDesktop &&
+                      (expanded ? (
+                        <ChevronUp className="size-4 text-muted-foreground" aria-hidden />
+                      ) : (
+                        <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
+                      ))}
+                  </div>
+                </CardHeader>
 
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-slate-100">What They Look For</h2>
-        <p className="text-slate-300">{report.what_they_look_for}</p>
-      </section>
-
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-slate-100">Interview Preparation</h2>
-        <p className="text-slate-300">{report.interview_preparation}</p>
-        <ul className="list-disc space-y-1 pl-5 text-sm text-slate-300">
-          {profile.interview_insights.map((insight) => (
-            <li key={`${insight.source}-${insight.tip}`}>
-              {insight.tip} ({insight.source})
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-slate-100">Recent News</h2>
-        <ul className="space-y-2 text-sm text-slate-300">
-          {profile.recent_news.map((item) => (
-            <li key={`${item.source}-${item.headline}`} className="rounded border border-slate-800 p-3">
-              <p className="font-medium text-slate-100">{item.headline}</p>
-              <p>
-                {item.source}
-                {item.date ? ` • ${item.date}` : ""}
-              </p>
-              <p>{item.relevance}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-slate-100">Talking Points</h2>
-        <ol className="list-decimal space-y-1 pl-5 text-slate-300">
-          {report.talking_points.map((talkingPoint) => (
-            <li key={talkingPoint}>{talkingPoint}</li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-slate-100">Red Flags</h2>
-        <ul className="list-disc space-y-1 pl-5 text-amber-300">
-          {report.red_flags.map((redFlag) => (
-            <li key={redFlag}>{redFlag}</li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-slate-100">Employee Sentiment</h2>
-        <p className="text-slate-300">{profile.employee_sentiment.summary}</p>
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded border border-emerald-900/60 bg-emerald-950/20 p-3">
-            <h3 className="mb-1 text-sm font-semibold text-emerald-300">Pros</h3>
-            <ul className="list-disc space-y-1 pl-4 text-sm text-slate-300">
-              {profile.employee_sentiment.pros.map((pro) => (
-                <li key={pro}>{pro}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded border border-rose-900/60 bg-rose-950/20 p-3">
-            <h3 className="mb-1 text-sm font-semibold text-rose-300">Cons</h3>
-            <ul className="list-disc space-y-1 pl-4 text-sm text-slate-300">
-              {profile.employee_sentiment.cons.map((con) => (
-                <li key={con}>{con}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <KeywordChips keywords={report.keywords_to_mirror} />
-
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-slate-100">Sources</h2>
-        <ul className="space-y-1 text-sm text-sky-300">
-          {sources.map((source) => (
-            <li key={source}>
-              <a className="underline hover:text-sky-200" href={source} rel="noreferrer" target="_blank">
-                {source}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
+                <AnimatePresence initial={false}>
+                  {expanded ? (
+                    <motion.div
+                      initial={
+                        reducedMotion ? false : { height: 0, opacity: 0 }
+                      }
+                      animate={
+                        reducedMotion ? {} : { height: "auto", opacity: 1 }
+                      }
+                      exit={reducedMotion ? {} : { height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <CardContent className="pt-0 pb-4">{section.content}</CardContent>
+                      {section.hasSources ? (
+                        <CardFooter className="flex flex-col items-start gap-2 border-t border-border py-3">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {t("sources")}
+                          </span>
+                          <ul className="space-y-1 text-xs text-muted-foreground">
+                            {sources.map((source) => (
+                              <li key={source}>
+                                <a
+                                  className="underline hover:text-foreground"
+                                  href={source}
+                                  rel="noopener noreferrer"
+                                  target="_blank"
+                                >
+                                  {source}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardFooter>
+                      ) : null}
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </Card>
+            </motion.div>
+          );
+        })}
+      </motion.div>
     </article>
   );
 }

@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "@/features/auth/auth";
 import { OptimizationProvider } from "@/context/OptimizationContext";
 import { Navbar } from "@/components/ui/Navbar";
+import { PageTransition } from "@/components/ui/PageTransition";
 import type { ReactNode } from "react";
 
 const E2E_BYPASS =
@@ -35,7 +36,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         userEmail={user.email}
       />
       <main className="min-h-screen pt-14">
-        <OptimizationProvider>{children}</OptimizationProvider>
+        <OptimizationProvider>
+          <PageTransition>{children}</PageTransition>
+        </OptimizationProvider>
       </main>
     </SessionProvider>
   );

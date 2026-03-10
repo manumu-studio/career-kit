@@ -23,7 +23,7 @@ describe("KeywordMatch", () => {
 
     const matchedTag = screen.getByText("Python");
     const missedTag = screen.getByText("Kubernetes");
-    expect(matchedTag).toHaveClass("bg-emerald-500/20");
-    expect(missedTag).toHaveClass("bg-rose-500/20");
+    expect(matchedTag).toHaveClass("bg-emerald-500/15");
+    expect(missedTag).toHaveClass("bg-rose-500/15");
   });
 });
