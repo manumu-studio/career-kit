@@ -1,11 +1,9 @@
-/** Generic skeleton placeholder with shimmer animation. */
+/** Generic skeleton placeholder using ShadCN Skeleton. */
 "use client";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { LoadingSkeletonProps } from "./LoadingSkeleton.types";
-
-const baseClasses =
-  "animate-shimmer bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-[length:200%_100%]";
 
 export function LoadingSkeleton({
   variant = "text",
@@ -19,8 +17,8 @@ export function LoadingSkeleton({
         : "rounded-full";
 
   return (
-    <div
-      className={cn(baseClasses, variantClasses, className)}
+    <Skeleton
+      className={cn(variantClasses, className)}
       role="presentation"
       aria-hidden
     />

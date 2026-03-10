@@ -1,13 +1,13 @@
 /**
  * Captures CV/resume-specific page screenshots for UI/UX research.
- * Run: npx playwright test capture-cv-pages --config=e2e/playwright-dashboard-capture.config.ts
+ * Run from repo root: npx playwright test capture-cv-pages --config=e2e-captures/playwright-cv-capture.config.ts
  */
 import { test } from "@playwright/test";
 import path from "path";
 
 const SCREENSHOTS_DIR = path.join(
   process.cwd(),
-  "../docs/research/screenshots/cv-pages"
+  "docs/research/screenshots/cv-pages"
 );
 
 const CV_PAGES: Array<{

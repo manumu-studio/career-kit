@@ -2,6 +2,8 @@
 
 /** Company research form that triggers backend research and displays results. */
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { handleApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
@@ -62,16 +64,20 @@ export function CompanySearch({
   };
 
   return (
-    <section className={cn("space-y-4 rounded-xl border border-slate-800 bg-slate-900/40 p-5", className)}>
-      <h2 className="text-lg font-semibold text-white">{t("step1")}</h2>
-      <p className="text-sm text-slate-300">{t("step1Desc")}</p>
+    <section
+      className={cn(
+        "space-y-4 rounded-xl border border-border bg-card p-5",
+        className,
+      )}
+    >
+      <h2 className="text-lg font-semibold text-foreground">{t("step1")}</h2>
+      <p className="text-sm text-muted-foreground">{t("step1Desc")}</p>
 
       <div className="grid gap-3">
         <label className="grid gap-1 text-sm">
-          <span className="text-slate-200">{t("companyNameRequired")}</span>
-          <input
+          <span className="text-foreground">{t("companyNameRequired")}</span>
+          <Input
             aria-label={t("companyName")}
-            className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
             onChange={(event) => {
               setCompanyName(event.target.value);
             }}
@@ -82,10 +88,9 @@ export function CompanySearch({
         </label>
 
         <label className="grid gap-1 text-sm">
-          <span className="text-slate-200">{t("companyUrl")}</span>
-          <input
+          <span className="text-foreground">{t("companyUrl")}</span>
+          <Input
             aria-label={t("companyUrl")}
-            className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
             onChange={(event) => {
               setCompanyUrl(event.target.value);
             }}
@@ -96,10 +101,9 @@ export function CompanySearch({
         </label>
 
         <label className="grid gap-1 text-sm">
-          <span className="text-slate-200">{t("jobTitle")}</span>
-          <input
+          <span className="text-foreground">{t("jobTitle")}</span>
+          <Input
             aria-label={t("jobTitle")}
-            className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
             onChange={(event) => {
               setJobTitle(event.target.value);
             }}
@@ -120,24 +124,23 @@ export function CompanySearch({
       ) : null}
 
       <div className="flex items-center gap-3">
-        <button
-          className="rounded-md bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
+        <Button
           disabled={isLoading || companyName.trim().length === 0}
           onClick={() => {
             void handleResearch();
           }}
-          type="button"
         >
           {isLoading ? t("researching") : t("researchButton")}
-        </button>
+        </Button>
         {error ? (
-          <button
-            className="text-sm text-slate-300 underline"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
             onClick={clearError}
-            type="button"
           >
             {t("dismiss")}
-          </button>
+          </Button>
         ) : null}
       </div>
 
@@ -145,7 +148,7 @@ export function CompanySearch({
         <ResearchProgress currentStep={currentStep} />
       ) : null}
 
-      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {result ? (
         <CompanyCard

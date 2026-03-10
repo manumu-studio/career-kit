@@ -26,8 +26,8 @@ describe("ProviderSelector", () => {
         defaultProvider="anthropic"
       />,
     );
-    const select = screen.getByRole("combobox", { name: "Select AI provider" });
-    expect(select).toHaveValue("anthropic");
+    const combobox = screen.getByRole("combobox", { name: "Select AI provider" });
+    expect(combobox).toHaveTextContent("anthropic");
   });
 
   it("calls onChange when selection changes", async () => {
@@ -41,8 +41,10 @@ describe("ProviderSelector", () => {
         defaultProvider="anthropic"
       />,
     );
-    const select = screen.getByRole("combobox", { name: "Select AI provider" });
-    await user.selectOptions(select, "openai");
+    const combobox = screen.getByRole("combobox", { name: "Select AI provider" });
+    await user.click(combobox);
+    const openaiOption = await screen.findByText(/GPT-4o/);
+    await user.click(openaiOption);
     expect(onChange).toHaveBeenCalledWith("openai");
   });
 
@@ -55,8 +57,8 @@ describe("ProviderSelector", () => {
         defaultProvider="openai"
       />,
     );
-    const select = screen.getByRole("combobox", { name: "Select AI provider" });
-    expect(select).toHaveValue("openai");
+    const combobox = screen.getByRole("combobox", { name: "Select AI provider" });
+    expect(combobox).toHaveTextContent("openai");
   });
 
   it("disables select when disabled prop is true", () => {

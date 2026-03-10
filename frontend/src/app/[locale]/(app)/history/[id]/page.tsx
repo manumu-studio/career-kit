@@ -148,14 +148,14 @@ export default function HistoryDetailPage() {
         <div className="flex gap-2">
           {optimizationResult ? (
             <Link
-              className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 hover:text-white"
+              className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
               href={`/history/compare?a=${id}`}
             >
               {t("compareWithAnother")}
             </Link>
           ) : null}
           <Link
-            className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500 hover:text-white"
+            className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
             href="/history"
           >
             {t("backToHistory")}

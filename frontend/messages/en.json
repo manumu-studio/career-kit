@@ -199,6 +199,16 @@
     "clickToBrowse": "or click to browse (max 5MB)",
     "removeFile": "Remove file"
   },
+  "navbar": {
+    "home": "Home",
+    "history": "History",
+    "compare": "Compare",
+    "navAriaLabel": "Main navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "themeLight": "Switch to light mode",
+    "themeDark": "Switch to dark mode"
+  },
   "userBar": {
     "signedInAs": "Signed in as",
     "history": "History",

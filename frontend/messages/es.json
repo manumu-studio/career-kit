@@ -59,10 +59,6 @@
     "original": "Original",
     "optimized": "Optimizado",
     "changesMade": "Cambios realizados",
-    "keywordMatch": "Coincidencia de palabras clave",
-    "cvComparison": "Comparación de CV",
-    "original": "Original",
-    "optimized": "Optimizado",
     "coverLetter": "Carta de presentación",
     "generateCoverLetter": "Generar carta de presentación",
     "readyMessage": "Las mejoras de tu CV adaptadas al puesto están listas.",
@@ -202,6 +198,16 @@
     "dragDrop": "Arrastra y suelta tu PDF aquí",
     "clickToBrowse": "o haz clic para buscar (máx. 5MB)",
     "removeFile": "Quitar archivo"
+  },
+  "navbar": {
+    "home": "Inicio",
+    "history": "Historial",
+    "compare": "Comparar",
+    "navAriaLabel": "Navegación principal",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "themeLight": "Cambiar a modo claro",
+    "themeDark": "Cambiar a modo oscuro"
   },
   "userBar": {
     "signedInAs": "Conectado como",
