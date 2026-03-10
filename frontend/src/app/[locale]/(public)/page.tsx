@@ -1,9 +1,14 @@
-/** Public landing page with sign-in CTA or dashboard link. */
-import Link from "next/link";
+/** Public landing page — hero, features, sign-in CTA. */
 import { getTranslations } from "next-intl/server";
 import { auth, signIn } from "@/features/auth/auth";
 import { Link as LocaleLink } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { LandingHero } from "@/components/landing/LandingHero";
+import { FeatureShowcase } from "@/components/landing/FeatureShowcase";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { ProvidersSection } from "@/components/landing/ProvidersSection";
+import { CtaFooterSection } from "@/components/landing/CtaFooterSection";
+import { Footer } from "@/components/ui/Footer";
 
 interface LandingPageProps {
   params: Promise<{ locale: string }>;
@@ -21,56 +26,79 @@ export default async function LandingPage({
 
   const callbackUrl = `/${locale}/home`;
 
+  const gradientButtonClass =
+    "w-full animate-ai-gradient border-0 bg-clip-padding text-white hover:opacity-90 sm:w-auto sm:px-8";
+
+  const primaryCta = session?.user ? (
+    <LocaleLink href="/home">
+      <Button size="lg" className={gradientButtonClass}>
+        {t("goToApp")}
+      </Button>
+    </LocaleLink>
+  ) : (
+    <form
+      action={async () => {
+        "use server";
+        await signIn("manumustudio", { callbackUrl });
+      }}
+    >
+      <Button type="submit" size="lg" className={gradientButtonClass}>
+        {t("ctaPrimary")}
+      </Button>
+    </form>
+  );
+
+  const ctaFooterPrimaryCta = session?.user ? (
+    <LocaleLink href="/home">
+      <Button size="lg" className={gradientButtonClass}>
+        {t("goToApp")}
+      </Button>
+    </LocaleLink>
+  ) : (
+    <form
+      action={async () => {
+        "use server";
+        await signIn("manumustudio", { callbackUrl });
+      }}
+    >
+      <Button type="submit" size="lg" className={gradientButtonClass}>
+        {t("ctaFooterButton")}
+      </Button>
+    </form>
+  );
+
   return (
-    <main className="flex min-h-[calc(100dvh-3.5rem)] flex-col items-center justify-center px-4 py-12 sm:px-6 md:py-16">
-      <div className="w-full max-w-xl text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-          {t("title")}
-        </h1>
-        <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-          {t("subtitle")}
-        </p>
+    <>
+      <LandingHero
+        primaryCta={primaryCta}
+        heroTitle={t("heroTitle")}
+        heroSubtitle={t("heroSubtitle")}
+        ctaSecondaryLabel={t("ctaSecondary")}
+        socialProof={t("socialProof")}
+      />
 
-        <div className="mt-8">
-          {session?.user ? (
-            <LocaleLink href="/home">
-              <Button size="lg" className="w-full sm:w-auto sm:px-8">
-                {t("goToApp")}
-              </Button>
-            </LocaleLink>
-          ) : (
-            <>
-              {error ? (
-                <div className="mx-auto mb-6 max-w-md rounded-md border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
-                  {t("authFailed")}
-                </div>
-              ) : null}
-
-              <form
-                action={async () => {
-                  "use server";
-                  await signIn("manumustudio", { callbackUrl });
-                }}
-                className="mx-auto max-w-md"
-              >
-                <Button type="submit" size="lg" className="w-full sm:px-8">
-                  {t("signIn")}
-                </Button>
-              </form>
-
-              <p className="mt-4 text-sm text-muted-foreground">
-                {t("noAccount")}{" "}
-                <Link
-                  href="/api/auth/signup"
-                  className="text-primary underline-offset-4 hover:underline"
-                >
-                  {t("createAccount")}
-                </Link>
-              </p>
-            </>
-          )}
+      {error && !session?.user ? (
+        <div
+          className="mx-auto max-w-md px-4 pb-8"
+          role="alert"
+          aria-live="polite"
+        >
+          <div className="rounded-md border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+            {t("authFailed")}
+          </div>
         </div>
-      </div>
-    </main>
+      ) : null}
+
+      <FeatureShowcase />
+      <HowItWorks />
+      <ProvidersSection />
+      <CtaFooterSection primaryCta={ctaFooterPrimaryCta} />
+      <Footer
+        homeLabel={t("footerHome")}
+        privacyLabel={t("footerPrivacy")}
+        termsLabel={t("footerTerms")}
+        creditText={t("footerCredit")}
+      />
+    </>
   );
 }

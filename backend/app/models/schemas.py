@@ -35,6 +35,7 @@ class OptimizationResult(BaseModel):
     cached_at: Optional[str] = None  # ISO timestamp of original analysis
     analysis_id: Optional[str] = None  # UUID of stored analysis
     provider: Optional[str] = None  # LLM provider that generated this result
+    detected_language: Optional[str] = None  # "en" | "es" if auto-detected from CV
 
 
 class UsageMetrics(BaseModel):

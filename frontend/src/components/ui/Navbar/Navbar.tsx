@@ -1,6 +1,7 @@
 /** Navbar — fixed top bar with glass blur, nav links, language, theme, user menu. */
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
@@ -61,11 +62,16 @@ const LOGO_WHITE = "/assets/logo-white.webp";
 
 export function Navbar({ mode, userName, userEmail, className }: NavbarProps) {
   const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   const t = useTranslations("navbar");
   const tCommon = useTranslations("common");
   const tUserBar = useTranslations("userBar");
   const { mobileOpen, openMobile, closeMobile } = useNavbar();
-  const logoSrc = resolvedTheme === "dark" ? LOGO_WHITE : LOGO_BLACK;
+  const logoSrc =
+    !mounted ? LOGO_BLACK : resolvedTheme === "dark" ? LOGO_WHITE : LOGO_BLACK;
   const displayName = userName ?? userEmail ?? tCommon("user");
   const showNavLinks = mode === "app";
 

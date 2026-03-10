@@ -8,7 +8,8 @@ from typing import Annotated, Literal, Optional
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.core.config import settings
-from app.core.i18n import get_error_message, normalize_locale
+from app.core.i18n import get_error_message, normalize_locale, resolve_language
+from app.services.language_detector import detect_language
 from app.services.llm.factory import get_available_providers, get_provider
 from app.services.pdf_parser import extract_text_from_pdf
 
@@ -34,18 +35,21 @@ async def compare_providers(
     language: Annotated[Optional[Literal["en", "es"]], Form()] = None,  # noqa: UP045
 ) -> dict[str, object]:
     """Run optimize through multiple providers and return side-by-side results."""
-    loc = normalize_locale(language)
+    fallback = normalize_locale(language)
     filename = cv_file.filename or ""
     if not filename.lower().endswith(".pdf"):
         raise HTTPException(
             status_code=400,
-            detail=get_error_message(loc, "invalid_pdf"),
+            detail=get_error_message(fallback, "invalid_pdf"),
         )
 
     try:
-        cv_text = await extract_text_from_pdf(cv_file, locale=loc)
+        cv_text = await extract_text_from_pdf(cv_file, locale=fallback)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    detected = detect_language(cv_text)
+    loc = resolve_language(explicit=None, detected=detected, fallback=fallback)
 
     provider_names = [p.strip() for p in providers.split(",") if p.strip()]
     if len(provider_names) < 2:
