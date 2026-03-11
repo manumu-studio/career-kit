@@ -4,6 +4,7 @@ import { serverEnv } from "@/lib/env.server";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
+  secret: serverEnv.NEXTAUTH_SECRET,
   providers: [
     {
       id: "manumustudio",
