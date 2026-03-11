@@ -4,6 +4,7 @@ import { serverEnv } from "@/lib/env.server";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
+  secret: serverEnv.NEXTAUTH_SECRET,
   providers: [
     {
       id: "manumustudio",
@@ -56,5 +57,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
-  debug: serverEnv.NODE_ENV === "development",
+  /** TODO: revert to development-only after diagnosing production auth issue */
+  debug: true,
 });

@@ -7,6 +7,9 @@ import { Navbar } from "@/components/ui/Navbar";
 import { PageTransition } from "@/components/ui/PageTransition";
 import type { ReactNode } from "react";
 
+/** Force dynamic rendering so auth() runs per-request, not at build time. */
+export const dynamic = "force-dynamic";
+
 const E2E_BYPASS =
   process.env.NEXT_PUBLIC_E2E_BYPASS_AUTH === "true";
 
