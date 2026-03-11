@@ -1,9 +1,12 @@
-/** Temporary debug endpoint — returns what auth() sees in production. Remove after diagnosing. */
+/** Temporary debug endpoint — returns what auth() sees. Development only. */
 import { auth } from "@/features/auth/auth";
 import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  if (process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "Not available" }, { status: 404 });
+  }
   const session = await auth();
   const cookieStore = await cookies();
   const headerStore = await headers();

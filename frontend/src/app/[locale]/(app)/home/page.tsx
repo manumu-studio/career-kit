@@ -2,10 +2,11 @@
 
 /** Upload page where users submit CV + job description for optimization. */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
 import { CompanySearch } from "@/components/ui/CompanySearch";
@@ -13,6 +14,7 @@ import { FileUpload } from "@/components/ui/FileUpload";
 import { JobDescription } from "@/components/ui/JobDescription";
 import { ProviderSelector, useProviderSelector } from "@/components/ui/ProviderSelector";
 import { useOptimizationContext } from "@/context/OptimizationContext";
+import { cn } from "@/lib/utils";
 import { useSession } from "@/features/auth";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useToast } from "@/components/ui/Toast";
@@ -29,6 +31,8 @@ const STAGGER_DELAY = 0.15;
 
 export default function Home() {
   const locale = useLocale() as "en" | "es";
+  const searchParams = useSearchParams();
+  const isTailorMode = searchParams.get("mode") === "tailor";
   const t = useTranslations("home");
   const { data: session } = useSession();
   const router = useRouter();
@@ -63,7 +67,7 @@ export default function Home() {
   const [compareSelected, setCompareSelected] = useState<Set<string>>(new Set());
   const [isComparing, setIsComparing] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
-  const [companySearchExpanded, setCompanySearchExpanded] = useState(false);
+  const [companySearchExpanded, setCompanySearchExpanded] = useState(isTailorMode);
   const reducedMotion = useReducedMotion();
 
   // Hydrate job description from persisted form state once context finishes loading.
@@ -245,7 +249,20 @@ export default function Home() {
           animate="visible"
           variants={sectionVariants}
         >
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
+          {isTailorMode ? (
+            <p
+              className="mb-3 rounded-lg border-l-4 border-primary bg-primary/5 px-4 py-3 text-sm text-foreground"
+              role="status"
+            >
+              {t("tailorModeBanner")}
+            </p>
+          ) : null}
+          <div
+            className={cn(
+              "rounded-xl border border-border bg-card overflow-hidden",
+              isTailorMode && "border-l-4 border-l-primary",
+            )}
+          >
             <div className="flex w-full items-center justify-between gap-2 px-5 py-4">
               <button
                 type="button"
@@ -391,6 +408,12 @@ export default function Home() {
                 4
               </span>
               <h2 className="text-lg font-semibold text-foreground">{t("step4Label")}</h2>
+              {companyResearch ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                  <Sparkles className="size-3.5" aria-hidden />
+                  {t("companyTailoredBadge")}
+                </span>
+              ) : null}
             </div>
 
             {optimizationCachedMatch ? (
@@ -415,7 +438,7 @@ export default function Home() {
               onClick={() => void handleSubmit()}
               title={!isReadyToSubmit ? t("ariaOptimizeDisabled") : undefined}
             >
-              {t("optimizeButton")}
+              {companyResearch ? t("tailorAndOptimizeButton") : t("optimizeButton")}
             </Button>
 
             <div className="mt-6 border-t border-border pt-6">

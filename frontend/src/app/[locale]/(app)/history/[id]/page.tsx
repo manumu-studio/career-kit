@@ -185,22 +185,30 @@ export default function HistoryDetailPage() {
       ) : null}
 
       {optimizationResult ? (
-        <section className="space-y-6">
-          <h2 className="text-xl font-semibold text-slate-100">{t("cvOptimization")}</h2>
-          <p className="text-slate-300">{optimizationResult.summary}</p>
-          <div className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
-            <div className="space-y-8">
-              <ScoreCard score={optimizationResult.match_score} />
-              <KeywordMatch
-                matches={optimizationResult.keyword_matches}
-                misses={optimizationResult.keyword_misses}
-              />
-              <GapAnalysis gaps={optimizationResult.gap_analysis} />
-            </div>
-            <div className="max-h-[70vh] overflow-y-auto pr-1">
-              <CvComparison sections={optimizationResult.sections} />
-            </div>
+        <section className="flex flex-col gap-10">
+          <h2 className="text-xl font-semibold text-foreground">{t("cvOptimization")}</h2>
+
+          {/* Section 1 — Summary */}
+          <div className="rounded-xl border border-border bg-card p-5">
+            <p className="text-sm leading-relaxed text-foreground">
+              {optimizationResult.summary}
+            </p>
           </div>
+
+          {/* Section 2 — Score + Keywords (side by side on desktop) */}
+          <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+            <ScoreCard score={optimizationResult.match_score} />
+            <KeywordMatch
+              matches={optimizationResult.keyword_matches}
+              misses={optimizationResult.keyword_misses}
+            />
+          </div>
+
+          {/* Section 3 — CV Comparison (full width) */}
+          <CvComparison sections={optimizationResult.sections} />
+
+          {/* Section 4 — Gap Analysis (full width grid) */}
+          <GapAnalysis gaps={optimizationResult.gap_analysis} />
         </section>
       ) : null}
     </main>

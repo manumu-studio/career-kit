@@ -48,17 +48,17 @@ export function GapAnalysis({ gaps }: Readonly<GapAnalysisProps>) {
         </Button>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {sortedGaps.map((gap) => {
           const id = `${gap.skill}-${gap.importance}`;
           const isExpanded = expandedId === id;
           return (
             <Card
               key={id}
-              className="cursor-pointer transition-colors hover:bg-muted/30"
+              className="flex cursor-pointer flex-col transition-colors hover:bg-muted/30"
               onClick={() => setExpandedId(isExpanded ? null : id)}
             >
-              <CardContent className="p-5">
+              <CardContent className="flex flex-1 flex-col p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-base font-semibold text-foreground">{gap.skill}</p>
                   <Badge
@@ -71,24 +71,26 @@ export function GapAnalysis({ gaps }: Readonly<GapAnalysisProps>) {
                     {t(SEVERITY_KEYS[gap.importance])}
                   </Badge>
                 </div>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
-                  {gap.suggestion}
-                </p>
-                <AnimatePresence initial={false}>
-                  {isExpanded ? (
-                    <motion.div
-                      initial={reducedMotion ? false : { height: 0, opacity: 0 }}
-                      animate={reducedMotion ? {} : { height: "auto", opacity: 1 }}
-                      exit={reducedMotion ? {} : { height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="mt-3 border-t border-border pt-3 text-sm leading-relaxed text-foreground">
-                        {gap.suggestion}
-                      </p>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
+                <div className="mt-2 flex flex-1 flex-col">
+                  <p className="text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                    {gap.suggestion}
+                  </p>
+                  <AnimatePresence initial={false}>
+                    {isExpanded ? (
+                      <motion.div
+                        initial={reducedMotion ? false : { height: 0, opacity: 0 }}
+                        animate={reducedMotion ? {} : { height: "auto", opacity: 1 }}
+                        exit={reducedMotion ? {} : { height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <p className="mt-3 border-t border-border pt-3 text-sm leading-relaxed text-foreground">
+                          {gap.suggestion}
+                        </p>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
               </CardContent>
             </Card>
           );

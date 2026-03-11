@@ -11,6 +11,7 @@ import { CvComparison } from "@/components/ui/CvComparison";
 import { ExportToolbar } from "@/components/ui/ExportToolbar";
 import { GapAnalysis } from "@/components/ui/GapAnalysis";
 import { KeywordMatch } from "@/components/ui/KeywordMatch";
+import { Badge } from "@/components/ui/badge";
 import { ProviderBadge } from "@/components/ui/ProviderBadge";
 import { ScoreCard } from "@/components/ui/ScoreCard";
 import { ToneSelector } from "@/components/ui/ToneSelector";
@@ -137,7 +138,7 @@ export default function ResultsPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-4 pb-24 py-8 sm:px-6 md:pb-24 md:py-10 lg:py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-4 pb-24 py-8 sm:px-6 md:pb-24 md:py-10 lg:py-12">
       {/* Floating export toolbar */}
       <div className="fixed bottom-0 inset-x-0 z-30 border-t border-border bg-background/90 py-3 backdrop-blur-md">
         <ExportToolbar
@@ -146,8 +147,9 @@ export default function ResultsPage() {
         />
       </div>
 
-      <header className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="space-y-1">
+      {/* Section 1 — Header + Summary (full width) */}
+      <section className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">
               {t("title")}
@@ -158,77 +160,75 @@ export default function ResultsPage() {
                 <ProviderBadge provider={p as "anthropic" | "openai" | "gemini"} />
               ) : null;
             })()}
+            {companyResearch ? (
+              <Badge
+                variant="default"
+                className="bg-primary/90 text-primary-foreground"
+              >
+                {companyName
+                  ? t("companyTailoredFor", { company: companyName })
+                  : t("companyTailoredBadge")}
+              </Badge>
+            ) : null}
           </div>
           <p className="text-sm text-muted-foreground">{t("readyMessage")}</p>
+          <motion.div
+            aria-live="polite"
+            aria-label="Optimization summary"
+            className="rounded-xl border border-border bg-card p-5"
+            custom={0}
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+          >
+            <p className="text-sm leading-relaxed text-foreground">{result.summary}</p>
+          </motion.div>
         </div>
         <Link
-          className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
+          className="shrink-0 rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
           href="/home"
         >
           {t("backToUpload")}
         </Link>
-      </header>
+      </section>
 
-      <motion.section
-        aria-live="polite"
-        aria-label="Optimization summary"
-        className="rounded-xl border border-border bg-card p-5"
-        custom={0}
+      {/* Section 2 — Score + Keywords (side by side on desktop) */}
+      <motion.div
+        aria-label="Score and keywords"
+        className="grid gap-6 lg:grid-cols-[280px_1fr]"
+        custom={1}
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
       >
-        <p className="text-sm leading-relaxed text-foreground">{result.summary}</p>
-      </motion.section>
+        <ScoreCard score={result.match_score} />
+        <KeywordMatch matches={result.keyword_matches} misses={result.keyword_misses} />
+      </motion.div>
 
-      {/* Order: Keywords → Gaps → CV Comparison → Cover Letter → Score gauge (last) */}
-      <div
-        aria-label="Optimization results"
-        className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]"
+      {/* Section 3 — CV Comparison (full width) */}
+      <motion.div
+        custom={2}
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
       >
-        <div className="space-y-8">
-          <motion.div
-            custom={1}
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <KeywordMatch matches={result.keyword_matches} misses={result.keyword_misses} />
-          </motion.div>
-          <motion.div
-            custom={2}
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <GapAnalysis gaps={result.gap_analysis} />
-          </motion.div>
-          <motion.div
-            custom={5}
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <ScoreCard score={result.match_score} />
-          </motion.div>
-        </div>
-        <div className="space-y-8">
-          <motion.div
-            custom={3}
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-            className="max-h-[70vh] overflow-y-auto pr-1"
-          >
-            <CvComparison sections={result.sections} />
-          </motion.div>
-        </div>
-      </div>
+        <CvComparison sections={result.sections} />
+      </motion.div>
+
+      {/* Section 4 — Gap Analysis (full width grid) */}
+      <motion.div
+        custom={3}
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
+      >
+        <GapAnalysis gaps={result.gap_analysis} />
+      </motion.div>
 
       {!coverLetter ? (
         <motion.section
           className="rounded-xl border border-border bg-card p-5"
-          custom={2}
+          custom={4}
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
@@ -278,7 +278,7 @@ export default function ResultsPage() {
 
       {coverLetter ? (
         <motion.div
-          custom={3}
+          custom={5}
           initial="hidden"
           animate="visible"
           variants={sectionVariants}

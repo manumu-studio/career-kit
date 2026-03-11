@@ -23,7 +23,7 @@ export function ScoreCard({ score }: Readonly<ScoreCardProps>) {
   const interpretationKey = getInterpretationKey(score);
 
   return (
-    <Card className="w-full md:mx-auto md:max-w-xs lg:mx-0 lg:max-w-none">
+    <Card className="w-full">
       <CardContent className="flex flex-col items-center p-6">
         <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground">
           {t("atsMatchScore")}

@@ -1,4 +1,4 @@
-# ENTRY-14 — App Pages Polish
+# ENTRY-13 — App Pages Polish
 
 **Date:** 2026-03-10
 **Type:** Feature
@@ -25,18 +25,18 @@ Redesigned all authenticated app pages for clearer hierarchy and polished intera
 
 ## Files Touched
 
-| File | Action | Notes |
-|------|--------|------|
-| home/page.tsx, FileUpload, ProviderSelector, ProgressBar | Modified | Step layout, animations |
-| results/page.tsx, ScoreGauge, ScoreCard, KeywordMatch, KeywordChips | Modified | Gauge, chips, layout |
-| GapAnalysis, CvComparison, CoverLetterDisplay, ExportToolbar | Modified | Cards, comparison, export |
-| history/page.tsx, HistoryList, HistoryCard | Modified | Grid, search, empty states |
-| report/page.tsx, CompanyReport | Modified | Card sections, collapsible |
-| compare/page.tsx, ProviderComparison | Modified | Chart, columns, tabs |
-| layout.tsx, PageTransition | Modified/Created | Page transitions |
-| LoadingSkeleton | Modified | Page variants |
-| Navbar | Modified | Compare link |
-| en.json, es.json | Modified | New keys |
+| File                                                                | Action           | Notes                      |
+| ------------------------------------------------------------------- | ---------------- | -------------------------- |
+| home/page.tsx, FileUpload, ProviderSelector, ProgressBar            | Modified         | Step layout, animations    |
+| results/page.tsx, ScoreGauge, ScoreCard, KeywordMatch, KeywordChips | Modified         | Gauge, chips, layout       |
+| GapAnalysis, CvComparison, CoverLetterDisplay, ExportToolbar        | Modified         | Cards, comparison, export  |
+| history/page.tsx, HistoryList, HistoryCard                          | Modified         | Grid, search, empty states |
+| report/page.tsx, CompanyReport                                      | Modified         | Card sections, collapsible |
+| compare/page.tsx, ProviderComparison                                | Modified         | Chart, columns, tabs       |
+| layout.tsx, PageTransition                                          | Modified/Created | Page transitions           |
+| LoadingSkeleton                                                     | Modified         | Page variants              |
+| Navbar                                                              | Modified         | Compare link               |
+| en.json, es.json                                                    | Modified         | New keys                   |
 
 ## Decisions (rationale bullets)
 
