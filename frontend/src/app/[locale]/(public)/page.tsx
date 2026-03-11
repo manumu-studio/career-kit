@@ -65,6 +65,7 @@ export default async function LandingPage({
   const secondaryCta = session?.user ? (
     <LinkWithSpinner
       href="/api/auth/federated-signout?local_only=1"
+      prefetch={false}
       className={signOutClass}
     >
       {t("signOut")}
