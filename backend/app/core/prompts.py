@@ -37,14 +37,7 @@ You must also:
 Respond ONLY with valid JSON matching the provided schema.
 No markdown, no explanation outside the JSON."""
 
-COMPANY_CONTEXT_PROMPT_ADDITION = """
-## Company Context
-The candidate is applying to {company_name}.
-
-Company values: {core_values}
-Culture keywords: {culture_keywords}
-Keywords to mirror: {keywords_to_mirror}
-
+COMPANY_CONTEXT_RULES = """
 Additional optimization rules when company context is available:
 8. Mirror the company's core values where the candidate has genuine alignment
 9. Use culture keywords naturally in descriptions of work style and achievements
@@ -88,6 +81,46 @@ def build_system_prompt(
     return SYSTEM_PROMPT + LANGUAGE_INSTRUCTION.format(language_name=lang_name)
 
 
+def _build_company_context_section(
+    company_name: str, company_context: CompanyProfile
+) -> str:
+    """Build company context section, including only fields that have data."""
+    parts: list[str] = [
+        "## Company Context",
+        f"The candidate is applying to {company_name}.",
+        "",
+    ]
+    if company_context.industry:
+        parts.append(
+            f"The company operates in the {company_context.industry} industry."
+        )
+        parts.append("")
+    if company_context.core_values:
+        parts.append(f"Company values: {', '.join(company_context.core_values)}")
+        parts.append("")
+    if company_context.culture_keywords:
+        parts.append(f"Culture keywords: {', '.join(company_context.culture_keywords)}")
+        parts.append("")
+    keywords = company_context.core_values[:5] if company_context.core_values else []
+    if keywords:
+        parts.append(f"Keywords to mirror: {', '.join(keywords)}")
+        parts.append("")
+    if company_context.mission_statement:
+        parts.append(
+            f"Align the professional summary with the company's mission: "
+            f"{company_context.mission_statement}"
+        )
+        parts.append("")
+    if company_context.tech_stack:
+        parts.append(
+            "Emphasize these technologies in the skills section where the "
+            f"candidate has experience: {', '.join(company_context.tech_stack)}"
+        )
+        parts.append("")
+    parts.append(COMPANY_CONTEXT_RULES.strip())
+    return "\n".join(parts)
+
+
 def build_user_prompt(
     cv_text: str,
     job_description: str,
@@ -98,11 +131,8 @@ def build_user_prompt(
     json_schema = OptimizationResult.model_json_schema()
     company_context_section = ""
     if company_name and company_context:
-        company_context_section = COMPANY_CONTEXT_PROMPT_ADDITION.format(
-            company_name=company_name,
-            core_values=", ".join(company_context.core_values),
-            culture_keywords=", ".join(company_context.culture_keywords),
-            keywords_to_mirror=", ".join(company_context.core_values[:5]),
+        company_context_section = _build_company_context_section(
+            company_name, company_context
         )
     return (
         "## Candidate CV\n"

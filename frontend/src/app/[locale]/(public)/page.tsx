@@ -1,4 +1,5 @@
 /** Public landing page — hero, features, sign-in CTA. */
+import { Sparkles } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { auth, signIn } from "@/features/auth/auth";
 import { getFirstNameForGreeting } from "@/lib/name-utils";
@@ -27,6 +28,7 @@ export default async function LandingPage({
   const t = await getTranslations("landing");
 
   const callbackUrl = `/${locale}/home`;
+  const tailorCallbackUrl = `/${locale}/home?mode=tailor`;
 
   const gradientButtonClass =
     "w-full animate-ai-gradient border-0 bg-clip-padding text-white hover:opacity-90 sm:w-auto sm:px-8";
@@ -40,7 +42,7 @@ export default async function LandingPage({
         gradientButtonClass,
       )}
     >
-      {t("goToApp")}
+      {t("ctaPrimary")}
     </LinkWithSpinner>
   ) : (
     <form
@@ -55,22 +57,47 @@ export default async function LandingPage({
     </form>
   );
 
-  const welcomeBackText = session?.user?.name
-    ? t("welcomeBack", { name: getFirstNameForGreeting(session.user.name) })
-    : undefined;
+  const secondaryCtaOutlineClass =
+    "h-9 min-w-[180px] rounded-lg border-2 border-border bg-background px-2.5 font-medium transition-colors hover:bg-muted hover:text-foreground";
 
-  const signOutClass =
-    "cursor-pointer h-9 min-w-[180px] rounded-lg border-2 border-border bg-background px-2.5 text-sm font-medium transition-all duration-200 hover:scale-[1.02] hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-input dark:bg-input/30 dark:hover:border-destructive/40 dark:hover:bg-destructive/10 dark:hover:text-destructive";
+  const tailorLabel = (
+    <>
+      <Sparkles className="size-4" aria-hidden />
+      {t("ctaSecondaryTailor")}
+    </>
+  );
 
   const secondaryCta = session?.user ? (
     <LinkWithSpinner
-      href="/api/auth/federated-signout?local_only=1"
-      prefetch={false}
-      className={signOutClass}
+      href="/home?mode=tailor"
+      useLocale
+      className={cn(
+        "flex items-center justify-center gap-2",
+        secondaryCtaOutlineClass,
+      )}
     >
-      {t("signOut")}
+      {tailorLabel}
     </LinkWithSpinner>
-  ) : undefined;
+  ) : (
+    <form
+      action={async () => {
+        "use server";
+        await signIn("manumustudio", { callbackUrl: tailorCallbackUrl });
+      }}
+    >
+      <SubmitButtonWithSpinner
+        variant="outline"
+        size="lg"
+        className={cn("flex items-center justify-center gap-2", secondaryCtaOutlineClass)}
+      >
+        {tailorLabel}
+      </SubmitButtonWithSpinner>
+    </form>
+  );
+
+  const welcomeBackText = session?.user?.name
+    ? t("welcomeBack", { name: getFirstNameForGreeting(session.user.name) })
+    : undefined;
 
   const ctaFooterPrimaryCta = session?.user ? (
     <LinkWithSpinner
