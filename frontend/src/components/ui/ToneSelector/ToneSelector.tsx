@@ -17,12 +17,12 @@ export function ToneSelector({
 }: ToneSelectorProps) {
   return (
     <div className="space-y-2">
-      <span className="block text-sm font-medium text-slate-300">Tone</span>
+      <span className="block text-sm font-medium text-muted-foreground">Tone</span>
       <div className="flex flex-wrap gap-4">
         {TONES.map(({ value: toneValue, label }) => (
           <label
             key={toneValue}
-            className="flex cursor-pointer items-center gap-2 text-sm text-slate-300"
+            className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground"
           >
             <input
               checked={value === toneValue}

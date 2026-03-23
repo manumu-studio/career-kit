@@ -6,22 +6,22 @@ import type { CompanyCardProps } from "./CompanyCard.types";
 
 function sentimentStyles(sentiment: "positive" | "mixed" | "negative"): string {
   if (sentiment === "positive") {
-    return "bg-emerald-500/15 text-emerald-300";
+    return "bg-success/15 text-success";
   }
   if (sentiment === "negative") {
-    return "bg-rose-500/15 text-rose-300";
+    return "bg-destructive/15 text-destructive";
   }
-  return "bg-amber-500/15 text-amber-300";
+  return "bg-warning/15 text-warning";
 }
 
 function qualityStyles(quality: "high" | "medium" | "low"): string {
   if (quality === "high") {
-    return "bg-emerald-500/15 text-emerald-300";
+    return "bg-success/15 text-success";
   }
   if (quality === "medium") {
-    return "bg-amber-500/15 text-amber-300";
+    return "bg-warning/15 text-warning";
   }
-  return "bg-orange-500/15 text-orange-300";
+  return "bg-warning/15 text-warning";
 }
 
 export function CompanyCard({
@@ -31,11 +31,11 @@ export function CompanyCard({
   className,
 }: CompanyCardProps) {
   return (
-    <section className={cn("space-y-4 rounded-lg border border-slate-800 p-4", className)}>
+    <section className={cn("space-y-4 rounded-lg border border-border p-4", className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-base font-semibold text-white">{profile.name}</h3>
-          <p className="text-sm text-slate-300">
+          <h3 className="text-base font-semibold text-foreground">{profile.name}</h3>
+          <p className="text-sm text-muted-foreground">
             {profile.industry} • {profile.size_estimate}
           </p>
         </div>
@@ -48,7 +48,7 @@ export function CompanyCard({
         {profile.core_values.slice(0, 3).map((value) => (
           <span
             key={value}
-            className="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-200"
+            className="rounded-full bg-muted px-2 py-1 text-xs text-foreground"
           >
             {value}
           </span>
@@ -56,7 +56,7 @@ export function CompanyCard({
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-sm text-slate-300">Employee sentiment</span>
+        <span className="text-sm text-muted-foreground">Employee sentiment</span>
         <span
           className={cn(
             "rounded-full px-2 py-1 text-xs font-medium capitalize",
@@ -68,7 +68,7 @@ export function CompanyCard({
       </div>
 
       <button
-        className="text-sm font-medium text-sky-300 transition hover:text-sky-200"
+        className="text-sm font-medium text-primary transition hover:text-primary/80"
         onClick={onViewFullReport}
         type="button"
       >

@@ -14,11 +14,11 @@ export const SEVERITY_KEYS: Record<Gap["importance"], "severityCritical" | "seve
   nice_to_have: "severityNiceToHave",
 };
 
-/** Badge color classes: Critical (rose), Important (amber), Nice-to-have (sky). */
+/** Badge color classes: Critical (destructive), Important (warning), Nice-to-have (primary). */
 export const SEVERITY_BADGE_CLASSES: Record<Gap["importance"], string> = {
-  critical: "bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30",
-  preferred: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30",
-  nice_to_have: "bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-500/30",
+  critical: "bg-destructive/15 text-destructive border-destructive/30",
+  preferred: "bg-warning/15 text-warning border-warning/30",
+  nice_to_have: "bg-primary/15 text-primary border-primary/30",
 };
 
 export type SortMode = "severity" | "name";

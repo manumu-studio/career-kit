@@ -12,20 +12,20 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-slate-200">
+      <label className="block text-sm font-medium text-foreground">
         {label}
-        {required ? <span className="text-rose-400"> *</span> : null}
+        {required ? <span className="text-destructive"> *</span> : null}
       </label>
       <div
         className={cn(
           "flex items-center gap-2",
-          error ? "[&>div]:border-rose-500 [&>div]:ring-rose-500/30" : "",
+          error ? "[&>div]:border-destructive [&>div]:ring-destructive/30" : "",
         )}
       >
         {children}
         {error ? null : showValidIndicator ? (
           <span
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400"
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success/20 text-success"
             aria-hidden
           >
             ✓
@@ -33,11 +33,11 @@ export function FormField({
         ) : null}
       </div>
       {error ? (
-        <p className="text-sm text-rose-300" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : hint ? (
-        <p className="text-sm text-slate-400">{hint}</p>
+        <p className="text-sm text-muted-foreground">{hint}</p>
       ) : null}
     </div>
   );

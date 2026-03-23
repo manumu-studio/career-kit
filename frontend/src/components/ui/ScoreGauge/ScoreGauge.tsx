@@ -1,20 +1,44 @@
 /** Full circular score gauge — 3 segments (red 25% / orange 50% / green 25%), needle, center score. */
 "use client";
 
+import { useEffect, useState } from "react";
 import type { ScoreGaugeProps } from "./ScoreGauge.types";
 
 const SEGMENTS = [
-  { color: "#ef4444", share: 0.25 },
-  { color: "#f97316", share: 0.5 },
-  { color: "#22c55e", share: 0.25 },
+  { color: "var(--destructive)", share: 0.25 },
+  { color: "var(--warning)", share: 0.5 },
+  { color: "var(--success)", share: 0.25 },
 ] as const;
 
 function clampScore(score: number): number {
   return Math.min(100, Math.max(0, Math.round(score)));
 }
 
-export function ScoreGauge({ score, size = 140, label = "Job Match" }: ScoreGaugeProps) {
+export function ScoreGauge({ score, size = 140, label = "Job Match", animateFrom }: ScoreGaugeProps) {
   const clampedScore = clampScore(score);
+  const [displayedScore, setDisplayedScore] = useState(animateFrom ?? clampedScore);
+
+  useEffect(() => {
+    if (animateFrom === undefined) {
+      setDisplayedScore(clampedScore);
+      return;
+    }
+    const start = animateFrom;
+    const end = clampedScore;
+    const duration = 1000;
+    const startTime = performance.now();
+
+    function tick(now: number) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayedScore(Math.round(start + (end - start) * eased));
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }, [animateFrom, clampedScore]);
+
   const strokeWidth = 12;
   const radius = (size - strokeWidth) / 2;
   const cx = size / 2;
@@ -22,7 +46,7 @@ export function ScoreGauge({ score, size = 140, label = "Job Match" }: ScoreGaug
 
   const circumference = 2 * Math.PI * radius;
 
-  const needleAngle = ((90 - (clampedScore / 100) * 360) * Math.PI) / 180;
+  const needleAngle = ((90 - (displayedScore / 100) * 360) * Math.PI) / 180;
   const needleLength = radius - strokeWidth / 2;
   const needleX = cx + needleLength * Math.cos(needleAngle);
   const needleY = cy - needleLength * Math.sin(needleAngle);
@@ -89,7 +113,7 @@ export function ScoreGauge({ score, size = 140, label = "Job Match" }: ScoreGaug
         aria-hidden
       >
         <span className="text-2xl font-bold tabular-nums text-foreground">
-          {clampedScore}
+          {displayedScore}
         </span>
         <span className="text-xs text-muted-foreground">{label}</span>
       </div>

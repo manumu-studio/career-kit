@@ -375,7 +375,7 @@ function ProviderColumn({
           {isProvider(providerName) ? (
             <ProviderBadge provider={providerName} />
           ) : (
-            <span className="rounded-full bg-slate-700/80 px-2.5 py-0.5 text-xs font-medium text-slate-200">
+            <span className="rounded-full bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-foreground">
               {PROVIDER_LABELS[providerName] ?? providerName}
             </span>
           )}

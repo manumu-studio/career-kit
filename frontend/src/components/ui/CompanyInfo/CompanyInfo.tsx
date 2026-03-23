@@ -14,13 +14,13 @@ export function CompanyInfo({
     <div className="space-y-4">
       <div>
         <label
-          className="mb-1 block text-sm font-medium text-slate-300"
+          className="mb-1 block text-sm font-medium text-muted-foreground"
           htmlFor="company-name"
         >
-          Company name <span className="text-rose-400">*</span>
+          Company name <span className="text-destructive">*</span>
         </label>
         <input
-          className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-50"
+          className="w-full rounded-md border border-border bg-muted px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
           disabled={disabled}
           id="company-name"
           onChange={(e) => onCompanyNameChange(e.target.value)}
@@ -31,13 +31,13 @@ export function CompanyInfo({
       </div>
       <div>
         <label
-          className="mb-1 block text-sm font-medium text-slate-300"
+          className="mb-1 block text-sm font-medium text-muted-foreground"
           htmlFor="hiring-manager"
         >
-          Hiring manager name <span className="text-slate-500">(optional)</span>
+          Hiring manager name <span className="text-muted-foreground/60">(optional)</span>
         </label>
         <input
-          className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-50"
+          className="w-full rounded-md border border-border bg-muted px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
           disabled={disabled}
           id="hiring-manager"
           onChange={(e) =>

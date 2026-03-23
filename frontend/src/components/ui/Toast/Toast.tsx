@@ -12,23 +12,23 @@ const typeStyles: Record<
   { bg: string; border: string; icon: string }
 > = {
   success: {
-    bg: "bg-emerald-900/95 border-emerald-700",
-    border: "border-emerald-700",
+    bg: "bg-success/10 border-success/30",
+    border: "border-success/30",
     icon: "✓",
   },
   error: {
-    bg: "bg-red-900/95 border-red-700",
-    border: "border-red-700",
+    bg: "bg-destructive/10 border-destructive/30",
+    border: "border-destructive/30",
     icon: "✕",
   },
   warning: {
-    bg: "bg-amber-900/95 border-amber-700",
-    border: "border-amber-700",
+    bg: "bg-warning/10 border-warning/30",
+    border: "border-warning/30",
     icon: "!",
   },
   info: {
-    bg: "bg-sky-900/95 border-sky-700",
-    border: "border-sky-700",
+    bg: "bg-primary/10 border-primary/30",
+    border: "border-primary/30",
     icon: "i",
   },
 };
@@ -52,18 +52,18 @@ export function Toast({ toast, onDismiss }: ToastProps) {
       )}
     >
       <span
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/20 text-sm font-bold"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground/20 text-sm font-bold"
         aria-hidden
       >
         {styles.icon}
       </span>
-      <p className="min-w-0 flex-1 text-sm font-medium text-slate-100">
+      <p className="min-w-0 flex-1 text-sm font-medium text-foreground">
         {toast.message}
       </p>
       <button
         type="button"
         onClick={() => onDismiss(toast.id)}
-        className="shrink-0 rounded p-1 text-slate-300 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+        className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         aria-label="Dismiss notification"
       >
         <span aria-hidden>×</span>
