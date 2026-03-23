@@ -46,10 +46,17 @@ npm run dev
 - [x] v0.5 — Backend deployment (EC2, Nginx, HTTPS, GitHub Actions CI/CD)
 - [x] v0.6 — Multi-provider LLM support (Claude / OpenAI / Gemini)
 - [x] v0.7 — Cover letter generation + PDF export
-- [x] v0.8 — i18n EN/ES (UI + LLM output + cross-language input)
-- [x] v0.9 — Testing suite
-- [x] v0.10 — UX polish + validation + accessibility
-- [ ] v0.11 — Full production (Docker, Sentry, monitoring)
+- [x] v0.8 — Testing suite
+- [x] v0.9 — UX polish + validation + accessibility
+- [x] v0.10 — Internationalization (EN/ES support)
+- [x] v0.11 — Design system foundation (semantic tokens, theme system)
+- [x] v0.12 — Landing page redesign + CV language auto-detection
+- [x] v0.13 — App pages polish (responsive layouts, accessibility)
+- [x] v0.14 — Tailored optimization flow (company research integration)
+- [x] v0.15 — Design system foundation (dual-theme architecture, UI primitives)
+- [ ] v0.16 — Landing page UI/UX overhaul
+- [ ] v0.17 — App pages UI/UX overhaul
+- [ ] v1.0 — Full production release
 
 ## Database (optional)
 

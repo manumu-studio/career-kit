@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { Menu } from "lucide-react";
+import { useScroll, useMotionValueEvent } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -60,18 +61,33 @@ function NavLinks({ onClick }: { onClick?: () => void }) {
 const LOGO_BLACK = "/assets/logo-black.webp";
 const LOGO_WHITE = "/assets/logo-white.webp";
 
-export function Navbar({ mode, userName, userEmail, className }: NavbarProps) {
+export function Navbar({ mode, variant, userName, userEmail, className }: NavbarProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  const isTransparent = variant === "transparent";
+
+  // Only track scroll when transparent variant is used
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (isTransparent) {
+      setScrolled(latest > 50);
+    }
+  });
 
   const t = useTranslations("navbar");
   const tCommon = useTranslations("common");
   const tUserBar = useTranslations("userBar");
   const { mobileOpen, openMobile, closeMobile } = useNavbar();
   const logoSrc =
-    !mounted ? LOGO_BLACK : resolvedTheme === "dark" ? LOGO_WHITE : LOGO_BLACK;
+    !mounted 
+      ? LOGO_BLACK 
+      : (isTransparent || resolvedTheme === "dark") 
+        ? LOGO_WHITE 
+        : LOGO_BLACK;
   const displayName = userName ?? userEmail ?? tCommon("user");
   const showNavLinks = mode === "app";
 
@@ -82,7 +98,10 @@ export function Navbar({ mode, userName, userEmail, className }: NavbarProps) {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-40 flex h-14 min-h-[3.5rem] items-center justify-between border-b border-border/50 bg-background/80 px-4 backdrop-blur-md sm:px-6",
+        "fixed inset-x-0 top-0 z-40 flex h-14 min-h-[3.5rem] items-center justify-between px-4 transition-all duration-300 sm:px-6",
+        isTransparent && !scrolled
+          ? "bg-transparent border-transparent"
+          : "bg-background/80 backdrop-blur-md border-b border-border/50",
         className,
       )}
     >

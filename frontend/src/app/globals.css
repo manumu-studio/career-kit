@@ -38,15 +38,43 @@ a[href] {
   }
 }
 
+@keyframes scanline {
+  0% { transform: translateY(0%); opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+@keyframes keyword-pulse {
+  0% { background-color: transparent; }
+  50% { background-color: color-mix(in oklch, var(--success) 20%, transparent); }
+  100% { background-color: color-mix(in oklch, var(--success) 10%, transparent); }
+}
+
+@keyframes score-glow {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 20px 4px color-mix(in oklch, var(--primary) 30%, transparent); }
+}
+
+@keyframes typewriter-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 .animate-shimmer {
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
 .animate-ai-gradient {
-  background: linear-gradient(80deg, #0070f3, #7c3aed, #0070f3);
+  background: linear-gradient(80deg, var(--landing-gradient-end, #0070f3), var(--landing-gradient-start, #1A3A5C), var(--landing-gradient-end, #0070f3));
   background-size: 400% 100%;
   animation: ai-gradient 8s ease infinite;
 }
+
+.animate-scanline { animation: scanline 1.5s ease-in-out forwards; }
+.animate-keyword-pulse { animation: keyword-pulse 0.6s ease-out forwards; }
+.animate-score-glow { animation: score-glow 1.5s ease-in-out; }
+.animate-typewriter-cursor { animation: typewriter-cursor 0.6s step-end infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-shimmer {
@@ -56,5 +84,11 @@ a[href] {
   .animate-ai-gradient {
     animation: none;
     background: var(--primary);
+  }
+  .animate-scanline,
+  .animate-keyword-pulse,
+  .animate-score-glow,
+  .animate-typewriter-cursor {
+    animation: none !important;
   }
 }

@@ -23,8 +23,8 @@ function KeywordChip({
 }) {
   const isMatched = variant === "matched";
   const className = isMatched
-    ? "rounded-full border border-emerald-500/30 bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400"
-    : "rounded-full border border-rose-500/30 bg-rose-500/15 px-3 py-1 text-xs font-medium text-rose-700 dark:text-rose-400";
+    ? "rounded-full border border-success/30 bg-success/15 px-3 py-1 text-xs font-medium text-success"
+    : "rounded-full border border-destructive/30 bg-destructive/15 px-3 py-1 text-xs font-medium text-destructive";
 
   return (
     <Tooltip>
@@ -61,7 +61,7 @@ export function KeywordMatch({ matches, misses }: Readonly<KeywordMatchProps>) {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardContent className="p-5">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-success">
               {t("matchedKeywords", { count: matchedCount })}
             </h3>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -80,7 +80,7 @@ export function KeywordMatch({ matches, misses }: Readonly<KeywordMatchProps>) {
 
         <Card>
           <CardContent className="p-5">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-400">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-destructive">
               {t("missingKeywords", { count: totalKeywords - matchedCount })}
             </h3>
             <div className="mt-3 flex flex-wrap gap-2">

@@ -12,13 +12,13 @@ export function UserBar({ userName, userEmail }: UserBarProps) {
   const displayName = userName ?? userEmail ?? tCommon("user");
 
   return (
-    <header className="flex items-center justify-between border-b border-slate-800 bg-slate-900/60 px-6 py-3">
+    <header className="flex items-center justify-between border-b border-border bg-muted/60 px-6 py-3">
       <div className="flex items-center gap-4">
-        <span className="text-sm text-slate-300">
-          {t("signedInAs")} <span className="font-medium text-slate-100">{displayName}</span>
+        <span className="text-sm text-muted-foreground">
+          {t("signedInAs")} <span className="font-medium text-foreground">{displayName}</span>
         </span>
         <Link
-          className="text-sm text-slate-400 transition hover:text-slate-200"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
           href="/history"
         >
           {t("history")}
@@ -30,7 +30,7 @@ export function UserBar({ userName, userEmail }: UserBarProps) {
           onClick={() => {
             window.location.href = "/api/auth/federated-signout?local_only=1";
           }}
-          className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-slate-600 hover:text-slate-100"
+          className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-border/80 hover:text-foreground"
           type="button"
         >
           {t("signOut")}

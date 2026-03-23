@@ -20,8 +20,8 @@ export function useScoreCard(rawScore: number): ScoreCardState {
     return {
       score,
       label: "Low Match",
-      accentClass: "text-rose-400",
-      trailClass: "text-rose-500/20",
+      accentClass: "text-destructive",
+      trailClass: "text-destructive/20",
       offset: FULL_CIRCLE * (1 - score / 100),
     };
   }
@@ -30,8 +30,8 @@ export function useScoreCard(rawScore: number): ScoreCardState {
     return {
       score,
       label: "Moderate Match",
-      accentClass: "text-amber-400",
-      trailClass: "text-amber-500/20",
+      accentClass: "text-warning",
+      trailClass: "text-warning/20",
       offset: FULL_CIRCLE * (1 - score / 100),
     };
   }
@@ -39,8 +39,8 @@ export function useScoreCard(rawScore: number): ScoreCardState {
   return {
     score,
     label: "Strong Match",
-    accentClass: "text-emerald-400",
-    trailClass: "text-emerald-500/20",
+    accentClass: "text-success",
+    trailClass: "text-success/20",
     offset: FULL_CIRCLE * (1 - score / 100),
   };
 }

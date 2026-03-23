@@ -6,19 +6,19 @@ describe("useScoreCard", () => {
   it("returns low match state for scores under 40", () => {
     const state = useScoreCard(20);
     expect(state.label).toBe("Low Match");
-    expect(state.accentClass).toBe("text-rose-400");
+    expect(state.accentClass).toBe("text-destructive");
   });
 
   it("returns moderate match state for scores 40 through 69", () => {
     const state = useScoreCard(55);
     expect(state.label).toBe("Moderate Match");
-    expect(state.accentClass).toBe("text-amber-400");
+    expect(state.accentClass).toBe("text-warning");
   });
 
   it("returns strong match state for scores 70 and above", () => {
     const state = useScoreCard(85);
     expect(state.label).toBe("Strong Match");
-    expect(state.accentClass).toBe("text-emerald-400");
+    expect(state.accentClass).toBe("text-success");
   });
 
   it("clamps boundary values into 0-100", () => {

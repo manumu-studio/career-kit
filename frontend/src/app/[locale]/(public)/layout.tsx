@@ -50,17 +50,17 @@ export async function generateMetadata({
 
 export default function PublicLayout({ children }: PublicLayoutProps) {
   return (
-    <>
+    <div>
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none"
       >
         Skip to content
       </a>
-      <Navbar mode="public" />
+      <Navbar mode="public" variant="transparent" />
       <main id="main-content" className="min-h-screen pt-14">
         {children}
       </main>
-    </>
+    </div>
   );
 }

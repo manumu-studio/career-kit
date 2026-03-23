@@ -41,8 +41,8 @@ function getStepStatus(
 
 export function ResearchProgress({ currentStep, className }: ResearchProgressProps) {
   return (
-    <section className={cn("space-y-3 rounded-lg border border-slate-800 p-4", className)}>
-      <h3 className="text-sm font-semibold text-slate-200">Research Progress</h3>
+    <section className={cn("space-y-3 rounded-lg border border-border p-4", className)}>
+      <h3 className="text-sm font-semibold text-foreground">Research Progress</h3>
       <ol className="space-y-3">
         {STEPS.map((step) => {
           const status = getStepStatus(currentStep, step.id);
@@ -51,10 +51,10 @@ export function ResearchProgress({ currentStep, className }: ResearchProgressPro
               <span
                 className={cn(
                   "inline-flex h-5 w-5 items-center justify-center rounded-full text-xs",
-                  status === "done" && "bg-emerald-500/20 text-emerald-300",
-                  status === "active" && "bg-sky-500/20 text-sky-300",
-                  status === "pending" && "bg-slate-800 text-slate-400",
-                  status === "error" && "bg-rose-500/20 text-rose-300",
+                  status === "done" && "bg-success/20 text-success",
+                  status === "active" && "bg-primary/20 text-primary",
+                  status === "pending" && "bg-muted text-muted-foreground",
+                  status === "error" && "bg-destructive/20 text-destructive",
                 )}
               >
                 {status === "done" ? "✓" : status === "error" ? "✕" : status === "active" ? "…" : "•"}
@@ -62,10 +62,10 @@ export function ResearchProgress({ currentStep, className }: ResearchProgressPro
               <span
                 className={cn(
                   "text-sm",
-                  status === "active" && "text-slate-100",
-                  status === "done" && "text-slate-300",
-                  status === "pending" && "text-slate-500",
-                  status === "error" && "text-rose-300",
+                  status === "active" && "text-foreground",
+                  status === "done" && "text-muted-foreground",
+                  status === "pending" && "text-muted-foreground/60",
+                  status === "error" && "text-destructive",
                 )}
               >
                 {step.label}
@@ -73,7 +73,7 @@ export function ResearchProgress({ currentStep, className }: ResearchProgressPro
               {status === "active" ? (
                 <span
                   aria-label="Loading"
-                  className="ml-auto h-4 w-4 animate-spin rounded-full border-2 border-sky-300 border-t-transparent"
+                  className="ml-auto h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
                 />
               ) : null}
             </li>
@@ -81,7 +81,7 @@ export function ResearchProgress({ currentStep, className }: ResearchProgressPro
         })}
       </ol>
       {currentStep === "error" ? (
-        <p className="text-xs text-rose-300">Research failed. Please try again.</p>
+        <p className="text-xs text-destructive">Research failed. Please try again.</p>
       ) : null}
     </section>
   );

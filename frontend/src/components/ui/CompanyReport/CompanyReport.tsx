@@ -55,11 +55,11 @@ function ConfidenceBadge({
 
   const variantClass =
     quality === "high"
-      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+      ? "bg-success/20 text-success border-success/30"
       : quality === "medium"
-        ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+        ? "bg-warning/20 text-warning border-warning/30"
         : quality === "low"
-          ? "bg-slate-500/20 text-slate-400 border-slate-500/30"
+          ? "bg-muted/20 text-muted-foreground border-border"
           : "bg-muted text-muted-foreground";
 
   return (

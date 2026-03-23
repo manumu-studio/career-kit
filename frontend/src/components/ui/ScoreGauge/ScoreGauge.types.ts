@@ -6,4 +6,6 @@ export interface ScoreGaugeProps {
   size?: number;
   /** Optional label below score (e.g. "Job Match"). */
   label?: string;
+  /** Starting value for animation. When set, gauge animates from this value to `score`. */
+  animateFrom?: number;
 }
