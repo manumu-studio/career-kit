@@ -4,4 +4,5 @@ import type { CompanyResearchResult } from "@/types/company";
 export interface CompanyReportProps {
   research: CompanyResearchResult;
   className?: string;
+  headingLevel?: "h1" | "h2" | "h3";
 }

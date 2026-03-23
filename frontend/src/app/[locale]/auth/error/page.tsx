@@ -27,20 +27,20 @@ export default async function AuthErrorPage({ searchParams }: AuthErrorPageProps
   const message = tErrors(key);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6">
+    <div className="flex min-h-screen items-center justify-center px-6">
       <div className="max-w-md text-center">
-        <h1 className="text-3xl font-bold text-white">{t("errorTitle")}</h1>
-        <p className="mt-4 text-slate-300">{message}</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("errorTitle")}</h1>
+        <p className="mt-4 text-muted-foreground">{message}</p>
         {error ? (
-          <p className="mt-2 text-sm text-slate-500">Error code: {error}</p>
+          <p className="mt-2 text-sm text-muted-foreground/60">Error code: {error}</p>
         ) : null}
         <Link
           href="/"
-          className="mt-6 inline-block rounded-lg bg-sky-500 px-6 py-2.5 font-semibold text-slate-950 transition hover:bg-sky-400"
+          className="mt-6 inline-block rounded-lg bg-primary px-6 py-2.5 font-semibold text-primary-foreground transition hover:bg-primary/90"
         >
           {t("backToHome")}
         </Link>
       </div>
-    </main>
+    </div>
   );
 }

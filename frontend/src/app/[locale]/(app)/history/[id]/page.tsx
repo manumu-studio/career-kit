@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   LoadingSkeleton,
   ResultsSectionSkeleton,
@@ -83,25 +83,25 @@ export default function HistoryDetailPage() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10">
         <div className="space-y-2">
           <LoadingSkeleton variant="text" className="h-8 w-48" />
           <LoadingSkeleton variant="text" className="h-4 w-32" />
         </div>
         <ResultsSectionSkeleton />
-      </main>
+      </div>
     );
   }
 
   if (error || !detail) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-4 px-6 py-12">
-        <h1 className="text-2xl font-semibold text-white">{t("analysisNotFound")}</h1>
-        <p className="text-slate-300">{error ?? t("mayHaveBeenDeleted")}</p>
-        <Link className="text-sky-300 underline" href="/history">
+      <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-4 px-6 py-12">
+        <h1 className="text-2xl font-semibold text-foreground">{t("analysisNotFound")}</h1>
+        <p className="text-muted-foreground">{error ?? t("mayHaveBeenDeleted")}</p>
+        <Link className="text-primary underline" href="/history">
           {t("backToHistory")}
         </Link>
-      </main>
+      </div>
     );
   }
 
@@ -121,31 +121,35 @@ export default function HistoryDetailPage() {
 
   if (!hasContent) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-4 px-6 py-12">
-        <h1 className="text-2xl font-semibold text-white">{t("noResults")}</h1>
-        <p className="text-slate-300">{t("noStoredData")}</p>
-        <Link className="text-sky-300 underline" href="/history">
+      <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-4 px-6 py-12">
+        <h1 className="text-2xl font-semibold text-foreground">{t("noResults")}</h1>
+        <p className="text-muted-foreground">{t("noStoredData")}</p>
+        <Link className="text-primary underline" href="/history">
           {t("backToHistory")}
         </Link>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10">
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <Link
-          href="/history"
-          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-        >
-          <ChevronLeft className="h-4 w-4" aria-hidden />
-          {t("backToHistory")}
-        </Link>
-        <span aria-hidden>/</span>
-        <span className="text-foreground">
-          {detail.company_name ?? t("analysis")} {detail.job_title ? `— ${detail.job_title}` : ""}
-        </span>
-      </div>
+    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10">
+      <nav aria-label="Breadcrumb">
+        <ol className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <li>
+            <Link
+              href="/history"
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden />
+              {t("backToHistory")}
+            </Link>
+          </li>
+          <li aria-hidden>/</li>
+          <li className="text-foreground" aria-current="page">
+            {detail.company_name ?? t("analysis")} {detail.job_title ? `— ${detail.job_title}` : ""}
+          </li>
+        </ol>
+      </nav>
 
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -162,16 +166,15 @@ export default function HistoryDetailPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/home">
-            <Button variant="outline" size="sm">
-              {t("reRunAnalysis")}
-            </Button>
+          <Link href="/home" className={buttonVariants({ variant: "outline", size: "sm" })}>
+            {t("reRunAnalysis")}
           </Link>
           {optimizationResult ? (
-            <Link href={`/history/compare?a=${id}`}>
-              <Button variant="outline" size="sm">
-                {t("compareWithAnother")}
-              </Button>
+            <Link
+              href={`/history/compare?a=${id}`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              {t("compareWithAnother")}
             </Link>
           ) : null}
         </div>
@@ -179,8 +182,8 @@ export default function HistoryDetailPage() {
 
       {companyResearch ? (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-slate-100">{t("companyResearch")}</h2>
-          <CompanyReport research={companyResearch} />
+          <h2 className="text-xl font-semibold text-foreground">{t("companyResearch")}</h2>
+          <CompanyReport research={companyResearch} headingLevel="h3" />
         </section>
       ) : null}
 
@@ -211,6 +214,6 @@ export default function HistoryDetailPage() {
           <GapAnalysis gaps={optimizationResult.gap_analysis} />
         </section>
       ) : null}
-    </main>
+    </div>
   );
 }

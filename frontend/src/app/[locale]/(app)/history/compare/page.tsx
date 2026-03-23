@@ -12,9 +12,9 @@ import type { OptimizationResult } from "@/types/optimization";
 
 function CompareLoadingFallback() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-12">
-      <span className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-sky-400" />
-    </main>
+    <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-12">
+      <span className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+    </div>
   );
 }
 
@@ -102,30 +102,30 @@ function ComparePageContent() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-12">
-        <span className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-sky-400" />
-      </main>
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-6 py-12">
+        <span className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+      </div>
     );
   }
 
   if (error || !resultA || !resultB) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-4 px-6 py-12">
-        <h1 className="text-2xl font-semibold text-white">{t("title")}</h1>
-        <p className="text-slate-300">{error ?? t("couldNotLoad")}</p>
-        <Link className="text-sky-300 underline" href="/history">
+      <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-4 px-6 py-12">
+        <h1 className="text-2xl font-semibold text-foreground">{t("title")}</h1>
+        <p className="text-muted-foreground">{error ?? t("couldNotLoad")}</p>
+        <Link className="text-primary underline" href="/history">
           {t("backToHistory")}
         </Link>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-6 py-10">
+    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-6 py-10">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{t("title")}</h1>
-          <p className="mt-1 text-slate-400">{t("subtitle")}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t("title")}</h1>
+          <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Link
           className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
@@ -141,7 +141,7 @@ function ComparePageContent() {
         resultA={resultA}
         resultB={resultB}
       />
-    </main>
+    </div>
   );
 }
 

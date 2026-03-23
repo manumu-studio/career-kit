@@ -46,12 +46,23 @@ docs/PACKET-04-BEGINNER-GUIDE.md
 docs/PACKET-05-DEPLOYMENT-REPORT.md
 docs/TASK-025-JUNIOR-GUIDE.md
 docs/research
+docs/audits
 # ============================================
 # AI/IDE Development System (PRIVATE — local only)
 # ============================================
 
-# Cursor rules
+# Cursor config & skills
 .cursorrules
+.cursor/skills/
+
+# GitHub Copilot prompts
+.github/prompts/
+
+# MCP server config
+.mcp.json
+
+# Python bytecode (global — covers root-level scripts too)
+__pycache__/
 
 # Session continuity
 CONTINUATION_PROMPT_NEXT_SESSION.md

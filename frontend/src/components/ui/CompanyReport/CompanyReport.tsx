@@ -69,11 +69,16 @@ function ConfidenceBadge({
   );
 }
 
-export function CompanyReport({ research, className }: CompanyReportProps) {
+export function CompanyReport({
+  research,
+  className,
+  headingLevel = "h1",
+}: CompanyReportProps) {
   const t = useTranslations("report");
   const { profile, report, research_quality: quality, sources_used: sources } = research;
   const reducedMotion = useReducedMotion();
   const isDesktop = useIsDesktop();
+  const CompanyNameHeading = headingLevel;
 
   const [expandedSection, setExpandedSection] = useState<SectionId | null>("culture");
 
@@ -119,7 +124,7 @@ export function CompanyReport({ research, className }: CompanyReportProps) {
             {profile.core_values.map((value) => (
               <span
                 key={value}
-                className="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-200"
+                className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground"
               >
                 {value}
               </span>
@@ -164,7 +169,7 @@ export function CompanyReport({ research, className }: CompanyReportProps) {
       icon: AlertTriangle,
       iconClass: "text-rose-400",
       content: (
-        <ul className="list-disc space-y-1 pl-5 text-sm text-amber-300">
+        <ul className="list-disc space-y-1 pl-5 text-sm text-destructive">
           {report.red_flags.map((redFlag) => (
             <li key={redFlag}>{redFlag}</li>
           ))}
@@ -194,11 +199,13 @@ export function CompanyReport({ research, className }: CompanyReportProps) {
   return (
     <article className={cn("space-y-6", className)}>
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold text-white">{profile.name}</h1>
-        <p className="text-sm text-slate-300">
+        <CompanyNameHeading className="text-3xl font-semibold text-foreground">
+          {profile.name}
+        </CompanyNameHeading>
+        <p className="text-sm text-muted-foreground">
           {profile.industry} • {profile.size_estimate}
         </p>
-        <p className="text-sm text-slate-300">{report.executive_summary}</p>
+        <p className="text-sm text-muted-foreground">{report.executive_summary}</p>
       </header>
 
       <motion.div

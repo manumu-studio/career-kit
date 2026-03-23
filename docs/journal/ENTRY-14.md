@@ -37,7 +37,7 @@ Split the landing page into two clear entry points: **Quick Optimize** (CV + job
 
 ## Still Open (known gaps)
 
-- None
+- TASK-081: Systematic semantic color migration across ~12 remaining UI components (task spec written)
 
 ## Validation (commands + results)
 
