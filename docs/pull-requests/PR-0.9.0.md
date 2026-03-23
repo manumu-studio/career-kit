@@ -1,7 +1,7 @@
 # PR-0.10.0 — UX Polish & Error Handling
 
 **Branch:** `feature/ux-polish` → `main`
-**Version:** `0.10.0`
+**Version:** `0.9.0`
 **Date:** 2026-03-09
 **Status:** ✅ Ready to merge
 

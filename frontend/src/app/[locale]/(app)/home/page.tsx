@@ -231,7 +231,7 @@ export default function Home() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-6 px-4 py-10 sm:px-6 sm:py-12">
+    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-6 px-4 py-10 sm:px-6 sm:py-12">
       {isSubmitting ? (
         <ProgressBar steps={OPTIMIZATION_STEPS} currentStep={progressStep} />
       ) : null}
@@ -486,6 +486,6 @@ export default function Home() {
           </motion.div>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

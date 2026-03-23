@@ -18,5 +18,6 @@ Log of feature work and releases.
 | 12 | [ENTRY-12 — Landing Page Redesign & CV Language Auto-Detection](journal/ENTRY-12.md) | [PR-0.12.0](pull-requests/PR-0.12.0.md) | 2026-03-10 |
 | 13 | [ENTRY-13 — App Pages Polish](journal/ENTRY-13.md) | [PR-0.13.0](pull-requests/PR-0.13.0.md) | 2026-03-10 |
 | 14 | [ENTRY-14 — Tailored Optimization Flow](journal/ENTRY-14.md) | [PR-0.14.0](pull-requests/PR-0.14.0.md) | 2026-03-11 |
+| 15 | [ENTRY-15 — History Detail Accessibility and Theme Fixes](journal/ENTRY-15.md) | [PR-0.14.0](pull-requests/PR-0.14.0.md) | 2026-03-23 |
 | xx | [ENTRY-fix-oauth-redirect-uri — OAuth Redirect URI Fix](journal/ENTRY-fix-oauth-redirect-uri.md) | [PR-fix-oauth-redirect-uri](pull-requests/PR-fix-oauth-redirect-uri.md) | 2026-03-10 |
 

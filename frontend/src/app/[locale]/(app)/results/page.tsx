@@ -120,9 +120,9 @@ export default function ResultsPage() {
 
   if (!result) {
     return (
-      <main className="mx-auto min-h-screen w-full max-w-6xl px-6 py-10">
+      <div className="mx-auto min-h-screen w-full max-w-6xl px-6 py-10">
         <LoadingSkeleton variant="results" />
-      </main>
+      </div>
     );
   }
 
@@ -138,7 +138,7 @@ export default function ResultsPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-4 pb-24 py-8 sm:px-6 md:pb-24 md:py-10 lg:py-12">
+    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-4 pb-24 py-8 sm:px-6 md:pb-24 md:py-10 lg:py-12">
       {/* Floating export toolbar */}
       <div className="fixed bottom-0 inset-x-0 z-30 border-t border-border bg-background/90 py-3 backdrop-blur-md">
         <ExportToolbar
@@ -290,6 +290,6 @@ export default function ResultsPage() {
           />
         </motion.div>
       ) : null}
-    </main>
+    </div>
   );
 }

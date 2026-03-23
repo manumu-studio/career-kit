@@ -33,7 +33,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-10">
+    <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-10">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-foreground">{t("title")}</h1>
@@ -63,6 +63,6 @@ export default function HistoryPage() {
         total={total}
         typeFilter={typeFilter}
       />
-    </main>
+    </div>
   );
 }

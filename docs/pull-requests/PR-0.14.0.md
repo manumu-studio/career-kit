@@ -1,176 +1,109 @@
-# PR-0.14.0 — Tailored Optimization Flow
+# PR-0.14.0 — Tailored Optimization Flow + A11y Fixes
 
-**Branch:** `feature/design-system` → `main`
-**Date:** 2026-03-11
+**Branch:** `feature/tailored-optimization` → `main`
+**Date:** 2026-03-23
 **Status:** ✅ Ready to merge
 
 ---
 
 ## Summary
 
-Comprehensive design system overhaul: ShadCN/ui primitives, dark/light theme (next-themes), Framer Motion animations, Raleway typography, and 38 CSS design tokens. Landing page fully redesigned with hero, feature showcase, how-it-works, provider badges, CTA footer, and site footer. App pages (results, history, compare) polished with improved layouts. E2E capture scripts cleaned up. Auth session debugging endpoint added (dev-only gated).
+Split the landing page into two clear entry points (Quick Optimize vs Tailor for Company), enhanced the backend LLM prompt with richer company profile fields, restructured results/history layouts into a 4-section grid, and fixed six accessibility/theme bugs from a senior dev audit.
 
 ---
 
 ## Scope
 
-This PR bundles five areas of work into one cohesive release:
+### 1. Tailored Optimization Flow
 
-### 1. Design System Foundation
+- **Landing:** Dual CTAs — primary "Optimize My CV" (gradient) and secondary "Tailor for a Company" (outline + sparkle icon). FeatureShowcase cards updated.
+- **Home:** `?mode=tailor` expands company research section with highlighted border and callout banner. Submit button shows "Tailor & Optimize CV" when research is loaded.
+- **Results:** Company-tailored badge when optimization used company context.
+- **Backend:** Enhanced LLM prompt dynamically includes `mission_statement`, `tech_stack`, `industry` from CompanyProfile when available (no more static template).
 
-- ShadCN/ui installed (base-nova preset): 13 primitives (button, card, input, textarea, select, badge, dropdown-menu, tooltip, separator, sheet, dialog, toggle, skeleton)
-- next-themes for dark/light mode with system preference + persistence
-- Framer Motion for page transitions and micro-animations
-- Raleway variable font (weights 300–700)
-- 38 CSS variables (dark + light) in `globals.css`
-- ThemeToggle (sun/moon with animation) + ThemeProvider
+### 2. Results & History Layout Restructure
 
-### 2. Landing Page Redesign
+- 4-section layout: score + keywords (inline), CV comparison (full width), gap analysis (responsive grid)
+- GapAnalysis: responsive 1/2/3-column grid, ScoreCard width constraints removed
+- History detail page aligned with results layout
 
-- New components: LandingHero, FeatureShowcase, HowItWorks, ProvidersSection, CtaFooterSection, Footer
-- Supporting primitives: AnimatedText, FeatureCard, StepCard
-- Provider SVG logos (Anthropic, Gemini, OpenAI)
-- Animated headline with staggered word reveal
+### 3. A11y & Theme Bug Fixes (Senior Dev Audit)
 
-### 3. App Page Polish
+- Removed `←` unicode arrows from translation keys (3 `backToUpload` + 1 `backToHistory`) — replaced with Lucide icons
+- Replaced hardcoded dark-only colors (`text-white`, `text-slate-*`, `bg-slate-*`, `text-sky-*`) with semantic tokens across 8 page files
+- Fixed `<Link><Button>` invalid nesting → `<Link className={buttonVariants()}>` pattern
+- Removed duplicate `<main>` landmarks from 6 page files (app layout already wraps in `<main>`)
+- Added `headingLevel` prop to CompanyReport to avoid duplicate `<h1>` on history detail
+- Fixed CompanyReport risk flags color: `text-amber-300` → `text-destructive`
 
-- Results page: layout restructured for better visual hierarchy
-- History detail page: aligned with results layout
-- History list: search, filters, pagination improvements
-- Compare page: updated styling
-- Navbar: glass blur, mobile drawer (Sheet), auth-aware, language/theme toggles replace UserBar
+### 4. Cleanup
 
-### 4. Component Migration to ShadCN
-
-- 11 existing components migrated to ShadCN primitives
-- Hardcoded colors (slate-_, sky-_) → CSS variable classes
-- Custom buttons → ShadCN Button variants
-- Card containers → ShadCN Card
-- Status pills → ShadCN Badge (+ custom success/warning variants)
-- Loading shimmer → ShadCN Skeleton
-
-### 5. Cleanup & Fixes
-
-- Deleted 8 e2e capture scripts (moved to e2e-captures/ previously)
+- Deleted 9 e2e capture scripts (previously moved to `e2e-captures/`)
+- Added commit-msg hook enforcing conventional commit format + Golden Goose Rule
 - Debug session route (dev-only, returns 404 in production)
-- Auth callback error logging
 
 ---
 
 ## Files Changed
 
-| Area                    | File                                         | Action                                         |
-| ----------------------- | -------------------------------------------- | ---------------------------------------------- |
-| **E2E cleanup**         | e2e/capture-cv-pages-30.spec.ts              | Deleted                                        |
-|                         | e2e/capture-cv-pages.spec.ts                 | Deleted                                        |
-|                         | e2e/capture-dashboards.spec.ts               | Deleted                                        |
-|                         | e2e/capture-rezi-login.spec.ts               | Deleted                                        |
-|                         | e2e/playwright-cv-capture-30.config.ts       | Deleted                                        |
-|                         | e2e/playwright-cv-capture.config.ts          | Deleted                                        |
-|                         | e2e/playwright-dashboard-capture.config.ts   | Deleted                                        |
-|                         | e2e/playwright-rezi-capture.config.ts        | Deleted                                        |
-| **i18n**                | messages/en.json                             | Modified — new keys for navbar, landing, pages |
-|                         | messages/es.json                             | Modified — Spanish equivalents, full parity    |
-| **Assets**              | public/assets/providers/anthropic.svg        | New                                            |
-|                         | public/assets/providers/gemini.svg           | New                                            |
-|                         | public/assets/providers/openai.svg           | New                                            |
-| **Pages**               | src/app/[locale]/(app)/compare/page.tsx      | Modified — styling                             |
-|                         | src/app/[locale]/(app)/history/[id]/page.tsx | Modified — layout restructure                  |
-|                         | src/app/[locale]/(app)/history/page.tsx      | Modified — search, filters, pagination         |
-|                         | src/app/[locale]/(app)/home/page.tsx         | Modified — ShadCN migration                    |
-|                         | src/app/[locale]/(app)/layout.tsx            | Modified — Navbar, OptimizationProvider        |
-|                         | src/app/[locale]/(app)/report/page.tsx       | Modified — styling                             |
-|                         | src/app/[locale]/(app)/results/page.tsx      | Modified — layout restructure                  |
-|                         | src/app/[locale]/(public)/layout.tsx         | Modified — Navbar public mode                  |
-|                         | src/app/[locale]/(public)/page.tsx           | Modified — full landing redesign               |
-|                         | src/app/[locale]/not-found.tsx               | Modified — design tokens                       |
-|                         | src/app/not-found.tsx                        | Modified — design tokens                       |
-|                         | src/app/globals.css                          | Modified — 38 CSS vars, animations, font       |
-|                         | src/app/layout.tsx                           | Modified — ThemeProvider, TooltipProvider      |
-| **Auth**                | src/app/api/auth/[...nextauth]/route.ts      | Modified — callback logging                    |
-|                         | src/app/api/debug-session/route.ts           | New — dev-only debug endpoint                  |
-|                         | src/features/auth/auth.ts                    | Modified — debug logging                       |
-| **Landing components**  | src/components/landing/CtaFooterSection/     | New (2 files)                                  |
-|                         | src/components/landing/FeatureShowcase/      | New (2 files)                                  |
-|                         | src/components/landing/HowItWorks/           | New (2 files)                                  |
-|                         | src/components/landing/LandingHero/          | New (3 files)                                  |
-|                         | src/components/landing/ProvidersSection/     | New (2 files)                                  |
-| **UI components**       | src/components/ui/AnimatedText/              | New (3 files)                                  |
-|                         | src/components/ui/FeatureCard/               | New (3 files)                                  |
-|                         | src/components/ui/Footer/                    | New (3 files)                                  |
-|                         | src/components/ui/LinkWithSpinner/           | New (2 files)                                  |
-|                         | src/components/ui/PageTransition/            | New (2 files)                                  |
-|                         | src/components/ui/ScoreGauge/                | New (3 files)                                  |
-|                         | src/components/ui/StepCard/                  | New (3 files)                                  |
-|                         | src/components/ui/SubmitButtonWithSpinner/   | New (2 files)                                  |
-| **Modified components** | src/components/ui/CompanyReport/             | Modified — ShadCN + tests                      |
-|                         | src/components/ui/CoverLetterDisplay/        | Modified — ShadCN + tests                      |
-|                         | src/components/ui/CvComparison/              | Modified — ShadCN + tests                      |
-|                         | src/components/ui/ExportToolbar/             | Modified — ShadCN                              |
-|                         | src/components/ui/FileUpload/                | Modified — ShadCN                              |
-|                         | src/components/ui/GapAnalysis/               | Modified — grid layout + tests                 |
-|                         | src/components/ui/HistoryCard/               | Modified — ShadCN + tests                      |
-|                         | src/components/ui/HistoryList/               | Modified — ShadCN + tests                      |
-|                         | src/components/ui/KeywordChips/              | Modified — styling                             |
-|                         | src/components/ui/KeywordMatch/              | Modified — ShadCN + tests                      |
-|                         | src/components/ui/LoadingSkeleton/           | Modified — ShadCN                              |
-|                         | src/components/ui/Navbar/                    | Modified — full rewrite                        |
-|                         | src/components/ui/ProgressBar/               | Modified — styling                             |
-|                         | src/components/ui/ProviderComparison/        | Modified — ShadCN + tests                      |
-|                         | src/components/ui/ProviderSelector/          | Modified — ShadCN + tests                      |
-|                         | src/components/ui/ScoreCard/                 | Modified — ScoreGauge extraction               |
-|                         | src/components/ui/ThemeToggle/               | Modified — animation                           |
-|                         | src/components/ui/button.tsx                 | Modified — variants                            |
-| **Utilities**           | src/lib/name-utils.ts                        | New — name formatting                          |
-|                         | src/lib/name-utils.test.ts                   | New — tests                                    |
-| **Test infra**          | src/test/setup.ts                            | Modified — mocks                               |
-|                         | src/test/utils.tsx                           | Modified — test providers                      |
-|                         | vitest.config.ts                             | Modified — coverage config                     |
+| Area | File | Action | Notes |
+|------|------|--------|-------|
+| **Landing** | `src/app/[locale]/(public)/page.tsx` | Modified | Dual CTAs, feature card updates |
+| **Home** | `src/app/[locale]/(app)/home/page.tsx` | Modified | `?mode=tailor` logic, `<main>` → `<div>` |
+| **Results** | `src/app/[locale]/(app)/results/page.tsx` | Modified | 4-section layout, company badge, `<main>` → `<div>` |
+| **History** | `src/app/[locale]/(app)/history/page.tsx` | Modified | `<main>` → `<div>` |
+| **History detail** | `src/app/[locale]/(app)/history/[id]/page.tsx` | Modified | Breadcrumb nav, semantic colors, heading flow, link/button fix |
+| **History compare** | `src/app/[locale]/(app)/history/compare/page.tsx` | Modified | Semantic colors, `<main>` → `<div>` |
+| **Compare** | `src/app/[locale]/(app)/compare/page.tsx` | Modified | Semantic colors, `<main>` → `<div>`, link/button fix |
+| **Report** | `src/app/[locale]/(app)/report/page.tsx` | Modified | Semantic colors, `<main>` → `<div>`, link/button fix |
+| **Auth error** | `src/app/[locale]/auth/error/page.tsx` | Modified | Full semantic token migration, `<main>` → `<div>` |
+| **CompanyReport** | `src/components/ui/CompanyReport/CompanyReport.tsx` | Modified | Semantic tokens, configurable heading tag |
+| **CompanyReport types** | `src/components/ui/CompanyReport/CompanyReport.types.ts` | Modified | Added `headingLevel` prop |
+| **GapAnalysis** | `src/components/ui/GapAnalysis/GapAnalysis.tsx` | Modified | Responsive grid layout |
+| **ScoreCard** | `src/components/ui/ScoreCard/ScoreCard.tsx` | Modified | Width constraints removed |
+| **i18n** | `messages/en.json` | Modified | New tailored keys, removed `←` from labels |
+| **i18n** | `messages/es.json` | Modified | Spanish equivalents, removed `←` |
+| **Backend** | `backend/app/core/prompts.py` | Modified | Dynamic company context builder |
+| **Hooks** | `.husky/commit-msg` | Added | Conventional commits + opsec enforcement |
+| **E2E** | `e2e-captures/*.spec.ts`, `*.config.ts` | Deleted | 9 files removed |
+| **Debug** | `src/app/api/debug-session/route.ts` | Modified | Dev-only session debug |
 
 ---
 
 ## Architecture Decisions
 
-| Decision                            | Why                                                                 |
-| ----------------------------------- | ------------------------------------------------------------------- |
-| ShadCN/ui (base-nova)               | Unstyled primitives + Tailwind = full control, no CSS-in-JS runtime |
-| next-themes over custom             | ~2KB, handles SSR hydration, system preference, cookie persistence  |
-| Framer Motion                       | Page transitions + micro-interactions, tree-shakeable               |
-| CSS variables for tokens            | Works with Tailwind v4, supports runtime theme switching            |
-| ScoreGauge extracted from ScoreCard | Reusable SVG gauge, separation of concerns                          |
-| Navbar replaces UserBar             | Single responsive nav with glass blur, mobile drawer, auth-aware    |
-| Debug route dev-gated               | Returns 404 in production, useful for auth debugging locally        |
+| Decision | Why |
+|----------|-----|
+| Dynamic company prompt builder | Only includes fields with data — avoids sending empty placeholders to LLM |
+| `headingLevel` prop on CompanyReport | Reuse component at different heading depths without duplicate `<h1>` |
+| `buttonVariants()` over `<Link><Button>` | Valid HTML — `<a>` cannot nest `<button>` per spec |
+| Semantic CSS tokens over hardcoded colors | Supports both light and dark themes via CSS variables |
+| Single `<main>` in app layout only | Pages use `<div>` — conforms to HTML landmark rules |
+| commit-msg hook | Enforces conventional commit format and blocks internal workflow references |
 
 ---
 
 ## Testing Checklist
 
-- [x] Dark/light theme toggle works, persists across refresh
-- [x] Landing page renders all sections (hero, features, how-it-works, providers, CTA, footer)
-- [x] Navbar: glass blur, mobile drawer, language/theme toggles, sign out
-- [x] All 13 ShadCN primitives render correctly in both themes
-- [x] Results page layout: score + keywords inline, CV comparison full width, gaps grid
-- [x] History detail page matches results layout
-- [x] Component tests pass (ScoreCard, GapAnalysis, KeywordMatch, CvComparison, HistoryCard, etc.)
-- [x] i18n: all new keys in EN + ES, no missing translations
-- [x] Debug route returns 404 in production mode
-- [x] No `any` types, strict TypeScript
+- [x] Landing: both CTAs navigate correctly (`/home` vs `/home?mode=tailor`)
+- [x] Home: `?mode=tailor` expands company research with banner
+- [x] Results: company-tailored badge appears when research context used
+- [x] Results/history: 4-section layout renders correctly
+- [x] GapAnalysis: responsive grid (1/2/3 cols) at all breakpoints
+- [x] Light mode: all text readable, no invisible elements across all pages
+- [x] Dark mode: visual parity with previous design
+- [x] No duplicate `<main>` landmarks on any page
+- [x] No `<a>` wrapping `<button>` anywhere
+- [x] Translation keys: no `←` arrows, EN/ES parity
+- [x] `npx tsc --noEmit` passes
+- [x] `npm run build` passes
+- [x] `npm run lint` passes
 
 ---
 
 ## Deployment Notes
 
 - No new environment variables required
-- No backend changes in this PR
-- Vercel will auto-deploy on merge (existing config)
-- Provider SVGs added to `public/assets/` — served statically
-
----
-
-## Validation
-
-```bash
-# Frontend
-cd frontend && npx tsc --noEmit && npm run build && npm run lint && npm run test
-# All passing
-```
+- Backend: prompt change is backward-compatible (company context is optional)
+- Vercel auto-deploys on merge
+- EC2 backend needs `git pull` + service restart for prompt changes
