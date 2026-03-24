@@ -25,6 +25,19 @@
     --ring: #2E75B6;
     --success: #107c10;
     --warning: #d97706;
+
+    /* Landing tokens — light mode */
+    --landing-bg: #ffffff;
+    --landing-surface: #f8f9fa;
+    --landing-glow: rgba(46, 117, 182, 0.1);
+    --landing-gradient-start: #1A3A5C;
+    --landing-gradient-mid: #2E75B6;
+    --landing-gradient-end: #0070f3;
+    --landing-cta-gradient-start: rgba(26, 58, 92, 0.12);
+    --landing-cta-gradient-mid: rgba(46, 117, 182, 0.08);
+    --landing-cta-gradient-end: rgba(0, 112, 243, 0.06);
+    --landing-text: #1b1b1b;
+    --landing-text-muted: #71717a;
     --chart-1: oklch(0.809 0.105 251.813);
     --chart-2: oklch(0.623 0.214 259.815);
     --chart-3: oklch(0.546 0.245 262.881);
@@ -106,6 +119,9 @@
   --landing-gradient-start: #1A3A5C;
   --landing-gradient-mid: #2E75B6;
   --landing-gradient-end: #0070f3;
+  --landing-cta-gradient-start: #1A3A5C;
+  --landing-cta-gradient-mid: #2E75B6;
+  --landing-cta-gradient-end: #0070f3;
   --landing-text: #f4f4f5;
   --landing-text-muted: #a1a1aa;
 }

@@ -206,6 +206,7 @@
     "scoreLabel": "Coincidencia",
     "strongMatch": "Alta coincidencia",
     "keywordsMatched": "{matched} de {total} palabras clave encontradas",
+    "keywordsMissing": "{missing} de {total} palabras clave no encontradas",
     "matchedKeywords": "Palabras Clave Encontradas",
     "missingKeywords": "Palabras Clave Faltantes",
     "featuresTitle": "Todo lo que necesitas para conseguir el puesto",

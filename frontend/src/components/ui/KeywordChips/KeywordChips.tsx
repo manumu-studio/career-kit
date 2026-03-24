@@ -13,6 +13,8 @@ export function KeywordChips({
   keywords,
   label = "Keywords to Mirror",
   className,
+  animated = false,
+  animationDelay = 0,
 }: KeywordChipsProps) {
   const [copiedKeyword, setCopiedKeyword] = useState<string | null>(null);
   const reducedMotion = useReducedMotion();
@@ -33,12 +35,14 @@ export function KeywordChips({
           <Tooltip key={keyword}>
             <TooltipTrigger
               render={
-                <motion.span
-                  initial={reducedMotion ? false : { opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={
-                    reducedMotion ? { duration: 0 } : { delay: i * CHIP_STAGGER, duration: 0.2 }
-                  }
+              <motion.span
+                initial={animated && !reducedMotion ? { opacity: 0, scale: 0.8, y: 8 } : false}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={
+                  animated && !reducedMotion
+                    ? { delay: i * CHIP_STAGGER + animationDelay / 1000, duration: 0.2 }
+                    : { duration: 0 }
+                }
                   className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-xs text-foreground transition hover:bg-muted/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   role="button"
                   tabIndex={0}

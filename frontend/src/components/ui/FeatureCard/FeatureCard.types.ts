@@ -12,4 +12,6 @@ export interface FeatureCardProps {
   visual: React.ReactNode;
   /** Whether to reverse layout (visual on left). */
   reverse?: boolean;
+  /** Visual variant. 'glass' uses glassmorphism styling for dark backgrounds. */
+  variant?: "default" | "glass";
 }
