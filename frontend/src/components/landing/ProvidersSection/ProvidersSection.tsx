@@ -50,10 +50,18 @@ export function ProvidersSection() {
             <p className="mt-4 text-muted-foreground">{t("providersDesc")}</p>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-6">
-              {PROVIDERS.map((p) => (
-                <div
+              {PROVIDERS.map((p, index) => (
+                <m.div
                   key={p.key}
                   className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-5 py-3"
+                  initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : { delay: index * 0.1, duration: 0.3 }
+                  }
                 >
                   <span className="dark:invert" aria-hidden>
                     <Image
@@ -67,7 +75,7 @@ export function ProvidersSection() {
                   <span className="text-sm font-medium text-foreground">
                     {t(p.key)}
                   </span>
-                </div>
+                </m.div>
               ))}
             </div>
           </m.div>

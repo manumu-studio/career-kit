@@ -35,18 +35,31 @@ export function StepCard({
         custom={reduceMotion}
       >
         <div className="relative flex flex-col items-center">
-          <span
+          <m.span
             className="absolute -top-2 left-1/2 flex size-6 -translate-x-1/2 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
             aria-hidden
+            initial={reduceMotion ? false : { opacity: 0, scale: 0.5 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.3, delay: 0.2 }}
           >
             {step}
-          </span>
-          <div
+          </m.span>
+          <m.div
             className="flex size-14 items-center justify-center rounded-full border-2 border-primary bg-primary/10 text-primary"
             aria-hidden
+            whileInView={
+              reduceMotion
+                ? {}
+                : {
+                    scale: [1, 1.1, 1],
+                    transition: { duration: 0.6, ease: "easeInOut" },
+                  }
+            }
+            viewport={{ once: true, margin: "-60px" }}
           >
             <Icon className="size-7" />
-          </div>
+          </m.div>
         </div>
         <h3 className="mt-4 text-lg font-semibold text-foreground">{title}</h3>
         <p className="mt-2 max-w-xs text-sm text-muted-foreground">

@@ -206,6 +206,7 @@
     "scoreLabel": "Job Match",
     "strongMatch": "Strong match",
     "keywordsMatched": "{matched} of {total} keywords matched",
+    "keywordsMissing": "{missing} of {total} keywords missing",
     "matchedKeywords": "Matched Keywords",
     "missingKeywords": "Missing Keywords",
     "featuresTitle": "Everything you need to land the role",

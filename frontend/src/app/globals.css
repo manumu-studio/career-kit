@@ -47,8 +47,8 @@ a[href] {
 
 @keyframes keyword-pulse {
   0% { background-color: transparent; }
-  50% { background-color: color-mix(in oklch, var(--success) 20%, transparent); }
-  100% { background-color: color-mix(in oklch, var(--success) 10%, transparent); }
+  50% { background-color: rgba(40, 90, 200, 0.25); }
+  100% { background-color: rgba(40, 90, 200, 0.15); }
 }
 
 @keyframes score-glow {
@@ -69,6 +69,13 @@ a[href] {
   background: linear-gradient(80deg, var(--landing-gradient-end, #0070f3), var(--landing-gradient-start, #1A3A5C), var(--landing-gradient-end, #0070f3));
   background-size: 400% 100%;
   animation: ai-gradient 8s ease infinite;
+}
+
+.cv-demo-shadow {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+.dark .cv-demo-shadow {
+  box-shadow: 0 20px 25px -5px rgba(46, 117, 182, 0.15), 0 8px 10px -6px rgba(0, 112, 243, 0.1);
 }
 
 .animate-scanline { animation: scanline 1.5s ease-in-out forwards; }

@@ -101,22 +101,39 @@ export function FeatureShowcase() {
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 0.4 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.3 }}
           >
             {t("featuresTitle")}
           </m.h2>
         </LazyMotion>
 
         <div className="flex flex-col gap-16 md:gap-24">
-          {features.map((f) => (
-            <FeatureCard
-              key={f.titleKey}
-              icon={f.icon}
-              title={t(f.titleKey)}
-              description={t(f.descKey)}
-              visual={f.visual}
-              reverse={f.reverse}
-            />
+          {features.map((f, index) => (
+            <LazyMotion key={f.titleKey} features={domAnimation} strict>
+              <m.div
+                initial={
+                  reduceMotion
+                    ? false
+                    : { opacity: 0, x: index % 2 === 0 ? -40 : 40 }
+                }
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.3, delay: index * 0.1 }
+                }
+              >
+                <FeatureCard
+                  icon={f.icon}
+                  title={t(f.titleKey)}
+                  description={t(f.descKey)}
+                  visual={f.visual}
+                  reverse={f.reverse}
+                  variant="glass"
+                />
+              </m.div>
+            </LazyMotion>
           ))}
         </div>
       </div>
