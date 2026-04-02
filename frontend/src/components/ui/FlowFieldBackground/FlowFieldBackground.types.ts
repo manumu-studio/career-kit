@@ -21,4 +21,13 @@ export interface FlowFieldBackgroundProps {
    * Speed multiplier. Default: 1
    */
   speed?: number;
+  /**
+   * Background color for the fade effect.
+   * If not provided, will use the container's computed background color.
+   */
+  backgroundColor?: string;
+  /**
+   * When true, renders a single static frame instead of continuous animation.
+   */
+  reducedMotion?: boolean;
 }

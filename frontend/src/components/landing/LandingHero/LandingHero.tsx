@@ -47,6 +47,7 @@ export function LandingHero({
           trailOpacity={0.08}
           particleCount={400}
           speed={0.6}
+          reducedMotion={reducedMotion}
         />
       </div>
       <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[1fr_1.2fr] lg:items-center lg:gap-12">

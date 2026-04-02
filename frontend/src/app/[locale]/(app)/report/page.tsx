@@ -27,11 +27,11 @@ export default function ReportPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-6 py-10">
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link className="hover:text-foreground" href="/home">
           {t("backToUpload")}
         </Link>
-      </nav>
+      </div>
       <CompanyReport research={companyResearch} />
     </div>
   );

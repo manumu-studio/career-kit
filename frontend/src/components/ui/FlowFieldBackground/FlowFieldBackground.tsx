@@ -3,42 +3,16 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-
-interface FlowFieldBackgroundProps {
-  className?: string;
-  /**
-   * Color of the particles.
-   * Defaults to a cyan/indigo mix if not specified.
-   */
-  color?: string;
-  /**
-   * The opacity of the trails (0.0 to 1.0).
-   * Lower = longer trails. Higher = shorter trails.
-   * Default: 0.1
-   */
-  trailOpacity?: number;
-  /**
-   * Number of particles. Default: 600
-   */
-  particleCount?: number;
-  /**
-   * Speed multiplier. Default: 1
-   */
-  speed?: number;
-  /**
-   * Background color for the fade effect.
-   * If not provided, will use black for dark mode and white for light mode.
-   */
-  backgroundColor?: string;
-}
+import type { FlowFieldBackgroundProps } from "./FlowFieldBackground.types";
 
 export function FlowFieldBackground({
   className,
-  color = "#6366f1", // Default Indigo
+  color = "#6366f1",
   trailOpacity = 0.15,
   particleCount = 600,
   speed = 1,
   backgroundColor,
+  reducedMotion = false,
 }: FlowFieldBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,21 +47,16 @@ export function FlowFieldBackground({
         this.vx = 0;
         this.vy = 0;
         this.age = 0;
-        // Random lifespan to create natural recycling
         this.life = Math.random() * 200 + 100;
       }
 
       update() {
-        // 1. Flow Field Math (Simplex-ish noise)
-        // We calculate an angle based on position to create the "flow"
         const angle =
           (Math.cos(this.x * 0.005) + Math.sin(this.y * 0.005)) * Math.PI;
 
-        // 2. Add force from flow field
         this.vx += Math.cos(angle) * 0.2 * speed;
         this.vy += Math.sin(angle) * 0.2 * speed;
 
-        // 3. Mouse Repulsion/Attraction
         const dx = mouse.x - this.x;
         const dy = mouse.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -95,24 +64,20 @@ export function FlowFieldBackground({
 
         if (distance < interactionRadius) {
           const force = (interactionRadius - distance) / interactionRadius;
-          // Push away
           this.vx -= dx * force * 0.05;
           this.vy -= dy * force * 0.05;
         }
 
-        // 4. Apply Velocity & Friction
         this.x += this.vx;
         this.y += this.vy;
-        this.vx *= 0.95; // Friction to stop infinite acceleration
+        this.vx *= 0.95;
         this.vy *= 0.95;
 
-        // 5. Aging
         this.age++;
         if (this.age > this.life) {
           this.reset();
         }
 
-        // 6. Wrap around screen
         if (this.x < 0) this.x = width;
         if (this.x > width) this.x = 0;
         if (this.y < 0) this.y = height;
@@ -129,17 +94,15 @@ export function FlowFieldBackground({
       }
 
       draw(context: CanvasRenderingContext2D, resolvedColor: string) {
-        context.fillStyle = resolvedColor;
-        // Fade in and out based on age
         const alpha = 1 - Math.abs(this.age / this.life - 0.5) * 2;
         context.globalAlpha = alpha;
-        context.fillRect(this.x, this.y, 1.5, 1.5); // Tiny dots are faster than arcs
+        context.fillStyle = resolvedColor;
+        context.fillRect(this.x, this.y, 1.5, 1.5);
       }
     }
 
     // --- INITIALIZATION ---
     const init = () => {
-      // Handle High-DPI screens (Retina)
       const dpr = window.devicePixelRatio || 1;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
@@ -164,16 +127,34 @@ export function FlowFieldBackground({
       return value;
     };
 
+    // Resolve background color for the fade layer
+    const resolveBgColor = (): string =>
+      backgroundColor ??
+      getComputedStyle(container).backgroundColor ??
+      "rgb(0, 0, 0)";
+
+    // --- RENDER A SINGLE STATIC FRAME ---
+    const renderStaticFrame = () => {
+      init();
+      // Let particles settle for a few ticks
+      for (let tick = 0; tick < 30; tick++) {
+        particles.forEach((p) => p.update());
+      }
+      ctx.globalAlpha = 1;
+      ctx.clearRect(0, 0, width, height);
+      const resolvedColor = resolveCssColor(color);
+      particles.forEach((p) => {
+        p.draw(ctx, resolvedColor);
+      });
+      ctx.globalAlpha = 1;
+    };
+
     // --- ANIMATION LOOP ---
     const animate = () => {
-      // "Fade" effect: Instead of clearing the canvas, we draw a semi-transparent rect
-      // This creates the "Trails" look.
-      // Get background color from container's computed style if not provided
-      const bgColor = backgroundColor || 
-        getComputedStyle(container).backgroundColor || 
-        'rgb(0, 0, 0)';
-      
-      // Parse RGB values from the background color
+      // Reset globalAlpha before drawing the fade layer
+      ctx.globalAlpha = 1;
+
+      const bgColor = resolveBgColor();
       const rgbMatch = bgColor.match(/\d+/g);
       if (rgbMatch && rgbMatch.length >= 3) {
         const [r, g, b] = rgbMatch.map(Number);
@@ -190,6 +171,9 @@ export function FlowFieldBackground({
         p.draw(ctx, resolvedColor);
       });
 
+      // Reset globalAlpha after all particles so next frame's fade layer is correct
+      ctx.globalAlpha = 1;
+
       animationFrameId = requestAnimationFrame(animate);
     };
 
@@ -197,7 +181,11 @@ export function FlowFieldBackground({
     const handleResize = () => {
       width = container.clientWidth;
       height = container.clientHeight;
-      init();
+      if (reducedMotion) {
+        renderStaticFrame();
+      } else {
+        init();
+      }
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -211,21 +199,27 @@ export function FlowFieldBackground({
       mouse.y = -1000;
     };
 
-    // Start
-    init();
-    animate();
+    // Start — static frame for reduced motion, full animation otherwise
+    if (reducedMotion) {
+      renderStaticFrame();
+    } else {
+      init();
+      animate();
+      container.addEventListener("mousemove", handleMouseMove);
+      container.addEventListener("mouseleave", handleMouseLeave);
+    }
 
     window.addEventListener("resize", handleResize);
-    container.addEventListener("mousemove", handleMouseMove);
-    container.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      container.removeEventListener("mousemove", handleMouseMove);
-      container.removeEventListener("mouseleave", handleMouseLeave);
-      cancelAnimationFrame(animationFrameId);
+      if (!reducedMotion) {
+        container.removeEventListener("mousemove", handleMouseMove);
+        container.removeEventListener("mouseleave", handleMouseLeave);
+        cancelAnimationFrame(animationFrameId);
+      }
     };
-  }, [color, trailOpacity, particleCount, speed, backgroundColor]);
+  }, [color, trailOpacity, particleCount, speed, backgroundColor, reducedMotion]);
 
   return (
     <div

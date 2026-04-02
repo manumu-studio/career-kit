@@ -46,7 +46,7 @@ export function HistoryCard({
       whileHover={reducedMotion ? {} : { y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
       transition={{ duration: 0.2 }}
       className={cn(
-        "cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:bg-muted/30 hover:border-l-2 hover:border-l-primary",
+        "cursor-pointer rounded-xl border border-l-2 border-border border-l-transparent bg-card p-4 transition-all hover:bg-muted/30 hover:border-l-primary",
         isExpired && "border-warning/50 bg-muted/40",
       )}
       onClick={() => onView(item.id)}

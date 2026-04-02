@@ -23,7 +23,10 @@ export default async function LandingPage({
   searchParams,
 }: LandingPageProps) {
   // Gracefully handle stale/invalid JWT cookies (e.g. after AUTH_SECRET rotation)
-  const session = await auth().catch(() => null);
+  const session = await auth().catch((error: unknown) => {
+    console.error("[auth] session retrieval failed:", error);
+    return null;
+  });
   const { locale } = await params;
   const { error } = await searchParams;
   const t = await getTranslations("landing");
