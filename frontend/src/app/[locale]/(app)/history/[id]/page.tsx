@@ -23,28 +23,37 @@ import type { CompanyResearchResult } from "@/types/company";
 import type { OptimizationResult } from "@/types/optimization";
 import type { HistoryDetailResponse } from "@/types/history";
 
+function readUnknownProp(obj: object, key: string): unknown {
+  if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+    return undefined;
+  }
+  return Reflect.get(obj, key);
+}
+
 function isCompanyResearchResult(value: unknown): value is CompanyResearchResult {
   if (typeof value !== "object" || value === null) return false;
-  const o = value as Record<string, unknown>;
+  const profile = readUnknownProp(value, "profile");
+  const report = readUnknownProp(value, "report");
   return (
-    typeof o.profile === "object" &&
-    typeof o.report === "object" &&
-    Array.isArray(o.sources_used) &&
-    typeof o.research_quality === "string" &&
-    typeof o.researched_at === "string"
+    typeof profile === "object" &&
+    profile !== null &&
+    typeof report === "object" &&
+    report !== null &&
+    Array.isArray(readUnknownProp(value, "sources_used")) &&
+    typeof readUnknownProp(value, "research_quality") === "string" &&
+    typeof readUnknownProp(value, "researched_at") === "string"
   );
 }
 
 function isOptimizationResult(value: unknown): value is OptimizationResult {
   if (typeof value !== "object" || value === null) return false;
-  const o = value as Record<string, unknown>;
   return (
-    Array.isArray(o.sections) &&
-    Array.isArray(o.gap_analysis) &&
-    Array.isArray(o.keyword_matches) &&
-    Array.isArray(o.keyword_misses) &&
-    typeof o.match_score === "number" &&
-    typeof o.summary === "string"
+    Array.isArray(readUnknownProp(value, "sections")) &&
+    Array.isArray(readUnknownProp(value, "gap_analysis")) &&
+    Array.isArray(readUnknownProp(value, "keyword_matches")) &&
+    Array.isArray(readUnknownProp(value, "keyword_misses")) &&
+    typeof readUnknownProp(value, "match_score") === "number" &&
+    typeof readUnknownProp(value, "summary") === "string"
   );
 }
 

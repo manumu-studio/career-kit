@@ -7,6 +7,12 @@ import type { LLMProviderName } from "@/types/provider";
 
 const STORAGE_KEY = "ats-provider-preference";
 
+const LLM_PROVIDER_IDS: readonly LLMProviderName[] = ["anthropic", "openai", "gemini"];
+
+function isLLMProviderName(value: string): value is LLMProviderName {
+  return LLM_PROVIDER_IDS.some((id) => id === value);
+}
+
 export function useProviderSelector() {
   const [available, setAvailable] = useState<string[]>([]);
   const [defaultProvider, setDefaultProvider] = useState<string>("anthropic");
@@ -22,13 +28,21 @@ export function useProviderSelector() {
           setAvailable(data.available);
           setDefaultProvider(data.default);
           const stored = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-          const valid =
-            stored && data.available.includes(stored)
-              ? (stored as LLMProviderName)
-              : data.available.includes(data.default)
-                ? (data.default as LLMProviderName)
-                : (data.available[0] as LLMProviderName);
-          setSelected(valid);
+          let next: LLMProviderName | null = null;
+          if (stored && data.available.includes(stored) && isLLMProviderName(stored)) {
+            next = stored;
+          } else if (
+            data.available.includes(data.default) &&
+            isLLMProviderName(data.default)
+          ) {
+            next = data.default;
+          } else {
+            const first = data.available[0];
+            if (first && isLLMProviderName(first)) {
+              next = first;
+            }
+          }
+          setSelected(next ?? "anthropic");
         }
       })
       .catch((err) => {

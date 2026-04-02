@@ -36,7 +36,10 @@ export function CompanySearch({
     loadCachedResearch,
     dismissCachedBanner,
     clearError,
-  } = useCompanySearch({ userId, language });
+  } = useCompanySearch({
+    ...(userId !== undefined ? { userId } : {}),
+    ...(language !== undefined ? { language } : {}),
+  });
   const t = useTranslations("companySearch");
 
   const handleResearch = async (forceRefresh?: boolean): Promise<void> => {

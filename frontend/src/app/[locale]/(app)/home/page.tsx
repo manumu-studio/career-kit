@@ -1,11 +1,7 @@
 "use client";
 
 /** Upload page where users submit CV + job description for optimization. */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,226 +10,52 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { CompareProvidersPanel } from "@/components/app/CompareProvidersPanel";
 import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
 import { CompanySearch } from "@/components/ui/CompanySearch";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { JobDescription } from "@/components/ui/JobDescription";
-import { ProviderSelector, useProviderSelector } from "@/components/ui/ProviderSelector";
-import { useOptimizationContext } from "@/context/OptimizationContext";
-import { useSession } from "@/features/auth";
-import { useToast } from "@/components/ui/Toast";
-import {
-  checkOptimizationCache,
-  compareProviders,
-  handleApiError,
-  optimizeCV,
-} from "@/lib/api";
-import type { CachedMatchInfo } from "@/types/history";
-import type { CompanyResearchResult } from "@/types/company";
-
-const STAGGER_DELAY = 0.15;
+import { ProviderSelector } from "@/components/ui/ProviderSelector";
+import { useHomePage } from "./useHomePage";
 
 export default function Home() {
-  const locale = useLocale() as "en" | "es";
-  const searchParams = useSearchParams();
-  const isTailorMode = searchParams.get("mode") === "tailor";
-  const t = useTranslations("home");
-  const { data: session } = useSession();
-  const router = useRouter();
-  const OPTIMIZATION_STEPS = useMemo(
-    () =>
-      [
-        t("stepUploading"),
-        t("stepParsing"),
-        t("stepAnalyzing"),
-        t("stepGenerating"),
-      ] as const,
-    [t],
-  );
   const {
-    companyResearch,
-    setCompanyResearch,
-    setComparisonResult,
-    setResult,
+    t,
+    isTailorMode,
     formState,
-    setFormState,
-  } = useOptimizationContext();
-  const { available, defaultProvider, selected, onChange, loading: providersLoading } =
-    useProviderSelector();
-  const { error: toastError } = useToast();
-  const [file, setFile] = useState<File | null>(null);
-  const [jobDescription, setJobDescription] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [submissionError, setSubmissionError] = useState<string | null>(null);
-  const [optimizationCachedMatch, setOptimizationCachedMatch] =
-    useState<CachedMatchInfo | null>(null);
-  const [compareExpanded, setCompareExpanded] = useState(false);
-  const [compareSelected, setCompareSelected] = useState<Set<string>>(new Set());
-  const [isComparing, setIsComparing] = useState(false);
-  const [progressStep, setProgressStep] = useState(0);
-  const reducedMotion = useReducedMotion();
-
-  // Hydrate job description from persisted form state once context finishes loading.
-  const hydratedRef = useRef(false);
-  useEffect(() => {
-    if (hydratedRef.current) return;
-    if (formState.jobDescription) {
-      setJobDescription(formState.jobDescription);
-      hydratedRef.current = true;
-    }
-  }, [formState.jobDescription]);
-
-  const jobDescTrimmed = jobDescription.trim();
-  const isJobDescValid =
-    jobDescTrimmed.length >= 50 && jobDescTrimmed.length <= 10000;
-  const isReadyToSubmit = file !== null && isJobDescValid;
-
-  const handleJobDescriptionChange = (value: string): void => {
-    setJobDescription(value);
-    setFormState({ jobDescription: value });
-  };
-
-  const handleFileChange = useCallback(
-    (newFile: File | null): void => {
-      setFile(newFile);
-      setFormState({ fileName: newFile?.name ?? null });
-    },
-    [setFormState],
-  );
-
-  const runOptimization = useCallback(
-    async (forceRefresh?: boolean): Promise<void> => {
-      if (!file || !isReadyToSubmit) return;
-      setSubmissionError(null);
-      setOptimizationCachedMatch(null);
-      setIsSubmitting(true);
-      setProgressStep(0);
-      let stepInterval: ReturnType<typeof setInterval> | null = null;
-      const steps = OPTIMIZATION_STEPS;
-      stepInterval = setInterval(() => {
-        setProgressStep((s) => Math.min(s + 1, steps.length - 1));
-      }, 3000);
-      try {
-        const result = await optimizeCV(file, jobDescription.trim(), {
-          companyContext: companyResearch
-            ? {
-                companyName: companyResearch.profile.name,
-                companyProfile: companyResearch.profile,
-              }
-            : undefined,
-          userId: session?.user?.externalId,
-          forceRefresh,
-          provider: selected ?? undefined,
-          language: locale,
-        });
-        setResult(result, selected ?? undefined);
-        router.push("/results");
-      } catch (err: unknown) {
-        const msg = handleApiError(err);
-        setSubmissionError(msg);
-        toastError(msg);
-      } finally {
-        if (stepInterval) clearInterval(stepInterval);
-        setIsSubmitting(false);
-      }
-    },
-    [
-      file,
-      jobDescription,
-      isReadyToSubmit,
-      companyResearch,
-      session?.user?.externalId,
-      router,
-      setResult,
-      selected,
-      toastError,
-      OPTIMIZATION_STEPS,
-      locale,
-    ],
-  );
-
-  const handleSubmit = async (): Promise<void> => {
-    if (!file || !isReadyToSubmit) return;
-
-    setSubmissionError(null);
-    const companyUrl = companyResearch?.profile?.website ?? undefined;
-
-    try {
-      const check = await checkOptimizationCache(
-        jobDescription.trim(),
-        companyUrl,
-        session?.user?.externalId,
-      );
-      if (check.cached && check.match) {
-        setOptimizationCachedMatch(check.match);
-        return;
-      }
-    } catch {
-      // Proceed with optimization if check fails
-    }
-
-    void runOptimization();
-  };
-
-  const handleViewPreviousOptimization = (): void => {
-    if (optimizationCachedMatch) {
-      router.push(`/history/${optimizationCachedMatch.analysis_id}`);
-      setOptimizationCachedMatch(null);
-    }
-  };
-
-  const handleOptimizeAgain = (): void => {
-    setOptimizationCachedMatch(null);
-    void runOptimization(true);
-  };
-
-  const handleResearchComplete = (researchResult: CompanyResearchResult): void => {
-    setCompanyResearch(researchResult);
-  };
-
-  const toggleCompareProvider = (name: string): void => {
-    setCompareSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      return next;
-    });
-  };
-
-  const handleCompare = async (): Promise<void> => {
-    if (!file || !jobDescription.trim() || compareSelected.size < 2) return;
-    setSubmissionError(null);
-    setIsComparing(true);
-    try {
-      const result = await compareProviders(
-        file,
-        jobDescription.trim(),
-        Array.from(compareSelected),
-        locale,
-      );
-      setComparisonResult(result);
-      router.push("/compare");
-    } catch (err: unknown) {
-      const msg = handleApiError(err);
-      setSubmissionError(msg);
-      toastError(msg);
-    } finally {
-      setIsComparing(false);
-    }
-  };
-
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 12 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: reducedMotion
-        ? { duration: 0 }
-        : { delay: i * STAGGER_DELAY, duration: 0.3 },
-    }),
-  };
-
-  const currentStepLabel = OPTIMIZATION_STEPS[progressStep] ?? OPTIMIZATION_STEPS[0];
+    companyResearch,
+    file,
+    jobDescription,
+    jobDescTrimmed,
+    isReadyToSubmit,
+    isSubmitting,
+    submissionError,
+    optimizationCachedMatch,
+    compareExpanded,
+    setCompareExpanded,
+    compareSelected,
+    isComparing,
+    currentStepLabel,
+    sectionVariants,
+    sessionUserId,
+    available,
+    defaultProvider,
+    selected,
+    onProviderChange,
+    providersLoading,
+    handleJobDescriptionChange,
+    handleFileChange,
+    handleSubmit,
+    handleViewPreviousOptimization,
+    handleOptimizeAgain,
+    handleResearchComplete,
+    toggleCompareProvider,
+    handleCompare,
+    setSubmissionError,
+    skipCompanyResearch,
+    navigateToReport,
+    locale,
+  } = useHomePage();
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-6 px-4 py-10 sm:px-6 sm:py-12">
@@ -320,7 +142,7 @@ export default function Home() {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCompanyResearch(null);
+                      skipCompanyResearch();
                     }}
                   >
                     {t("skipResearch")}
@@ -334,10 +156,8 @@ export default function Home() {
                     onResearchError={(error) => {
                       setSubmissionError(error);
                     }}
-                    onViewReport={() => {
-                      router.push("/report");
-                    }}
-                    userId={session?.user?.externalId}
+                    onViewReport={navigateToReport}
+                    {...(sessionUserId !== undefined ? { userId: sessionUserId } : {})}
                     language={locale}
                   />
                 </div>
@@ -371,7 +191,7 @@ export default function Home() {
             {!providersLoading ? (
               <ProviderSelector
                 value={selected}
-                onChange={onChange}
+                onChange={onProviderChange}
                 available={available}
                 defaultProvider={defaultProvider}
                 disabled={isSubmitting}
@@ -402,34 +222,15 @@ export default function Home() {
             {compareExpanded ? t("hideProviders") : t("compareProviders")}
           </Button>
           {compareExpanded ? (
-            <div className="mt-3 space-y-3">
-              <p className="text-sm text-muted-foreground">{t("compareDesc")}</p>
-              <div className="flex flex-wrap gap-4">
-                {(["anthropic", "openai", "gemini"] as const).map((name) => (
-                  <label
-                    key={name}
-                    className="flex cursor-pointer items-center gap-2 text-sm text-foreground"
-                  >
-                    <input
-                      checked={compareSelected.has(name)}
-                      disabled={!available.includes(name)}
-                      onChange={() => toggleCompareProvider(name)}
-                      type="checkbox"
-                    />
-                    {name}
-                    {!available.includes(name) ? ` ${t("notConfigured")}` : ""}
-                  </label>
-                ))}
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!isReadyToSubmit || isComparing || compareSelected.size < 2}
-                onClick={() => void handleCompare()}
-              >
-                {isComparing ? t("comparing") : t("runComparison")}
-              </Button>
-            </div>
+            <CompareProvidersPanel
+              availableProviders={available}
+              selectedProviders={compareSelected}
+              onToggle={toggleCompareProvider}
+              onCompare={handleCompare}
+              isComparing={isComparing}
+              isReadyToSubmit={isReadyToSubmit}
+              selectedProvider={selected}
+            />
           ) : null}
         </div>
       </motion.div>

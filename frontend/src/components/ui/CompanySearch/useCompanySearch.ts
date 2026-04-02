@@ -6,6 +6,7 @@ import {
   fetchHistoryDetail,
   handleApiError,
   researchCompany,
+  type ResearchCompanyOptions,
 } from "@/lib/api";
 import type { CachedMatchInfo } from "@/types/history";
 import type { CompanyResearchResult, ResearchStep } from "@/types/company";
@@ -37,6 +38,28 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => {
     window.setTimeout(resolve, ms);
   });
+}
+
+function readUnknownProp(obj: object, key: string): unknown {
+  if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+    return undefined;
+  }
+  return Reflect.get(obj, key);
+}
+
+function isCompanyResearchResult(value: unknown): value is CompanyResearchResult {
+  if (typeof value !== "object" || value === null) return false;
+  const profile = readUnknownProp(value, "profile");
+  const report = readUnknownProp(value, "report");
+  return (
+    typeof profile === "object" &&
+    profile !== null &&
+    typeof report === "object" &&
+    report !== null &&
+    Array.isArray(readUnknownProp(value, "sources_used")) &&
+    typeof readUnknownProp(value, "research_quality") === "string" &&
+    typeof readUnknownProp(value, "researched_at") === "string"
+  );
 }
 
 export function useCompanySearch(
@@ -129,18 +152,6 @@ export function useCompanySearch(
     };
   }, [companyUrl, userId]);
 
-  function isCompanyResearchResult(value: unknown): value is CompanyResearchResult {
-    if (typeof value !== "object" || value === null) return false;
-    const o = value as Record<string, unknown>;
-    return (
-      typeof o.profile === "object" &&
-      typeof o.report === "object" &&
-      Array.isArray(o.sources_used) &&
-      typeof o.research_quality === "string" &&
-      typeof o.researched_at === "string"
-    );
-  }
-
   const loadCachedResearch = useCallback(
     async (match: CachedMatchInfo): Promise<CompanyResearchResult> => {
       setCachedMatch(null);
@@ -172,13 +183,23 @@ export function useCompanySearch(
       await wait(800);
       setCurrentStep("analyzing");
 
+      const researchOpts: ResearchCompanyOptions = {};
+      if (options?.userId !== undefined) {
+        researchOpts.userId = options.userId;
+      }
+      if (forceRefresh !== undefined) {
+        researchOpts.forceRefresh = forceRefresh;
+      }
+      if (options?.language !== undefined) {
+        researchOpts.language = options.language;
+      }
       const response = await researchCompany(
         {
           company_name: companyName.trim(),
           company_url: companyUrl.trim() || null,
           job_title: jobTitle.trim() || null,
         },
-        { userId: options?.userId, forceRefresh, language: options?.language },
+        researchOpts,
       );
 
       setResult(response);

@@ -41,7 +41,7 @@ export function LoadingSkeleton({
   );
 }
 
-function HomeSkeleton({ className }: { className?: string }) {
+function HomeSkeleton({ className }: { className?: string | undefined }) {
   return (
     <div
       className={cn("mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6 sm:py-12", className)}
@@ -64,7 +64,7 @@ function HomeSkeleton({ className }: { className?: string }) {
   );
 }
 
-function ResultsSkeleton({ className }: { className?: string }) {
+function ResultsSkeleton({ className }: { className?: string | undefined }) {
   return (
     <div
       className={cn("mx-auto w-full max-w-6xl space-y-8 px-6 py-10", className)}
@@ -88,7 +88,7 @@ function ResultsSkeleton({ className }: { className?: string }) {
   );
 }
 
-function HistorySkeleton({ className }: { className?: string }) {
+function HistorySkeleton({ className }: { className?: string | undefined }) {
   return (
     <div
       className={cn("mx-auto w-full max-w-5xl space-y-8 px-6 py-10", className)}
@@ -111,7 +111,7 @@ function HistorySkeleton({ className }: { className?: string }) {
   );
 }
 
-function ReportSkeleton({ className }: { className?: string }) {
+function ReportSkeleton({ className }: { className?: string | undefined }) {
   return (
     <div
       className={cn("mx-auto w-full max-w-5xl space-y-6 px-6 py-10", className)}
@@ -129,7 +129,7 @@ function ReportSkeleton({ className }: { className?: string }) {
   );
 }
 
-function CompareSkeleton({ className }: { className?: string }) {
+function CompareSkeleton({ className }: { className?: string | undefined }) {
   return (
     <div
       className={cn("mx-auto w-full max-w-6xl space-y-6 px-6 py-10", className)}

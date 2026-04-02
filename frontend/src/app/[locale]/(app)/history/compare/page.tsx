@@ -18,16 +18,22 @@ function CompareLoadingFallback() {
   );
 }
 
+function readUnknownProp(obj: object, key: string): unknown {
+  if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+    return undefined;
+  }
+  return Reflect.get(obj, key);
+}
+
 function isOptimizationResult(value: unknown): value is OptimizationResult {
   if (typeof value !== "object" || value === null) return false;
-  const o = value as Record<string, unknown>;
   return (
-    Array.isArray(o.sections) &&
-    Array.isArray(o.gap_analysis) &&
-    Array.isArray(o.keyword_matches) &&
-    Array.isArray(o.keyword_misses) &&
-    typeof o.match_score === "number" &&
-    typeof o.summary === "string"
+    Array.isArray(readUnknownProp(value, "sections")) &&
+    Array.isArray(readUnknownProp(value, "gap_analysis")) &&
+    Array.isArray(readUnknownProp(value, "keyword_matches")) &&
+    Array.isArray(readUnknownProp(value, "keyword_misses")) &&
+    typeof readUnknownProp(value, "match_score") === "number" &&
+    typeof readUnknownProp(value, "summary") === "string"
   );
 }
 

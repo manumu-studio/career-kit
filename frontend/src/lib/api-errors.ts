@@ -1,10 +1,7 @@
 /** API error types and user-friendly message mapping. */
+import type { ApiErrorBody } from "@/lib/schemas/api-error.schema";
 
-export interface ApiErrorBody {
-  error?: string;
-  detail?: string;
-  code?: string;
-}
+export type { ApiErrorBody };
 
 export class ApiError extends Error {
   readonly status: number;

@@ -21,5 +21,7 @@ Log of feature work and releases.
 | 15 | [ENTRY-15 — History Detail Accessibility and Theme Fixes](journal/ENTRY-15.md) | [PR-0.14.0](pull-requests/PR-0.14.0.md) | 2026-03-23 |
 | 16 | [ENTRY-16 — Design System Foundation](journal/ENTRY-16.md) | [PR-0.15.0](pull-requests/PR-0.15.0.md) | 2026-03-23 |
 | 17 | [ENTRY-17 — Landing Page Cinematic Overhaul](journal/ENTRY-17.md) | [PR-0.16.0](pull-requests/PR-0.16.0.md) | 2026-03-23 |
+| 18 | [ENTRY-18 — App Pages Minimalist Workspace](journal/ENTRY-18.md) | [PR-0.17.0](pull-requests/PR-0.17.0.md) | 2026-04-02 |
+| 19 | [ENTRY-19 — Frontend TypeScript Quality Hardening](journal/ENTRY-19.md) | [PR-0.18.0](pull-requests/PR-0.18.0.md) | 2026-04-02 |
 | xx | [ENTRY-fix-oauth-redirect-uri — OAuth Redirect URI Fix](journal/ENTRY-fix-oauth-redirect-uri.md) | [PR-fix-oauth-redirect-uri](pull-requests/PR-fix-oauth-redirect-uri.md) | 2026-03-10 |
 

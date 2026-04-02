@@ -35,8 +35,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <SessionProvider session={session}>
       <Navbar
         mode="app"
-        userName={user.name}
-        userEmail={user.email}
+        userName={user.name ?? null}
+        userEmail={user.email ?? null}
       />
       <main className="min-h-screen pt-14">
         <OptimizationProvider>

@@ -4,11 +4,7 @@
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-interface SubmitButtonWithSpinnerProps
-  extends React.ComponentProps<typeof Button> {
-  spinnerClassName?: string;
-}
+import type { SubmitButtonWithSpinnerProps } from "./SubmitButtonWithSpinner.types";
 
 export function SubmitButtonWithSpinner({
   children,
