@@ -25,7 +25,25 @@ const STAGGER_DELAY = 0.1;
 function isErrorResult(
   r: OptimizationResult | { error: string } | undefined,
 ): r is { error: string } {
-  return r != null && "error" in r && typeof (r as { error: string }).error === "string";
+  if (r === undefined || r === null) {
+    return false;
+  }
+  if (typeof r !== "object") {
+    return false;
+  }
+  if (!("error" in r)) {
+    return false;
+  }
+  return typeof r.error === "string";
+}
+
+function optimizationFromComparisonEntry(
+  entry: OptimizationResult | { error: string } | undefined,
+): OptimizationResult | undefined {
+  if (entry === undefined || isErrorResult(entry)) {
+    return undefined;
+  }
+  return entry;
 }
 
 function getScoreBarColor(score: number): string {
@@ -38,10 +56,7 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
   const t = useTranslations("providerCompare");
   const reducedMotion = useReducedMotion();
 
-  const providerNames = Object.keys(data.results);
-  const validProviders = providerNames.filter(
-    (name) => name in data.results,
-  ) as string[];
+  const validProviders = Object.keys(data.results);
   const successProviders = validProviders.filter((name) => {
     const r = data.results[name];
     return r !== undefined && !isErrorResult(r);
@@ -51,9 +66,10 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
 
   const keywordStats = (() => {
     if (successProviders.length < 2) return null;
-    const allMatches = successProviders.map(
-      (n) => (data.results[n] as OptimizationResult).keyword_matches,
-    );
+    const allMatches = successProviders.map((n) => {
+      const opt = optimizationFromComparisonEntry(data.results[n]);
+      return opt?.keyword_matches ?? [];
+    });
     const allKeywords = new Set<string>();
     allMatches.forEach((arr) => arr.forEach((kw) => allKeywords.add(kw)));
     const inAll = [...allKeywords].filter((kw) =>
@@ -80,7 +96,7 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
     visible: reducedMotion ? {} : { opacity: 1, y: 0 },
   };
 
-  if (providerNames.length === 0) {
+  if (validProviders.length === 0) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -125,7 +141,7 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
             const score =
               !res || isErrorResult(res)
                 ? 0
-                : score_delta[name] ?? (res as OptimizationResult).match_score ?? 0;
+                : score_delta[name] ?? res.match_score ?? 0;
             const clamped = Math.min(100, Math.max(0, Math.round(score)));
             return (
               <div key={name} className="flex items-center gap-3">

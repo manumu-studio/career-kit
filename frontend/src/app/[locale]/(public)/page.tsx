@@ -135,7 +135,7 @@ export default async function LandingPage({
         heroSubtitle={t("heroSubtitle")}
         ctaSecondaryLabel={t("ctaSecondary")}
         socialProof={t("socialProof")}
-        welcomeBackText={welcomeBackText}
+        {...(welcomeBackText !== undefined ? { welcomeBackText } : {})}
         secondaryCta={secondaryCta}
       />
 

@@ -1,6 +1,8 @@
 /** NextAuth configuration with ManuMuStudio OAuth/OIDC provider */
 import NextAuth from "next-auth";
+import { z } from "zod";
 import { serverEnv } from "@/lib/env.server";
+import { OidcProfileSchema } from "@/lib/schemas/auth-profile.schema";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
@@ -20,12 +22,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientId: serverEnv.AUTH_CLIENT_ID,
       clientSecret: serverEnv.AUTH_CLIENT_SECRET,
       checks: ["pkce", "state"],
-      profile(profile: Record<string, unknown>) {
+      profile(rawProfile: Record<string, unknown>) {
+        const parsed = OidcProfileSchema.parse(rawProfile);
         return {
-          id: profile["sub"] as string,
-          name: (profile["name"] ?? profile["email"] ?? null) as string | null,
-          email: (profile["email"] ?? null) as string | null,
-          image: (profile["picture"] ?? null) as string | null,
+          id: parsed.sub,
+          name: parsed.name ?? parsed.email ?? null,
+          email: parsed.email ?? null,
+          image: parsed.picture ?? null,
         };
       },
     },
@@ -40,10 +43,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, account, profile }) {
-      if (profile?.sub) {
-        token.externalId = profile.sub as string;
-        token.email = profile.email as string | undefined;
-        token.name = profile.name as string | undefined;
+      if (profile && typeof profile === "object") {
+        const record = profile as Record<string, unknown>;
+        const subFromOAuth =
+          typeof record.sub === "string"
+            ? record.sub
+            : typeof record.id === "string"
+              ? record.id
+              : null;
+        if (subFromOAuth !== null) {
+          const parsed = OidcProfileSchema.parse({ ...record, sub: subFromOAuth });
+          token.externalId = parsed.sub;
+          token.email = parsed.email ?? null;
+          token.name = parsed.name ?? null;
+        }
       }
       if (account?.id_token) {
         token.idToken = account.id_token;
@@ -52,7 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }) {
       if (token.externalId) {
-        session.user.externalId = token.externalId as string;
+        session.user.externalId = z.string().parse(token.externalId);
       }
       return session;
     },

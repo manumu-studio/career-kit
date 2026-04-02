@@ -2,12 +2,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
-
-export interface CtaFooterSectionProps {
-  /** Primary CTA (sign-in button or link to app). */
-  primaryCta: ReactNode;
-}
+import type { CtaFooterSectionProps } from "./CtaFooterSection.types";
 
 export function CtaFooterSection({ primaryCta }: CtaFooterSectionProps) {
   const t = useTranslations("landing");

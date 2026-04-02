@@ -51,12 +51,14 @@ export function useHistoryList(
     setIsLoading(true);
     setError(null);
     try {
-      const params: HistoryListParams = {
-        page,
-        limit,
-        company: companySearch.trim() || undefined,
-        type: typeFilter === "all" ? undefined : typeFilter,
-      };
+      const params: HistoryListParams = { page, limit };
+      const company = companySearch.trim();
+      if (company) {
+        params.company = company;
+      }
+      if (typeFilter !== "all") {
+        params.type = typeFilter;
+      }
       const data = await fetchHistoryList(params, userId);
       setItems(data.items);
       setTotal(data.total);

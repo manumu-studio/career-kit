@@ -5,14 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Link as LocaleLink } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-
-interface LinkWithSpinnerProps
-  extends Omit<React.ComponentProps<typeof Link>, "children"> {
-  children: React.ReactNode;
-  spinnerClassName?: string;
-  /** Use locale-aware Link for internal routes (e.g. /home). Use false for API routes. */
-  useLocale?: boolean;
-}
+import type { LinkWithSpinnerProps } from "./LinkWithSpinner.types";
 
 export function LinkWithSpinner({
   href,
@@ -48,8 +41,15 @@ export function LinkWithSpinner({
   };
 
   if (useLocale) {
-    return <LocaleLink href={href as "/home"} {...commonProps} />;
+    return <LocaleLink href={href} {...commonProps} />;
   }
 
-  return <Link href={href} {...commonProps} prefetch={prefetch} {...props} />;
+  return (
+    <Link
+      href={href}
+      {...commonProps}
+      {...(prefetch !== undefined ? { prefetch } : {})}
+      {...props}
+    />
+  );
 }

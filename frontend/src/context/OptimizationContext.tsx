@@ -54,6 +54,12 @@ interface OptimizationContextValue {
 
 const OptimizationContext = createContext<OptimizationContextValue | undefined>(undefined);
 
+const LLM_PROVIDER_IDS: readonly LLMProviderName[] = ["anthropic", "openai", "gemini"];
+
+function isLLMProviderName(value: string): value is LLMProviderName {
+  return LLM_PROVIDER_IDS.some((id) => id === value);
+}
+
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -140,9 +146,9 @@ export function OptimizationProvider({
         const parsed: unknown = JSON.parse(optimizationStored);
         if (isOptimizationResult(parsed)) {
           setResultState(parsed);
-          const p = (parsed as { provider?: string }).provider;
-          if (p && ["anthropic", "openai", "gemini"].includes(p)) {
-            setProviderUsedState(p as LLMProviderName);
+          const p = parsed.provider;
+          if (typeof p === "string" && isLLMProviderName(p)) {
+            setProviderUsedState(p);
           }
         }
       } catch {
@@ -187,8 +193,8 @@ export function OptimizationProvider({
     }
 
     const providerStored = sessionStorage.getItem(PROVIDER_USED_KEY);
-    if (providerStored && ["anthropic", "openai", "gemini"].includes(providerStored)) {
-      setProviderUsedState(providerStored as LLMProviderName);
+    if (providerStored !== null && isLLMProviderName(providerStored)) {
+      setProviderUsedState(providerStored);
     }
   }, []);
 

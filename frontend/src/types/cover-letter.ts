@@ -1,17 +1,8 @@
 /** Cover letter API types matching backend schemas. */
 
-export type CoverLetterTone = "professional" | "conversational" | "enthusiastic";
+export type { CoverLetterResult } from "@/lib/schemas/cover-letter.schema";
 
-export interface CoverLetterResult {
-  greeting: string;
-  opening_paragraph: string;
-  body_paragraphs: string[];
-  closing_paragraph: string;
-  sign_off: string;
-  key_selling_points: string[];
-  tone_used: string;
-  word_count: number;
-}
+export type CoverLetterTone = "professional" | "conversational" | "enthusiastic";
 
 export type Locale = "en" | "es";
 

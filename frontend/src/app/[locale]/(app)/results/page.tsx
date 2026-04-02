@@ -238,7 +238,7 @@ export default function ResultsPage() {
             {coverLetter ? (
               <CoverLetterDisplay
                 coverLetter={coverLetter}
-                companyName={companyName || undefined}
+                companyName={companyName || null}
                 roleName={roleName}
               />
             ) : (

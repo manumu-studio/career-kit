@@ -1,6 +1,19 @@
 /** Typed API client for backend optimization and history endpoints. */
+import { z } from "zod";
 import { env } from "@/lib/env";
 import { ApiError, type ApiErrorBody } from "@/lib/api-errors";
+import {
+  ApiErrorBodySchema,
+  CheckCacheResponseSchema,
+  CompanyResearchResultSchema,
+  ComparisonResultSchema,
+  CoverLetterResultSchema,
+  HistoryDetailResponseSchema,
+  HistoryListResponseSchema,
+  HistoryStatsResponseSchema,
+  OptimizationResultSchema,
+  ProvidersResponseSchema,
+} from "@/lib/schemas";
 import type {
   CompanyProfile,
   CompanyResearchRequest,
@@ -19,11 +32,24 @@ import type { ComparisonResult, ProvidersResponse } from "@/types/provider";
 
 const RETRYABLE_STATUSES = [500, 502, 503, 504] as const;
 
+function parseApiResponse<T>(
+  schema: z.ZodType<T>,
+  data: unknown,
+  context: string,
+): T {
+  const parsed = schema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(`Invalid API response (${context})`);
+  }
+  return parsed.data;
+}
+
 async function parseErrorResponse(response: Response): Promise<ApiError> {
   let body: ApiErrorBody | null = null;
   try {
-    const json = await response.json();
-    body = json as ApiErrorBody;
+    const json: unknown = await response.json();
+    const parsed = ApiErrorBodySchema.safeParse(json);
+    body = parsed.success ? parsed.data : null;
   } catch {
     // Response body was not JSON
   }
@@ -65,7 +91,7 @@ interface OptimizeCompanyContext {
 
 type Locale = "en" | "es";
 
-interface OptimizeCvOptions {
+export interface OptimizeCvOptions {
   companyContext?: OptimizeCompanyContext;
   userId?: string;
   forceRefresh?: boolean;
@@ -115,7 +141,8 @@ export async function optimizeCV(
     }),
   );
 
-  return (await response.json()) as OptimizationResult;
+  const raw: unknown = await response.json();
+  return parseApiResponse(OptimizationResultSchema, raw, "optimization");
 }
 
 export async function generateCoverLetter(
@@ -139,14 +166,16 @@ export async function generateCoverLetter(
     }),
   );
 
-  return (await response.json()) as CoverLetterResult;
+  const raw: unknown = await response.json();
+  return parseApiResponse(CoverLetterResultSchema, raw, "cover letter");
 }
 
 export async function getProviders(): Promise<ProvidersResponse> {
   const response = await fetchWithRetry(() =>
     fetch(`${env.NEXT_PUBLIC_API_URL}${PROVIDERS_ENDPOINT}`),
   );
-  return (await response.json()) as ProvidersResponse;
+  const raw: unknown = await response.json();
+  return parseApiResponse(ProvidersResponseSchema, raw, "providers list");
 }
 
 export async function compareProviders(
@@ -169,10 +198,11 @@ export async function compareProviders(
     });
   });
 
-  return (await response.json()) as ComparisonResult;
+  const raw: unknown = await response.json();
+  return parseApiResponse(ComparisonResultSchema, raw, "provider comparison");
 }
 
-interface ResearchCompanyOptions {
+export interface ResearchCompanyOptions {
   userId?: string;
   forceRefresh?: boolean;
   language?: Locale;
@@ -201,7 +231,8 @@ export async function researchCompany(
     }),
   );
 
-  return (await response.json()) as CompanyResearchResult;
+  const raw: unknown = await response.json();
+  return parseApiResponse(CompanyResearchResultSchema, raw, "company research");
 }
 
 const HISTORY_BASE = "/history";
@@ -233,7 +264,8 @@ export async function fetchHistoryList(
     fetch(url, { headers: historyHeaders(userId) }),
   );
 
-  return (await response.json()) as HistoryListResponse;
+  const raw: unknown = await response.json();
+  return parseApiResponse(HistoryListResponseSchema, raw, "history list");
 }
 
 export async function fetchHistoryDetail(
@@ -246,7 +278,8 @@ export async function fetchHistoryDetail(
     }),
   );
 
-  return (await response.json()) as HistoryDetailResponse;
+  const raw: unknown = await response.json();
+  return parseApiResponse(HistoryDetailResponseSchema, raw, "history detail");
 }
 
 export async function fetchHistoryStats(userId?: string): Promise<HistoryStatsResponse> {
@@ -256,7 +289,8 @@ export async function fetchHistoryStats(userId?: string): Promise<HistoryStatsRe
     }),
   );
 
-  return (await response.json()) as HistoryStatsResponse;
+  const raw: unknown = await response.json();
+  return parseApiResponse(HistoryStatsResponseSchema, raw, "history stats");
 }
 
 export async function deleteHistoryEntry(
@@ -286,7 +320,8 @@ export async function checkResearchCache(
     }),
   );
 
-  return (await response.json()) as CheckCacheResponse;
+  const raw: unknown = await response.json();
+  return parseApiResponse(CheckCacheResponseSchema, raw, "research cache check");
 }
 
 export async function checkOptimizationCache(
@@ -308,7 +343,8 @@ export async function checkOptimizationCache(
     }),
   );
 
-  return (await response.json()) as CheckCacheResponse;
+  const raw: unknown = await response.json();
+  return parseApiResponse(CheckCacheResponseSchema, raw, "optimization cache check");
 }
 
 export async function clearAllHistory(userId?: string): Promise<void> {

@@ -1,37 +1,18 @@
-/** Types for history API responses. */
+/** Types for history API responses (inferred from Zod where applicable). */
 
-export type HistoryAnalysisType = "research" | "optimize" | "both";
+import type { HistoryAnalysisType } from "@/lib/schemas/history.schema";
 
-export interface HistoryListItem {
-  id: string;
-  analysis_type: HistoryAnalysisType;
-  company_name: string | null;
-  job_title: string | null;
-  job_description_preview: string | null;
-  cv_filename: string | null;
-  created_at: string;
-  expires_at: string;
-  cache_hit: boolean;
-  match_score: number | null;
-}
-
-export interface HistoryListResponse {
-  items: HistoryListItem[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
-export interface HistoryDetailResponse extends HistoryListItem {
-  company_research_json: Record<string, unknown> | null;
-  optimization_result_json: Record<string, unknown> | null;
-}
-
-export interface HistoryStatsResponse {
-  total_analyses: number;
-  cache_hits: number;
-  total_cost_usd: number;
-}
+export type {
+  CachedMatchInfo,
+  CheckCacheResponse,
+} from "@/lib/schemas/cache.schema";
+export type {
+  HistoryAnalysisType,
+  HistoryDetailResponse,
+  HistoryListItem,
+  HistoryListResponse,
+  HistoryStatsResponse,
+} from "@/lib/schemas/history.schema";
 
 export interface HistoryListParams {
   type?: HistoryAnalysisType;
@@ -40,16 +21,4 @@ export interface HistoryListParams {
   to?: string;
   page?: number;
   limit?: number;
-}
-
-export interface CachedMatchInfo {
-  analysis_id: string;
-  company_name: string | null;
-  job_title: string | null;
-  created_at: string;
-}
-
-export interface CheckCacheResponse {
-  cached: boolean;
-  match: CachedMatchInfo | null;
 }

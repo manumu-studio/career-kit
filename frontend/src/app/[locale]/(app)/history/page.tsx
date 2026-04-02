@@ -26,7 +26,9 @@ export default function HistoryPage() {
     deletingId,
     isLoading,
     error,
-  } = useHistoryList({ userId });
+  } = useHistoryList(
+    userId !== undefined ? { userId } : {},
+  );
 
   const handleView = (id: string): void => {
     router.push(`/history/${id}`);
