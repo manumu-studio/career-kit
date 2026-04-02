@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { FileSearch } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HistoryCard } from "@/components/ui/HistoryCard";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
@@ -30,6 +30,7 @@ export function HistoryList({
   error,
 }: HistoryListProps) {
   const t = useTranslations("historyList");
+  const tHist = useTranslations("history");
   const tCommon = useTranslations("common");
   const reducedMotion = useReducedMotion();
   const totalPages = Math.ceil(total / limit) || 1;
@@ -83,7 +84,7 @@ export function HistoryList({
       {error ? (
         <p className="text-sm text-destructive">{displayError}</p>
       ) : isLoading ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3, 4].map((i) => (
             <LoadingSkeleton key={i} variant="block" className="h-40 w-full" />
           ))}
@@ -102,22 +103,16 @@ export function HistoryList({
         </div>
       ) : isEmpty ? (
         <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-          <FileSearch className="h-12 w-12 text-muted-foreground" aria-hidden />
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              {t("emptyHeading")}
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("emptySubtext")}
-            </p>
-          </div>
-          <Link href="/home">
-            <Button>{t("emptyCta")}</Button>
+          <FileSearch className="size-14 text-muted-foreground" aria-hidden />
+          <h2 className="text-xl font-semibold text-foreground">{tHist("emptyTitle")}</h2>
+          <p className="text-muted-foreground">{tHist("emptySubtitle")}</p>
+          <Link href="/home" className={buttonVariants()}>
+            {tHist("emptyCta")}
           </Link>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {items.map((item, i) => (
               <motion.div
                 key={item.id}

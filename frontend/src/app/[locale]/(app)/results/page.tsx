@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProviderBadge } from "@/components/ui/ProviderBadge";
 import { ScoreCard } from "@/components/ui/ScoreCard";
 import { ToneSelector } from "@/components/ui/ToneSelector";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useOptimizationContext } from "@/context/OptimizationContext";
 import { useSession } from "@/features/auth";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
@@ -137,9 +138,23 @@ export default function ResultsPage() {
     }),
   };
 
+  const providerBadge = (() => {
+    const p = providerUsed ?? result?.provider;
+    return p && ["anthropic", "openai", "gemini"].includes(p) ? (
+      <ProviderBadge provider={p as "anthropic" | "openai" | "gemini"} />
+    ) : null;
+  })();
+
+  const companyBadge = companyResearch ? (
+    <Badge variant="default" className="bg-primary/90 text-primary-foreground">
+      {companyName
+        ? t("companyTailoredFor", { company: companyName })
+        : t("companyTailoredBadge")}
+    </Badge>
+  ) : null;
+
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-4 pb-24 py-8 sm:px-6 md:pb-24 md:py-10 lg:py-12">
-      {/* Floating export toolbar */}
       <div className="fixed bottom-0 inset-x-0 z-30 border-t border-border bg-background/90 py-3 backdrop-blur-md">
         <ExportToolbar
           optimizationResult={result}
@@ -147,42 +162,22 @@ export default function ResultsPage() {
         />
       </div>
 
-      {/* Section 1 — Header + Summary (full width) */}
-      <section className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <div className="space-y-4">
+      <motion.section
+        className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between"
+        custom={0}
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
+      >
+        <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">
               {t("title")}
             </h1>
-            {(() => {
-              const p = providerUsed ?? result?.provider;
-              return p && ["anthropic", "openai", "gemini"].includes(p) ? (
-                <ProviderBadge provider={p as "anthropic" | "openai" | "gemini"} />
-              ) : null;
-            })()}
-            {companyResearch ? (
-              <Badge
-                variant="default"
-                className="bg-primary/90 text-primary-foreground"
-              >
-                {companyName
-                  ? t("companyTailoredFor", { company: companyName })
-                  : t("companyTailoredBadge")}
-              </Badge>
-            ) : null}
+            {providerBadge}
+            {companyBadge}
           </div>
           <p className="text-sm text-muted-foreground">{t("readyMessage")}</p>
-          <motion.div
-            aria-live="polite"
-            aria-label="Optimization summary"
-            className="rounded-xl border border-border bg-card p-5"
-            custom={0}
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <p className="text-sm leading-relaxed text-foreground">{result.summary}</p>
-          </motion.div>
         </div>
         <Link
           className="shrink-0 rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition hover:border-foreground hover:text-foreground"
@@ -190,106 +185,109 @@ export default function ResultsPage() {
         >
           {t("backToUpload")}
         </Link>
-      </section>
+      </motion.section>
 
-      {/* Section 2 — Score + Keywords (side by side on desktop) */}
-      <motion.div
-        aria-label="Score and keywords"
-        className="grid gap-6 lg:grid-cols-[280px_1fr]"
+      <motion.section
+        className="flex flex-col gap-4 sm:flex-row sm:items-start"
         custom={1}
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
       >
-        <ScoreCard score={result.match_score} />
-        <KeywordMatch matches={result.keyword_matches} misses={result.keyword_misses} />
-      </motion.div>
+        <div className="shrink-0">
+          <ScoreCard score={result.match_score} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <KeywordMatch matches={result.keyword_matches} misses={result.keyword_misses} />
+        </div>
+      </motion.section>
 
-      {/* Section 3 — CV Comparison (full width) */}
       <motion.div
+        className="rounded-xl border border-border bg-card p-5"
         custom={2}
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
       >
-        <CvComparison sections={result.sections} />
+        <p className="text-sm leading-relaxed text-foreground">{result.summary}</p>
       </motion.div>
 
-      {/* Section 4 — Gap Analysis (full width grid) */}
       <motion.div
+        className="w-full"
         custom={3}
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
       >
-        <GapAnalysis gaps={result.gap_analysis} />
+        <Tabs defaultValue="comparison" className="w-full">
+          <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:inline-flex sm:w-auto sm:justify-start">
+            <TabsTrigger value="comparison">{t("tabCvComparison")}</TabsTrigger>
+            <TabsTrigger value="gaps">{t("tabGapAnalysis")}</TabsTrigger>
+            <TabsTrigger value="cover">{t("tabCoverLetter")}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="comparison" className="mt-4">
+            <CvComparison sections={result.sections} />
+          </TabsContent>
+
+          <TabsContent value="gaps" className="mt-4">
+            <GapAnalysis gaps={result.gap_analysis} />
+          </TabsContent>
+
+          <TabsContent value="cover" className="mt-4">
+            {coverLetter ? (
+              <CoverLetterDisplay
+                coverLetter={coverLetter}
+                companyName={companyName || undefined}
+                roleName={roleName}
+              />
+            ) : (
+              <div className="rounded-xl border border-border bg-card p-5">
+                <h2 className="mb-4 text-lg font-semibold text-foreground">
+                  {t("generateOptional")}
+                </h2>
+                <p className="mb-4 text-sm text-muted-foreground">{t("generateDesc")}</p>
+                <div className="space-y-4">
+                  <CompanyInfo
+                    companyName={coverCompanyName}
+                    hiringManager={coverHiringManager}
+                    onCompanyNameChange={setCoverCompanyName}
+                    onHiringManagerChange={setCoverHiringManager}
+                    disabled={isGenerating}
+                  />
+                  <ToneSelector
+                    value={coverTone}
+                    onChange={setCoverTone}
+                    disabled={isGenerating}
+                  />
+                  {coverError ? (
+                    <p className="text-sm text-destructive">{coverError}</p>
+                  ) : null}
+                  <button
+                    className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={
+                      isGenerating ||
+                      !coverCompanyName.trim() ||
+                      !formState.jobDescription.trim()
+                    }
+                    onClick={() => void handleGenerateCoverLetter()}
+                    type="button"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                        {t("generating")}
+                      </>
+                    ) : (
+                      t("generateCoverLetter")
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </motion.div>
-
-      {!coverLetter ? (
-        <motion.section
-          className="rounded-xl border border-border bg-card p-5"
-          custom={4}
-          initial="hidden"
-          animate="visible"
-          variants={sectionVariants}
-        >
-          <h2 className="mb-4 text-lg font-semibold text-foreground">
-            {t("generateOptional")}
-          </h2>
-          <p className="mb-4 text-sm text-muted-foreground">{t("generateDesc")}</p>
-          <div className="space-y-4">
-            <CompanyInfo
-              companyName={coverCompanyName}
-              hiringManager={coverHiringManager}
-              onCompanyNameChange={setCoverCompanyName}
-              onHiringManagerChange={setCoverHiringManager}
-              disabled={isGenerating}
-            />
-            <ToneSelector
-              value={coverTone}
-              onChange={setCoverTone}
-              disabled={isGenerating}
-            />
-            {coverError ? (
-              <p className="text-sm text-destructive">{coverError}</p>
-            ) : null}
-            <button
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={
-                isGenerating ||
-                !coverCompanyName.trim() ||
-                !formState.jobDescription.trim()
-              }
-              onClick={() => void handleGenerateCoverLetter()}
-              type="button"
-            >
-              {isGenerating ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                  {t("generating")}
-                </>
-              ) : (
-                t("generateCoverLetter")
-              )}
-            </button>
-          </div>
-        </motion.section>
-      ) : null}
-
-      {coverLetter ? (
-        <motion.div
-          custom={5}
-          initial="hidden"
-          animate="visible"
-          variants={sectionVariants}
-        >
-          <CoverLetterDisplay
-            coverLetter={coverLetter}
-            companyName={companyName || undefined}
-            roleName={roleName}
-          />
-        </motion.div>
-      ) : null}
     </div>
   );
 }

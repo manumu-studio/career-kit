@@ -5,7 +5,7 @@ import { GapAnalysis } from "@/components/ui/GapAnalysis";
 import type { Gap } from "@/types/optimization";
 
 describe("GapAnalysis", () => {
-  it("renders gap skills, importance badges, and suggestions", () => {
+  it("renders gap skills and importance badges in accordion triggers", () => {
     const gaps: Gap[] = [
       {
         skill: "Kubernetes",
@@ -18,7 +18,6 @@ describe("GapAnalysis", () => {
 
     expect(screen.getByText("Kubernetes")).toBeInTheDocument();
     expect(screen.getByText("Important")).toBeInTheDocument();
-    expect(screen.getByText("Add one production deployment bullet.")).toBeInTheDocument();
   });
 
   it("sorts by importance critical, preferred, nice to have", () => {

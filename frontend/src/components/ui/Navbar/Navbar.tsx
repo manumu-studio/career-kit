@@ -82,12 +82,8 @@ export function Navbar({ mode, variant, userName, userEmail, className }: Navbar
   const tCommon = useTranslations("common");
   const tUserBar = useTranslations("userBar");
   const { mobileOpen, openMobile, closeMobile } = useNavbar();
-  const logoSrc =
-    !mounted 
-      ? LOGO_BLACK 
-      : (isTransparent || resolvedTheme === "dark") 
-        ? LOGO_WHITE 
-        : LOGO_BLACK;
+  const isDark = mounted && resolvedTheme === "dark";
+  const logoSrc = isDark ? LOGO_WHITE : LOGO_BLACK;
   const displayName = userName ?? userEmail ?? tCommon("user");
   const showNavLinks = mode === "app";
 
@@ -98,7 +94,7 @@ export function Navbar({ mode, variant, userName, userEmail, className }: Navbar
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-40 flex h-14 min-h-[3.5rem] items-center justify-between px-4 transition-all duration-300 sm:px-6",
+        "fixed inset-x-0 top-0 z-40 flex h-14 min-h-[3.5rem] items-center justify-between px-4 sm:px-6",
         isTransparent && !scrolled
           ? "bg-transparent border-transparent"
           : "bg-background/80 backdrop-blur-md border-b border-border/50",

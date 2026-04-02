@@ -88,6 +88,9 @@ export function ScoreGauge({ score, size = 140, label = "Job Match", animateFrom
   const segAngle = sweepDeg / SEGMENT_COUNT;
   const segments: Array<{ d: string; color: string }> = [];
 
+  // Round to 4 decimal places to prevent SSR/client floating-point drift
+  const r4 = (n: number) => Math.round(n * 10000) / 10000;
+
   for (let i = 0; i < SEGMENT_COUNT; i++) {
     const t = i / SEGMENT_COUNT;
     const a1 = startDeg + i * segAngle;
@@ -95,13 +98,14 @@ export function ScoreGauge({ score, size = 140, label = "Job Match", animateFrom
     const r1 = (a1 * Math.PI) / 180;
     const r2 = (a2 * Math.PI) / 180;
 
-    const x1 = cx + radius * Math.cos(r1);
-    const y1 = cy + radius * Math.sin(r1);
-    const x2 = cx + radius * Math.cos(r2);
-    const y2 = cy + radius * Math.sin(r2);
+    const x1 = r4(cx + radius * Math.cos(r1));
+    const y1 = r4(cy + radius * Math.sin(r1));
+    const x2 = r4(cx + radius * Math.cos(r2));
+    const y2 = r4(cy + radius * Math.sin(r2));
+    const rr = r4(radius);
 
     segments.push({
-      d: `M ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2}`,
+      d: `M ${x1} ${y1} A ${rr} ${rr} 0 0 1 ${x2} ${y2}`,
       color: sampleColor(t),
     });
   }
@@ -110,8 +114,8 @@ export function ScoreGauge({ score, size = 140, label = "Job Match", animateFrom
   const needleDeg = startDeg + (displayedScore / 100) * sweepDeg;
   const needleRad = (needleDeg * Math.PI) / 180;
   const needleLen = radius - strokeWidth * 2;
-  const needleX = cx + needleLen * Math.cos(needleRad);
-  const needleY = cy + needleLen * Math.sin(needleRad);
+  const needleX = r4(cx + needleLen * Math.cos(needleRad));
+  const needleY = r4(cy + needleLen * Math.sin(needleRad));
 
   /* Text sizing */
   const scoreFontSize = Math.round(size * 0.28);

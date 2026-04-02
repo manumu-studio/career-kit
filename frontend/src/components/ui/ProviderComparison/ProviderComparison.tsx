@@ -1,23 +1,18 @@
 "use client";
 
 /** Side-by-side comparison of optimization results from multiple LLM providers. */
-import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ScoreGauge } from "@/components/ui/ScoreGauge";
 import { ProviderBadge } from "@/components/ui/ProviderBadge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { OptimizationResult } from "@/types/optimization";
 import type { LLMProviderName } from "@/types/provider";
 import type { ProviderComparisonProps } from "./ProviderComparison.types";
-import {
-  SEVERITY_KEYS,
-  SEVERITY_BADGE_CLASSES,
-} from "@/components/ui/GapAnalysis/useGapAnalysis";
 
 const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Claude",
@@ -25,20 +20,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   gemini: "Gemini",
 };
 
-const DESKTOP_BREAKPOINT = 1024;
 const STAGGER_DELAY = 0.1;
-
-function useIsDesktop(): boolean {
-  const [isDesktop, setIsDesktop] = useState(true);
-  useEffect(() => {
-    const mq = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`);
-    const handler = () => setIsDesktop(mq.matches);
-    handler();
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-  return isDesktop;
-}
 
 function isErrorResult(
   r: OptimizationResult | { error: string } | undefined,
@@ -54,9 +36,7 @@ function getScoreBarColor(score: number): string {
 
 export function ProviderComparison({ data }: ProviderComparisonProps) {
   const t = useTranslations("providerCompare");
-  const tResults = useTranslations("results");
   const reducedMotion = useReducedMotion();
-  const isDesktop = useIsDesktop();
 
   const providerNames = Object.keys(data.results);
   const validProviders = providerNames.filter(
@@ -67,11 +47,8 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
     return r !== undefined && !isErrorResult(r);
   });
 
-  const [activeTab, setActiveTab] = useState<string>(validProviders[0] ?? "");
-
   const { score_delta, unique_keywords } = data.comparison;
 
-  // Keyword overlap: found by all vs found by only one
   const keywordStats = (() => {
     if (successProviders.length < 2) return null;
     const allMatches = successProviders.map(
@@ -120,13 +97,6 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
     );
   }
 
-  const colsClass =
-    successProviders.length === 2
-      ? "lg:grid-cols-2"
-      : successProviders.length >= 3
-        ? "lg:grid-cols-3"
-        : "lg:grid-cols-1";
-
   return (
     <motion.div
       className="space-y-6"
@@ -147,7 +117,6 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
         </Link>
       </div>
 
-      {/* Score comparison bar chart */}
       <motion.section variants={itemVariants} className="space-y-3">
         <h2 className="text-sm font-medium text-muted-foreground">{t("scoreChart")}</h2>
         <div className="space-y-3">
@@ -164,7 +133,7 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
                   {PROVIDER_LABELS[name] ?? name}
                 </span>
                 <div className="flex flex-1 items-center gap-2">
-                  <div className="relative h-6 flex flex-1 overflow-hidden rounded-md bg-muted/50">
+                  <div className="relative flex h-6 flex-1 overflow-hidden rounded-md bg-muted/50">
                     <motion.div
                       className={cn(
                         "absolute inset-y-0 left-0 rounded-md",
@@ -187,8 +156,7 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
         </div>
       </motion.section>
 
-      {/* Keyword overlap summary */}
-      {keywordStats && validProviders.length >= 2 && (
+      {keywordStats && validProviders.length >= 2 ? (
         <motion.section
           variants={itemVariants}
           className="flex flex-wrap items-center gap-3"
@@ -200,97 +168,25 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
             {t("keywordsFoundByOne", { count: keywordStats.onlyOneCount })}
           </Badge>
         </motion.section>
-      )}
+      ) : null}
 
-      {/* Single provider note */}
-      {validProviders.length === 1 && (
+      {validProviders.length === 1 ? (
         <p className="text-sm text-muted-foreground">{t("addMoreProviders")}</p>
-      )}
+      ) : null}
 
-      {/* Columns (desktop) or Tabs (mobile) */}
-      {isDesktop ? (
-        <div className={cn("grid gap-4", colsClass)}>
-          {validProviders.map((name) => {
-            const result = data.results[name];
-            if (result === undefined) {
-              return (
-                <motion.div key={name} variants={itemVariants}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">
-                        {PROVIDER_LABELS[name] ?? name}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">No result</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            }
-            if (isErrorResult(result)) {
-              return (
-                <motion.div key={name} variants={itemVariants}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">
-                        {PROVIDER_LABELS[name] ?? name}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-destructive">{result.error}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            }
-            const score = score_delta[name] ?? result.match_score ?? 0;
-            const totalKw =
-              result.keyword_matches.length + result.keyword_misses.length;
-            const matchedKw = result.keyword_matches.length;
-            const topGaps = result.gap_analysis
-              .sort((a, b) => {
-                const order = { critical: 0, preferred: 1, nice_to_have: 2 };
-                return order[a.importance] - order[b.importance];
-              })
-              .slice(0, 3);
-
+      <motion.div
+        variants={itemVariants}
+        className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 md:overflow-visible md:snap-none lg:grid-cols-3"
+      >
+        {validProviders.map((name) => {
+          const result = data.results[name];
+          if (result === undefined) {
             return (
-              <motion.div key={name} variants={itemVariants}>
-                <ProviderColumn
-                  providerName={name}
-                  result={result}
-                  score={score}
-                  matchedKw={matchedKw}
-                  totalKw={totalKw}
-                  topGaps={topGaps}
-                  t={t}
-                  tResults={tResults}
-                />
-              </motion.div>
-            );
-          })}
-        </div>
-      ) : (
-        <motion.div variants={itemVariants} className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {validProviders.map((name) => (
-              <Button
+              <div
                 key={name}
-                variant={activeTab === name ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveTab(name)}
+                className="min-w-[85vw] shrink-0 snap-center md:min-w-0 md:shrink"
               >
-                {PROVIDER_LABELS[name] ?? name}
-              </Button>
-            ))}
-          </div>
-          {validProviders.map((name) => {
-            if (activeTab !== name) return null;
-            const result = data.results[name];
-            if (result === undefined) {
-              return (
-                <Card key={name}>
+                <Card className="h-full">
                   <CardHeader>
                     <CardTitle className="text-base">
                       {PROVIDER_LABELS[name] ?? name}
@@ -300,11 +196,16 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
                     <p className="text-sm text-muted-foreground">No result</p>
                   </CardContent>
                 </Card>
-              );
-            }
-            if (isErrorResult(result)) {
-              return (
-                <Card key={name}>
+              </div>
+            );
+          }
+          if (isErrorResult(result)) {
+            return (
+              <div
+                key={name}
+                className="min-w-[85vw] shrink-0 snap-center md:min-w-0 md:shrink"
+              >
+                <Card className="h-full">
                   <CardHeader>
                     <CardTitle className="text-base">
                       {PROVIDER_LABELS[name] ?? name}
@@ -314,62 +215,58 @@ export function ProviderComparison({ data }: ProviderComparisonProps) {
                     <p className="text-sm text-destructive">{result.error}</p>
                   </CardContent>
                 </Card>
-              );
-            }
-            const score = score_delta[name] ?? result.match_score ?? 0;
-            const totalKw =
-              result.keyword_matches.length + result.keyword_misses.length;
-            const matchedKw = result.keyword_matches.length;
-            const topGaps = result.gap_analysis
-              .sort((a, b) => {
-                const order = { critical: 0, preferred: 1, nice_to_have: 2 };
-                return order[a.importance] - order[b.importance];
-              })
-              .slice(0, 3);
+              </div>
+            );
+          }
+          const score = score_delta[name] ?? result.match_score ?? 0;
+          const totalKw = result.keyword_matches.length + result.keyword_misses.length;
+          const matchedKw = result.keyword_matches.length;
 
-            return (
-              <ProviderColumn
-                key={name}
+          return (
+            <div
+              key={name}
+              className="min-w-[85vw] shrink-0 snap-center md:min-w-0 md:shrink"
+            >
+              <ProviderResultCard
                 providerName={name}
                 result={result}
                 score={score}
                 matchedKw={matchedKw}
                 totalKw={totalKw}
-                topGaps={topGaps}
                 t={t}
-                tResults={tResults}
               />
-            );
-          })}
-        </motion.div>
-      )}
+            </div>
+          );
+        })}
+      </motion.div>
     </motion.div>
   );
 }
 
-function ProviderColumn({
+function ProviderResultCard({
   providerName,
+  result,
   score,
   matchedKw,
   totalKw,
-  topGaps,
   t,
-  tResults,
 }: {
   providerName: string;
-  result?: OptimizationResult;
+  result: OptimizationResult;
   score: number;
   matchedKw: number;
   totalKw: number;
-  topGaps: OptimizationResult["gap_analysis"];
   t: (key: string, values?: Record<string, number>) => string;
-  tResults: (key: string, values?: Record<string, number>) => string;
 }) {
   const isProvider = (s: string): s is LLMProviderName =>
     ["anthropic", "openai", "gemini"].includes(s);
 
+  const optimizedCvText = result.sections
+    .map((s) => `${s.heading}\n${s.optimized}`)
+    .join("\n\n");
+
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between gap-2">
         <CardTitle className="flex items-center gap-2 text-base">
           {isProvider(providerName) ? (
@@ -383,34 +280,16 @@ function ProviderColumn({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex justify-center">
-          <ScoreGauge score={score} size={72} label="" />
+          <ScoreGauge score={score} size={80} label="" />
         </div>
-        <div>
-          <span className="text-sm text-muted-foreground">
-            {t("ofMatched", { matched: matchedKw, total: totalKw })}
-          </span>
-        </div>
-        {topGaps.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">{t("topGaps")}</p>
-            <ul className="space-y-1">
-              {topGaps.map((gap) => (
-                <li
-                  key={`${gap.skill}-${gap.importance}`}
-                  className="flex items-center gap-2 text-sm"
-                >
-                  <Badge
-                    variant="outline"
-                    className={cn("text-xs", SEVERITY_BADGE_CLASSES[gap.importance])}
-                  >
-                    {tResults(SEVERITY_KEYS[gap.importance])}
-                  </Badge>
-                  <span className="line-clamp-1 text-muted-foreground">{gap.skill}</span>
-                </li>
-              ))}
-            </ul>
+        <p className="text-sm text-muted-foreground">
+          {t("ofMatched", { matched: matchedKw, total: totalKw })}
+        </p>
+        <ScrollArea className="max-h-[40vh]">
+          <div className="whitespace-pre-wrap pr-3 text-sm text-foreground">
+            {optimizedCvText}
           </div>
-        )}
+        </ScrollArea>
         <Link
           href="/results"
           className="inline-flex text-sm text-primary underline hover:text-primary/80"

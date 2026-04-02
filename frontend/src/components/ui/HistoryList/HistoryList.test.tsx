@@ -43,8 +43,8 @@ describe("HistoryList", () => {
   it("shows empty state when items are empty and not loading", () => {
     render(<HistoryList {...defaultProps} />);
     expect(screen.getByText("No analyses yet")).toBeInTheDocument();
-    expect(screen.getByText("Upload your first CV to get started")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Start your first analysis" })).toBeInTheDocument();
+    expect(screen.getByText("Upload a CV to get started")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Start Optimizing" })).toBeInTheDocument();
   });
 
   it("shows loading skeleton when isLoading is true", () => {

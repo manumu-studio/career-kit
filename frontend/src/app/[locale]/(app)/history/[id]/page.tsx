@@ -16,6 +16,7 @@ import { GapAnalysis } from "@/components/ui/GapAnalysis";
 import { KeywordMatch } from "@/components/ui/KeywordMatch";
 import { CompanyReport } from "@/components/ui/CompanyReport";
 import { ScoreCard } from "@/components/ui/ScoreCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "@/features/auth";
 import { fetchHistoryDetail, handleApiError } from "@/lib/api";
 import type { CompanyResearchResult } from "@/types/company";
@@ -49,6 +50,7 @@ function isOptimizationResult(value: unknown): value is OptimizationResult {
 
 export default function HistoryDetailPage() {
   const t = useTranslations("history");
+  const tResults = useTranslations("results");
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
@@ -131,6 +133,9 @@ export default function HistoryDetailPage() {
     );
   }
 
+  const breadcrumbLabel =
+    detail.company_name ?? detail.job_title ?? id.slice(0, 8);
+
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10">
       <nav aria-label="Breadcrumb">
@@ -146,7 +151,7 @@ export default function HistoryDetailPage() {
           </li>
           <li aria-hidden>/</li>
           <li className="text-foreground" aria-current="page">
-            {detail.company_name ?? t("analysis")} {detail.job_title ? `— ${detail.job_title}` : ""}
+            {t("breadcrumbAnalysis")} — {breadcrumbLabel}
           </li>
         </ol>
       </nav>
@@ -154,7 +159,8 @@ export default function HistoryDetailPage() {
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
-            {detail.company_name ?? t("analysis")} {detail.job_title ? `— ${detail.job_title}` : ""}
+            {detail.company_name ?? t("analysis")}{" "}
+            {detail.job_title ? `— ${detail.job_title}` : ""}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {new Date(detail.created_at).toLocaleString()}
@@ -188,30 +194,39 @@ export default function HistoryDetailPage() {
       ) : null}
 
       {optimizationResult ? (
-        <section className="flex flex-col gap-10">
-          <h2 className="text-xl font-semibold text-foreground">{t("cvOptimization")}</h2>
+        <section className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <div className="shrink-0">
+              <ScoreCard score={optimizationResult.match_score} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <KeywordMatch
+                matches={optimizationResult.keyword_matches}
+                misses={optimizationResult.keyword_misses}
+              />
+            </div>
+          </div>
 
-          {/* Section 1 — Summary */}
           <div className="rounded-xl border border-border bg-card p-5">
             <p className="text-sm leading-relaxed text-foreground">
               {optimizationResult.summary}
             </p>
           </div>
 
-          {/* Section 2 — Score + Keywords (side by side on desktop) */}
-          <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-            <ScoreCard score={optimizationResult.match_score} />
-            <KeywordMatch
-              matches={optimizationResult.keyword_matches}
-              misses={optimizationResult.keyword_misses}
-            />
-          </div>
+          <Tabs defaultValue="comparison" className="w-full">
+            <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:inline-flex sm:w-auto sm:justify-start">
+              <TabsTrigger value="comparison">{tResults("tabCvComparison")}</TabsTrigger>
+              <TabsTrigger value="gaps">{tResults("tabGapAnalysis")}</TabsTrigger>
+            </TabsList>
 
-          {/* Section 3 — CV Comparison (full width) */}
-          <CvComparison sections={optimizationResult.sections} />
+            <TabsContent value="comparison" className="mt-4">
+              <CvComparison sections={optimizationResult.sections} />
+            </TabsContent>
 
-          {/* Section 4 — Gap Analysis (full width grid) */}
-          <GapAnalysis gaps={optimizationResult.gap_analysis} />
+            <TabsContent value="gaps" className="mt-4">
+              <GapAnalysis gaps={optimizationResult.gap_analysis} />
+            </TabsContent>
+          </Tabs>
         </section>
       ) : null}
     </div>
