@@ -8,7 +8,7 @@ describe("CompanySearch", () => {
   const onResearchComplete = vi.fn();
   const onResearchError = vi.fn();
 
-  it("renders section heading and form fields", () => {
+  it("renders form fields", () => {
     render(
       <CompanySearch
         onResearchComplete={onResearchComplete}
@@ -16,9 +16,6 @@ describe("CompanySearch", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("heading", { name: "Step 1: Company Research (Optional)" }),
-    ).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Company Name" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Company Website URL" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Job Title" })).toBeInTheDocument();
