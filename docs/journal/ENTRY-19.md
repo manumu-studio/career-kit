@@ -16,7 +16,7 @@ Hardened authentication callbacks by validating OIDC profile payloads with Zod a
 
 Split the home upload page into a dedicated hook (`useHomePage`) and a small `CompareProvidersPanel` component so the route file stays maintainable and under the line-count guideline, without changing user-visible behavior.
 
-Removed remaining unsafe type assertions in context, hooks, comparison UI, history helpers, and the locale-aware link by using type guards and small `Reflect`-based property readers where JSON is only known at runtime.
+Removed remaining unsafe type assertions in context, hooks, comparison UI, history helpers, and the locale-aware link by using type guards and small `hasOwnProperty`-based property readers where JSON is only known at runtime.
 
 Moved inline component prop interfaces into `.types.ts` files for `LinkWithSpinner`, `SubmitButtonWithSpinner`, and `CtaFooterSection` to match the project’s component structure conventions.
 

@@ -4,7 +4,7 @@ export interface CompareProvidersPanelProps {
   availableProviders: string[];
   selectedProviders: ReadonlySet<string>;
   onToggle: (providerName: string) => void;
-  onCompare: () => void;
+  onCompare: () => void | Promise<void>;
   isComparing: boolean;
   isReadyToSubmit: boolean;
   /** Primary selected model (reserved for future UX; optional). */
