@@ -5,18 +5,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { CacheHitBanner } from "@/components/ui/CacheHitBanner";
 import { CompanySearch } from "@/components/ui/CompanySearch";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { JobDescription } from "@/components/ui/JobDescription";
 import { ProviderSelector, useProviderSelector } from "@/components/ui/ProviderSelector";
 import { useOptimizationContext } from "@/context/OptimizationContext";
-import { cn } from "@/lib/utils";
 import { useSession } from "@/features/auth";
-import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useToast } from "@/components/ui/Toast";
 import {
   checkOptimizationCache,
@@ -67,7 +71,6 @@ export default function Home() {
   const [compareSelected, setCompareSelected] = useState<Set<string>>(new Set());
   const [isComparing, setIsComparing] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
-  const [companySearchExpanded, setCompanySearchExpanded] = useState(isTailorMode);
   const reducedMotion = useReducedMotion();
 
   // Hydrate job description from persisted form state once context finishes loading.
@@ -230,131 +233,47 @@ export default function Home() {
     }),
   };
 
+  const currentStepLabel = OPTIMIZATION_STEPS[progressStep] ?? OPTIMIZATION_STEPS[0];
+
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-6 px-4 py-10 sm:px-6 sm:py-12">
+    <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-6 px-4 py-10 sm:px-6 sm:py-12">
       {isSubmitting ? (
-        <ProgressBar steps={OPTIMIZATION_STEPS} currentStep={progressStep} />
+        <div
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-background/80 backdrop-blur-sm"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <span className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm font-medium text-foreground">{currentStepLabel}</p>
+        </div>
       ) : null}
 
       <header>
         <p className="text-lg text-muted-foreground">{t("subtitle")}</p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8">
-        {/* Left: Collapsible CompanySearch */}
-        <motion.div
-          className="lg:sticky lg:top-20"
-          custom={0}
-          initial="hidden"
-          animate="visible"
-          variants={sectionVariants}
-        >
-          {isTailorMode ? (
-            <p
-              className="mb-3 rounded-lg border-l-4 border-primary bg-primary/5 px-4 py-3 text-sm text-foreground"
-              role="status"
-            >
-              {t("tailorModeBanner")}
-            </p>
-          ) : null}
-          <div
-            className={cn(
-              "rounded-xl border border-border bg-card overflow-hidden",
-              isTailorMode && "border-l-4 border-l-primary",
-            )}
-          >
-            <div className="flex w-full items-center justify-between gap-2 px-5 py-4">
-              <button
-                type="button"
-                className="flex flex-1 items-center justify-between rounded-lg p-2 text-left text-sm font-medium text-foreground hover:bg-muted/50"
-                onClick={() => setCompanySearchExpanded((e) => !e)}
-                aria-expanded={companySearchExpanded}
-              >
-                {t("companyResearchOptional")}
-                {companySearchExpanded ? (
-                  <ChevronUp className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                ) : (
-                  <ChevronDown className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                )}
-              </button>
-              {companyResearch ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="shrink-0 text-muted-foreground underline hover:text-foreground"
-                  onClick={() => setCompanyResearch(null)}
-                >
-                  {t("skipResearch")}
-                </Button>
-              ) : null}
-            </div>
-            <AnimatePresence initial={false}>
-              {companySearchExpanded ? (
-                <motion.div
-                  initial={reducedMotion ? false : { height: 0, opacity: 0 }}
-                  animate={reducedMotion ? {} : { height: "auto", opacity: 1 }}
-                  exit={reducedMotion ? {} : { height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="border-t border-border px-5 py-4">
-                    <CompanySearch
-                      onResearchComplete={handleResearchComplete}
-                      onResearchError={(error) => {
-                        setSubmissionError(error);
-                      }}
-                      onViewReport={() => {
-                        router.push("/report");
-                      }}
-                      userId={session?.user?.externalId}
-                      language={locale}
-                    />
-                  </div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-          </div>
-        </motion.div>
-
-        {/* Right: Form with numbered steps */}
-        <section className="space-y-6">
-          {/* Step 1: Upload CV */}
-          <motion.div
-            className="rounded-xl border border-border bg-card p-5"
-            custom={1}
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <div className="mb-4 flex items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                1
-              </span>
-              <h2 className="text-lg font-semibold text-foreground">{t("step1Label")}</h2>
-            </div>
+      <motion.div
+        className="rounded-xl border border-border bg-card p-6 shadow-sm"
+        custom={0}
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
+      >
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div>
+            <h2 className="mb-3 text-lg font-semibold text-foreground">{t("step1Label")}</h2>
             <FileUpload onFileChange={handleFileChange} />
             {!file && formState.fileName ? (
               <p className="mt-2 text-sm text-muted-foreground">
                 {t("previouslySelected")}{" "}
-                <span className="font-medium text-foreground">{formState.fileName}</span> — {t("reSelectFile")}
+                <span className="font-medium text-foreground">{formState.fileName}</span> —{" "}
+                {t("reSelectFile")}
               </p>
             ) : null}
-          </motion.div>
-
-          {/* Step 2: Job Description */}
-          <motion.div
-            className="rounded-xl border border-border bg-card p-5"
-            custom={2}
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <div className="mb-4 flex items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                2
-              </span>
-              <h2 className="text-lg font-semibold text-foreground">{t("step2Label")}</h2>
-            </div>
+          </div>
+          <div>
+            <h2 className="mb-3 text-lg font-semibold text-foreground">{t("step2Label")}</h2>
             <JobDescription
               onChange={handleJobDescriptionChange}
               value={jobDescription}
@@ -368,22 +287,87 @@ export default function Home() {
               minLength={50}
               maxLength={10000}
             />
-          </motion.div>
+          </div>
+        </div>
 
-          {/* Step 3: Options */}
-          <motion.div
-            className="rounded-xl border border-border bg-card p-5"
-            custom={3}
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <div className="mb-4 flex items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                3
-              </span>
-              <h2 className="text-lg font-semibold text-foreground">{t("step3Label")}</h2>
-            </div>
+        <div className="mt-6 border-t border-border pt-6">
+          {isTailorMode ? (
+            <p
+              className="mb-4 rounded-lg border-l-4 border-primary bg-primary/5 px-4 py-3 text-sm text-foreground"
+              role="status"
+            >
+              {t("tailorModeBanner")}
+            </p>
+          ) : null}
+          <Accordion defaultValue={isTailorMode ? ["company"] : []} multiple>
+            <AccordionItem value="company" className="border-none">
+              <div className="flex flex-wrap items-center gap-2">
+                <AccordionTrigger className="flex-1 py-2 text-sm font-medium hover:no-underline">
+                  {companyResearch ? (
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="size-4 text-primary" aria-hidden />
+                      {t("companyResearchOptional")}
+                    </span>
+                  ) : (
+                    t("companyResearchOptional")
+                  )}
+                </AccordionTrigger>
+                {companyResearch ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 text-muted-foreground underline hover:text-foreground"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCompanyResearch(null);
+                    }}
+                  >
+                    {t("skipResearch")}
+                  </Button>
+                ) : null}
+              </div>
+              <AccordionContent>
+                <div className="pt-2">
+                  <CompanySearch
+                    onResearchComplete={handleResearchComplete}
+                    onResearchError={(error) => {
+                      setSubmissionError(error);
+                    }}
+                    onViewReport={() => {
+                      router.push("/report");
+                    }}
+                    userId={session?.user?.externalId}
+                    language={locale}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
+        <div className="mt-6 space-y-4 border-t border-border pt-6">
+          {optimizationCachedMatch ? (
+            <CacheHitBanner
+              match={optimizationCachedMatch}
+              onRunAgain={handleOptimizeAgain}
+              onUseCached={handleViewPreviousOptimization}
+              variant="optimization"
+            />
+          ) : null}
+
+          {submissionError ? (
+            <p className="text-sm text-destructive">{submissionError}</p>
+          ) : null}
+
+          {companyResearch ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+              <Sparkles className="size-3.5" aria-hidden />
+              {t("companyTailoredBadge")}
+            </span>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-4">
             {!providersLoading ? (
               <ProviderSelector
                 value={selected}
@@ -393,44 +377,8 @@ export default function Home() {
                 disabled={isSubmitting}
               />
             ) : null}
-          </motion.div>
-
-          {/* Step 4: Submit */}
-          <motion.div
-            className="rounded-xl border border-border bg-card p-5"
-            custom={4}
-            initial="hidden"
-            animate="visible"
-            variants={sectionVariants}
-          >
-            <div className="mb-4 flex items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                4
-              </span>
-              <h2 className="text-lg font-semibold text-foreground">{t("step4Label")}</h2>
-              {companyResearch ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                  <Sparkles className="size-3.5" aria-hidden />
-                  {t("companyTailoredBadge")}
-                </span>
-              ) : null}
-            </div>
-
-            {optimizationCachedMatch ? (
-              <CacheHitBanner
-                match={optimizationCachedMatch}
-                onRunAgain={handleOptimizeAgain}
-                onUseCached={handleViewPreviousOptimization}
-                variant="optimization"
-              />
-            ) : null}
-
-            {submissionError ? (
-              <p className="mb-4 text-sm text-destructive">{submissionError}</p>
-            ) : null}
-
             <Button
-              className="w-full animate-ai-gradient border-0 bg-clip-padding text-white hover:opacity-90 sm:w-auto sm:px-8"
+              className="animate-ai-gradient border-0 bg-clip-padding text-white hover:opacity-90"
               aria-label={
                 !isReadyToSubmit ? t("ariaOptimizeDisabled") : t("ariaOptimizeReady")
               }
@@ -440,52 +388,51 @@ export default function Home() {
             >
               {companyResearch ? t("tailorAndOptimizeButton") : t("optimizeButton")}
             </Button>
+          </div>
+        </div>
 
-            <div className="mt-6 border-t border-border pt-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={() => setCompareExpanded((e) => !e)}
-              >
-                {compareExpanded ? t("hideProviders") : t("compareProviders")}
-              </Button>
-              {compareExpanded ? (
-                <div className="mt-3 space-y-3">
-                  <p className="text-sm text-muted-foreground">{t("compareDesc")}</p>
-                  <div className="flex flex-wrap gap-4">
-                    {(["anthropic", "openai", "gemini"] as const).map((name) => (
-                      <label
-                        key={name}
-                        className="flex cursor-pointer items-center gap-2 text-sm text-foreground"
-                      >
-                        <input
-                          checked={compareSelected.has(name)}
-                          disabled={!available.includes(name)}
-                          onChange={() => toggleCompareProvider(name)}
-                          type="checkbox"
-                        />
-                        {name}
-                        {!available.includes(name) ? ` ${t("notConfigured")}` : ""}
-                      </label>
-                    ))}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={
-                      !isReadyToSubmit || isComparing || compareSelected.size < 2
-                    }
-                    onClick={() => void handleCompare()}
+        <div className="mt-6 border-t border-border pt-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+            type="button"
+            onClick={() => setCompareExpanded((e) => !e)}
+          >
+            {compareExpanded ? t("hideProviders") : t("compareProviders")}
+          </Button>
+          {compareExpanded ? (
+            <div className="mt-3 space-y-3">
+              <p className="text-sm text-muted-foreground">{t("compareDesc")}</p>
+              <div className="flex flex-wrap gap-4">
+                {(["anthropic", "openai", "gemini"] as const).map((name) => (
+                  <label
+                    key={name}
+                    className="flex cursor-pointer items-center gap-2 text-sm text-foreground"
                   >
-                    {isComparing ? t("comparing") : t("runComparison")}
-                  </Button>
-                </div>
-              ) : null}
+                    <input
+                      checked={compareSelected.has(name)}
+                      disabled={!available.includes(name)}
+                      onChange={() => toggleCompareProvider(name)}
+                      type="checkbox"
+                    />
+                    {name}
+                    {!available.includes(name) ? ` ${t("notConfigured")}` : ""}
+                  </label>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!isReadyToSubmit || isComparing || compareSelected.size < 2}
+                onClick={() => void handleCompare()}
+              >
+                {isComparing ? t("comparing") : t("runComparison")}
+              </Button>
             </div>
-          </motion.div>
-        </section>
-      </div>
+          ) : null}
+        </div>
+      </motion.div>
     </div>
   );
 }

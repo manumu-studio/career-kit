@@ -9,7 +9,8 @@ This journal tracks the development progress of ATS Career Kit, an AI-powered CV
 
 ## Current Focus
 
-- Cover letter generation + PDF export (planned).
+- Merge `feature/app-pages-redesign` (app workspace UI) when ready; optional browser QA first.
+- Cover letter and export flows already shipped in earlier versions; further polish as needed.
 
 ---
 
@@ -51,6 +52,15 @@ PostgreSQL persistence for research and optimization. Cache check before LLM cal
 
 ---
 
+### [Entry 18 — App Pages Minimalist Workspace](docs/journal/ENTRY-18.md)
+**Date:** 2026-04-02
+**Type:** Feature
+**Version:** `0.17.0`
+
+Authenticated app redesign: single-card upload with accordion research, tabbed results and history detail, history empty state and card refresh, mobile snap for provider comparison, report design-token polish, landing↔app page transition timing. Related landing polish (theme transitions, flow-field hero, ScoreGauge hydration, auth session resilience).
+
+---
+
 ## Pull Requests
 
 ### [PR-0.1.0 — Foundation End-to-End Flow](docs/pull-requests/PR-0.1.0.md)
@@ -65,12 +75,15 @@ Auth gate with NextAuth v5 and M2 Auth. Route groups, UserBar, federated sign-ou
 ### [PR-0.4.0 — Analysis History & Result Caching](docs/pull-requests/PR-0.4.0.md)
 PostgreSQL persistence, cache logic, History page, cache hit banners, Neon support.
 
+### [PR-0.17.0 — App Pages Minimalist Workspace](docs/pull-requests/PR-0.17.0.md)
+Tabbed results and history detail, upload card + accordion research, compare snap layout, report polish, page transitions. See PR doc for full file list.
+
 ---
 
 ## Project Status
 
-**Current Version:** 0.4.0
-**Last Updated:** 2026-03-06
+**Current Version:** 0.17.0
+**Last Updated:** 2026-04-02
 
 ### Completed Features
 
@@ -85,14 +98,18 @@ PostgreSQL persistence, cache logic, History page, cache hit banners, Neon suppo
 - Rate limiting on optimize endpoint
 - Token cost logging
 - Frontend and backend test suites
+- Cover letter generation and PDF export (earlier releases)
+- Multi-provider LLM selection (earlier releases)
+- Internationalization EN/ES (earlier releases)
+- Design system and landing cinematic overhaul (earlier releases)
+- **App pages minimalist workspace:** tabbed results, accordion gaps, upload card, history empty state + card refresh, provider comparison snap, report token styling, landing↔app transition timing
 
 ### Planned Features
 
-- Cover letter and PDF export
-- UX polish and error handling
-- Multi-provider LLM support
-- CI/CD and deployment
+- Further UX polish and error handling
+- CI/CD hardening and production monitoring
+- v1.0 release packaging
 
 ---
 
-**Last Updated:** 2026-03-06
+**Last Updated:** 2026-04-02

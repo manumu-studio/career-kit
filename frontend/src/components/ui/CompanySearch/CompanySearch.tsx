@@ -64,13 +64,7 @@ export function CompanySearch({
   };
 
   return (
-    <section
-      className={cn(
-        "space-y-4 rounded-xl border border-border bg-card p-5",
-        className,
-      )}
-    >
-      <h2 className="text-lg font-semibold text-foreground">{t("step1")}</h2>
+    <section className={cn("space-y-4", className)}>
       <p className="text-sm text-muted-foreground">{t("step1Desc")}</p>
 
       <div className="grid gap-3">

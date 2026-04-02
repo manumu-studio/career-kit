@@ -7,6 +7,7 @@ import { CvDemoPreview } from "@/components/landing/CvDemoPreview";
 import { AnimatedText } from "@/components/ui/AnimatedText";
 import { ScoreGauge } from "@/components/ui/ScoreGauge";
 import { Button } from "@/components/ui/button";
+import { FlowFieldBackground } from "@/components/ui/FlowFieldBackground";
 import { cn } from "@/lib/utils";
 import {
   useHeroAnimation,
@@ -36,8 +37,18 @@ export function LandingHero({
 
   return (
     <section
-      className="flex min-h-dvh flex-col items-center justify-center overflow-x-clip px-4 py-16 sm:px-6 md:py-24"
-      aria-labelledby="hero-heading">
+      className="relative flex min-h-dvh flex-col items-center justify-center overflow-x-clip px-4 py-16 sm:px-6 md:py-24"
+      aria-labelledby="hero-heading"
+    >
+      {/* Flow Field Background */}
+      <div className="absolute inset-0 -z-10">
+        <FlowFieldBackground
+          color="var(--primary)"
+          trailOpacity={0.08}
+          particleCount={400}
+          speed={0.6}
+        />
+      </div>
       <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[1fr_1.2fr] lg:items-center lg:gap-12">
         {/* Left — Text content */}
         <div className="flex flex-col gap-6 text-center lg:text-left">

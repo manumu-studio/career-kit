@@ -54,8 +54,8 @@ npm run dev
 - [x] v0.13 — App pages polish (responsive layouts, accessibility)
 - [x] v0.14 — Tailored optimization flow (company research integration)
 - [x] v0.15 — Design system foundation (dual-theme architecture, UI primitives)
-- [ ] v0.16 — Landing page UI/UX overhaul
-- [ ] v0.17 — App pages UI/UX overhaul
+- [x] v0.16 — Landing page UI/UX overhaul
+- [x] v0.17 — App pages UI/UX overhaul
 - [ ] v1.0 — Full production release
 
 ## Database (optional)

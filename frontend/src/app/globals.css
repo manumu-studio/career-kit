@@ -6,6 +6,27 @@
   box-sizing: border-box;
 }
 
+/* Instant theme transitions */
+*,
+::before,
+::after {
+  transition:
+    background-color 80ms ease,
+    border-color 80ms ease,
+    color 80ms ease,
+    fill 80ms ease,
+    stroke 80ms ease !important;
+}
+
+/* Disable transitions on elements that must not animate */
+canvas,
+img,
+video,
+iframe,
+svg {
+  transition: none !important;
+}
+
 /* Pointer cursor for interactive elements */
 button,
 [role="button"],

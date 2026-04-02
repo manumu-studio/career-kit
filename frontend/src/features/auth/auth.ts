@@ -57,6 +57,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
-  /** TODO: revert to development-only after diagnosing production auth issue */
-  debug: true,
+  debug: process.env.NODE_ENV === "development",
 });

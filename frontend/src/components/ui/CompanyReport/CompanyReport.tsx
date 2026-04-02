@@ -59,7 +59,7 @@ function ConfidenceBadge({
       : quality === "medium"
         ? "bg-warning/20 text-warning border-warning/30"
         : quality === "low"
-          ? "bg-muted/20 text-muted-foreground border-border"
+          ? "bg-muted text-muted-foreground border-border"
           : "bg-muted text-muted-foreground";
 
   return (
@@ -222,7 +222,7 @@ export function CompanyReport({
             <motion.div key={section.id} variants={cardVariants}>
               <Card
                 className={cn(
-                  "overflow-hidden transition-colors",
+                  "overflow-hidden border-l-2 border-l-primary transition-colors",
                   !isDesktop && "cursor-pointer hover:bg-muted/30",
                 )}
               >

@@ -46,7 +46,7 @@ export function HistoryCard({
       whileHover={reducedMotion ? {} : { y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
       transition={{ duration: 0.2 }}
       className={cn(
-        "cursor-pointer rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted/30",
+        "cursor-pointer rounded-xl border border-border bg-card p-4 transition-all hover:bg-muted/30 hover:border-l-2 hover:border-l-primary",
         isExpired && "border-warning/50 bg-muted/40",
       )}
       onClick={() => onView(item.id)}
@@ -59,66 +59,61 @@ export function HistoryCard({
         }
       }}
     >
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="min-w-0 flex-1 space-y-1">
-              <h3 className="truncate text-base font-semibold text-foreground">
-                {item.company_name ?? t("unknownCompany")}
-              </h3>
-              {item.job_title ? (
-                <p className="truncate text-sm text-muted-foreground">
-                  {item.job_title}
-                </p>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge
-                variant="secondary"
-                className={cn(
-                  item.analysis_type === "research" && "bg-primary/20 text-primary",
-                  item.analysis_type === "optimize" && "bg-success/20 text-success",
-                  item.analysis_type === "both" && "bg-primary/20 text-primary",
-                )}
-              >
-                {typeLabel}
-              </Badge>
-              {item.cache_hit ? (
-                <Badge variant="secondary">{t("cached")}</Badge>
-              ) : null}
-            </div>
+      <div className="flex items-start gap-3">
+        {item.match_score !== null ? (
+          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+            <ScoreGauge score={item.match_score} size={48} label="" />
           </div>
+        ) : null}
 
-          <div className="mt-3 flex items-center justify-between gap-2">
-            <p className="text-sm text-muted-foreground">
-              {relativeDate}
-              {isExpired ? (
-                <span className="ml-2 text-warning">{t("mayBeOutdated")}</span>
-              ) : null}
-            </p>
-            {item.match_score !== null ? (
-              <div
-                className="shrink-0 [&_[aria-hidden]]:mt-0"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ScoreGauge score={item.match_score} size={72} label="" />
-              </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-base font-semibold text-foreground">
+            {item.company_name ?? t("unknownCompany")}
+          </h3>
+          {item.job_title ? (
+            <p className="truncate text-sm text-muted-foreground">{item.job_title}</p>
+          ) : null}
+          <p className="mt-1 text-xs text-muted-foreground">
+            {relativeDate}
+            {isExpired ? (
+              <span className="ml-2 text-warning">{t("mayBeOutdated")}</span>
             ) : null}
-          </div>
+          </p>
+        </div>
 
-          <div className="mt-4 flex gap-2" onClick={(e) => e.stopPropagation()}>
-            <Button size="sm" onClick={() => onView(item.id)}>
-              {t("view")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isDeleting}
-              onClick={() => onDelete(item.id)}
-              className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            >
-              {isDeleting ? t("deleting") : t("delete")}
-            </Button>
-          </div>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <Badge
+            variant="secondary"
+            className={cn(
+              item.analysis_type === "research" && "bg-primary/20 text-primary",
+              item.analysis_type === "optimize" && "bg-success/20 text-success",
+              item.analysis_type === "both" && "bg-primary/20 text-primary",
+            )}
+          >
+            {typeLabel}
+          </Badge>
+          {item.cache_hit ? (
+            <Badge variant="secondary">{t("cached")}</Badge>
+          ) : null}
+        </div>
+      </div>
+
+      <div
+        className="mt-3 flex gap-2 border-t border-border pt-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Button size="sm" variant="outline" onClick={() => onView(item.id)}>
+          {t("view")}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={isDeleting}
+          onClick={() => onDelete(item.id)}
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+        >
+          {isDeleting ? t("deleting") : t("delete")}
+        </Button>
       </div>
     </motion.div>
   );
