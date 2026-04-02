@@ -19,11 +19,13 @@ export const ProvidersResponseSchema = z
 export const ComparisonResultSchema = z
   .object({
     results: z.record(z.string(), ComparisonResultEntrySchema),
-    comparison: z.object({
-      score_delta: z.record(z.string(), z.number()),
-      unique_keywords: z.record(z.string(), z.array(z.string())),
-      processing_time_ms: z.record(z.string(), z.number()),
-    }),
+    comparison: z
+      .object({
+        score_delta: z.record(z.string(), z.number()),
+        unique_keywords: z.record(z.string(), z.array(z.string())),
+        processing_time_ms: z.record(z.string(), z.number()),
+      })
+      .passthrough(),
   })
   .passthrough();
 
