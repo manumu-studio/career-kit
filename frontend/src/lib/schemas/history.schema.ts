@@ -28,6 +28,7 @@ export const HistoryListResponseSchema = z
 export const HistoryDetailResponseSchema = HistoryListItemSchema.extend({
   company_research_json: z.record(z.string(), z.unknown()).nullable(),
   optimization_result_json: z.record(z.string(), z.unknown()).nullable(),
+  match_score: z.number().nullable().optional(),
 }).passthrough();
 
 export const HistoryStatsResponseSchema = z
